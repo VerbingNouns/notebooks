@@ -1,0 +1,112 @@
+---
+title: "R snippets"
+output: html_notebook
+---
+
+## Using prop.test()
+
+The following is some boilerplate R code I use to test whether, in my forced-choice (binomial) data, my participants are selecting one option different from chance (50%).
+
+```{r}
+# Author: Lauren M Ackerman
+# Available: https://lmackerman.com/r-snippets/
+# Date: July 21, 2016; updated January 30, 2018
+
+#library(lme4)
+data = read.csv("binomial-data.csv",header=TRUE,as.is=TRUE) #data file
+head(data)
+# "answer" is the responses which consist of 1s (hits) and 0s (misses)
+
+sum.cond.1 = sum(na.omit(data$selectCode[data$condition=="Baseline"])) # find the number of 1s in the "island" condition
+len.cond.1 = length(na.omit(data$selectCode[data$condition=="Baseline"])) # find the total number of points in the condition
+prop.test(sum.cond.1, len.cond.1, p = 0.5) # is the number of hits (1s) different from chance?
+
+sum.cond.2 = sum(na.omit(data$selectCode[data$condition=="Treatment"])) # same as previous, but in the "matrix" condition
+len.cond.2 = length(na.omit(data$selectCode[data$condition=="Treatment"]))
+prop.test(sum.cond.2, len.cond.2, p = 0.5)
+```
+
+```{r}
+summary(lm(selectCode~condition,data)) # summary of lmer to get Estimate and Standard Error
+max = lm(selectCode~condition,data) # store lmer for comparison
+less = lm(selectCode~1,data) # remove relevant term to see if it's relevant*
+anova(max,less) # anova test tells you the p value for "condition" (the estimate+SE)
+
+# Report:
+# prop.test...
+# χ²(df), p, 95% CI (lower-upper)
+# lmer...
+# Estimate, SE, χ²(df), p
+
+# * often, you might have a 2x2 design, but for this experiment, there was a 1x2 design, which has only one independent factor ("condition")
+```
+
+## Plotting prop.test() results with CI 95% error bars
+
+This code builds directly off of the previous code to produce the graph shown at the bottom of this section. It uses only the base graphics library.
+
+```{r}
+# Author: Lauren M Ackerman
+# Available: https://lmackerman.com/r-snippets/
+# Date: January 30, 2018
+
+# store the prop.test() results for use in the graph 
+err.cond.1 <- prop.test(sum.cond.1, len.cond.1, p = 0.5)
+err.cond.2 <- prop.test(sum.cond.2, len.cond.2, p = 0.5)
+
+# format the table as percentages rounded to 2 decimal places
+numOfConds <- length(levels(as.factor(data$condition)))
+numerator <- (table(data$selection, data$condition))
+denominator <- (length(data$selection)/numOfConds)
+dfTable <- (numerator/denominator)*100
+
+counts <- round(dfTable,2)
+barplot(counts,
+#  legend = rownames(counts),
+   main=paste0("Choice of ",rownames(counts)[1]," and ",rownames(counts)[2]," in a forced-choice task"),
+   ylab="Percent (%)", #xlab="condition", 
+   cex.names=1, names=c(colnames(counts)[1], colnames(counts)[2]),
+   col=c("lightseagreen","salmon"), border=c("black","black")
+   )
+```
+
+```{r}
+barplot(counts,
+#  legend = rownames(counts),
+   main=paste0("Choice of ",rownames(counts)[1]," and ",rownames(counts)[2]," in a forced-choice task"),
+   ylab="Percent (%)", #xlab="condition", 
+   cex.names=1, names=c(colnames(counts)[1], colnames(counts)[2]),
+   col=c("lightseagreen","salmon"), border=c("black","black")
+   )
+# label the stacked sections of the bar plot with the estimated percents
+mtext(paste0(rownames(counts)[1]," = ", counts[1],"%"), side=1,line=-1.5,at=0.7,col="black",cex=1)
+mtext(paste0(rownames(counts)[1]," = ", counts[3],"%"), side=1,line=-1.5,at=1.9,col="black",cex=1)
+mtext(paste0(rownames(counts)[2]," = ", counts[2],"%"), side=3,line=-1.5,at=0.7,col="black",cex=1)
+mtext(paste0(rownames(counts)[2]," = ", counts[4],"%"), side=3,line=-1.5,at=1.9,col="black",cex=1)
+```
+
+```{r}
+barplot(counts,
+#  legend = rownames(counts),
+   main=paste0("Choice of ",rownames(counts)[1]," and ",rownames(counts)[2]," in a forced-choice task"),
+   ylab="Percent (%)", #xlab="condition", 
+   cex.names=1, names=c(colnames(counts)[1], colnames(counts)[2]),
+   col=c("lightseagreen","salmon"), border=c("black","black")
+   )
+# label the stacked sections of the bar plot with the estimated percents
+mtext(paste0(rownames(counts)[1]," = ", counts[1],"%"), side=1,line=-1.5,at=0.7,col="black",cex=1)
+mtext(paste0(rownames(counts)[1]," = ", counts[3],"%"), side=1,line=-1.5,at=1.9,col="black",cex=1)
+mtext(paste0(rownames(counts)[2]," = ", counts[2],"%"), side=3,line=-1.5,at=0.7,col="black",cex=1)
+mtext(paste0(rownames(counts)[2]," = ", counts[4],"%"), side=3,line=-1.5,at=1.9,col="black",cex=1)
+
+# add the confidence intervals based on the prop.test() results
+arrows(0.7,counts[1],0.7,(unlist(err.cond.1[6])[1])*100, angle=90,col="black",lwd=1)
+arrows(0.7,counts[1],0.7,(unlist(err.cond.1[6])[2])*100, angle=90,col="black",lwd=1)
+arrows(1.9,counts[3],1.9,(unlist(err.cond.2[6])[1])*100, angle=90,col="black",lwd=1)
+arrows(1.9,counts[3],1.9,(unlist(err.cond.2[6])[2])*100, angle=90,col="black",lwd=1)
+
+# NOTE: Sometimes, 1-unlist() should be used because the count of "1" answers is on the top of this graph, alphabetically. If your error bars are misaligned, you may need to add  "1-" to these four lines of code.
+```
+
+Text size (cex) and line width of the error bars (lwd) are both set to size 1 in the above code, but should be increased for use on posters. The colors selected here are a close match to the default aesthetics of ggplot2, but are easily changed.
+
