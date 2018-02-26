@@ -1,0 +1,15 @@
+---
+title: "R Notebooks and Code Tutorials"
+author: "Lauren M Ackerman"
+date: "2/26/2018"
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## [Setting up RStudio](1_Setting_Up.nb.html)
