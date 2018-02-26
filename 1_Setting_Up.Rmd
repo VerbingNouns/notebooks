@@ -1,0 +1,72 @@
+---
+title: "Setting up RStudio"
+output: html_notebook
+---
+
+Congratulations! You have downloaded [R](https://www.stats.bris.ac.uk/R/) and [RStudio](https://www.rstudio.com/products/rstudio/download/#download).
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook while you're using RStudio, the results appear beneath the code. This will be handy for working through the material outside of class.
+
+If you are currently reading this in **RStudio**, try executing this chunk by clicking the *Run* button within the chunk (the green triangle) or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. If you are currently reading this using a **web browser**, you can hide or show the code that produces various outputs by clicking the *Hide*/*Code* button on the top right of the code "cell", but you cannot execute the code. It may help to have this notebook open in RStudio and a browser window at the same time, so you can navigate between them.
+
+Execute this code now, then save this file (*Cmd+s* on Mac, *CTRL+s* on Windows). Once you have done that, you can refresh the browser window and you will see the graph appear.
+
+```{r}
+plot(cars)
+```
+
+This graph was generated using some data that comes pre-loaded with the basic R software. However, to use R you will need to:
+
+1. **install**
+2. **load**, and
+3. **run**
+
+packages that do not automatically come with the basic R software. These packages contain important additions to the basic software that allow you to perform sophisticated analyses and produce clear, beautiful visualisations, among many other things. Some packages can take a while to install, depending on the speed of your internet connection. Therefore, you must install these packages before the first day of the workshop. Please contact one of us well in advance of the workshop if you encounter any problems with installation.
+
+## 1. Installing
+
+**Installing** a package only needs to be done once (per computer). This is because installation is equivalent of downloading a file from the internet and storing it on your hard drive (e.g., Local Disk or C: drive on Windows or /Downloads/ folder on Mac). Once a package has been downloaded, it exists on your computer and does not need to be re-downloaded later.
+
+First, make sure you are connected to the internet. Install the following packages now, by executing the code below as you did in the previous cell.
+
+```{r}
+# install.packages("ggplot2")
+# install.packages("dplyr")
+# install.packages("lme4")
+```
+
+While this code is running, a red square (the 'stop' symbol) will appear in the upper right corner of the code cell. When it has finished running, the green triangle (the 'run' symbol) will reappear. Wait for the code to finish before moving on. This may take a while. Make sure to give yourself plenty of time to run this code, and if you have any trouble, contact one of the workshop organisers.
+
+## 2. Loading
+
+Loading a package is an entirely different action from installing a package. By telling R to load a package, you are instructing it to look for the file you downloaded during installation and sort of "wake it up" while you have R open. When you close R, the package will go back to sleep and you'll have to reload it again. (You will not have to download it again, although you may need to download updates periodically.)
+
+Let's load the packaged called *ggplot2* right now by executing the following code.
+
+```{r}
+library(ggplot2)
+```
+
+If this code was successful, it will appear as though nothing happened. To show you what **an error** looks like, run the following code.
+
+```{r}
+library(Ggplot2)
+```
+
+Hopefully, this code produced text that reads:
+
+    Error in library(Ggplot2) : there is no package called ‘Ggplot2’
+    
+Uh oh! Looks like *capitalisation* is important in R. That will be something to remember for later.
+
+## 3. Running
+
+By this point, you have **installed** and **loaded** the three packages you will need for the first day of the workshop. Before you're done setting up RStudio, though, you should make sure that the packages are **running** properly. Let's produce that first graph again, but this time using code only available when 'ggplot2' is installed and loaded. Remember to save this RNotebook and then refresh the web browser page to see the formatted output.
+
+```{r}
+ggplot(cars, aes(x=speed, y=dist)) + geom_point(size=3, shape=1) + theme_bw()
+```
+
+If everything has gone to plan, you should now see a second graph that looks very much like the first graph. Don't worry about how we made it yet! That will be something we explain during the workshop. Right now, we just want to make sure that you are ready to hit the ground running on the first day.
+
+### See you soon!
