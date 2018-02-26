@@ -13,3 +13,4 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## [Setting up RStudio](1_Setting_Up.nb.html)
+## [Processing Ibex Farm Output](bash_processing.html)
