@@ -1,15 +1,18 @@
 ---
 title: "Setting up RStudio"
-output: html_notebook
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
 ---
 
 Congratulations! You have downloaded [R](https://www.stats.bris.ac.uk/R/) and [RStudio](https://www.rstudio.com/products/rstudio/download/#download).
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook while you're using RStudio, the results appear beneath the code. This will be handy for working through the material outside of class.
 
-If you are currently reading this in **RStudio**, try executing this chunk by clicking the *Run* button within the chunk (the green triangle) or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. If you are currently reading this using a **web browser**, you can hide or show the code that produces various outputs by clicking the *Hide*/*Code* button on the top right of the code "cell", but you cannot execute the code. It may help to have this notebook open in RStudio and a browser window at the same time, so you can navigate between them.
+If you are currently reading this in **RStudio**, try executing this chunk by clicking the *Run* button within the chunk (the green triangle) or by placing your cursor inside it and pressing `Cmd+Shift+Enter`. If you are currently reading this using a **web browser**, you can hide or show the code that produces various outputs by clicking the *Hide*/*Code* button on the top right of the code "cell", but you cannot execute the code. It may help to have this notebook open in RStudio and a browser window at the same time, so you can navigate between them.
 
-Execute this code now, then save this file (*Cmd+s* on Mac, *CTRL+s* on Windows). Once you have done that, you can refresh the browser window and you will see the graph appear.
+Execute this code now, then save this file (`Cmd+s` on Mac, `CTRL+s` on Windows). Once you have done that, you can refresh the browser window and you will see the graph appear.
 
 ```{r}
 plot(cars)
