@@ -1,0 +1,110 @@
+---
+title: "Dealing with ordinal data"
+output: 
+  html_notebook:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+> ★ DRAFT ★  
+> (A work in progress…)
+
+# What is "ordinal" data?
+
+Data like reaction times is *continuous* because there are no discrete boundaries. RTs can be seconds, fractions of sections, fractions of milliseconds, or even finer grained than that.
+
+Data like counts of words in corpora are *discrete*, but hypothetically infinite. You could have 0 attestations, 1, or one million… but you could not have 13.5 attestations of a word.
+
+*Binary* data is also discrete, and can come from looking at hits vs misses (e.g., correct or incorrect responses) among other things. This data type is binary because there are only two values you can observe: 1 (hit) or 0 (miss).
+
+But there is another type of data we use often, too. *Ordinal* data refers to data that is discrete but also ranked like in a Likert scale task. What makes this type of data unique is that it has a maximum and minimum endpoint, but also a limited number of (ordered) values in between. In this respect, binary data and ordinal data are similar, but when you have more than two possible responses, analysis can get quite complicated.
+
+In particular, what makes analysis of ordinal data different from continuous, count, and binary data is that the perceptual size of each level may vary. That is, on a 7-point scale, the difference between a rating of 1 and a rating of 2 may not be the same distance as the difference between a rating of 2 and a rating of 3, or between a rating of 6 and a rating of 7. The distance between each level of the scale can vary across participants and items, so when we analyse this data, we really should take into account this dimension of variability.
+
+That's where the `ordinal` package comes in.
+
+```{r}
+library(ordinal)
+
+dataOrd <- read.csv("ordinal_data.csv",header=TRUE)
+head(dataOrd)
+```
+
+When we graph our rating data in a box plot, we see there is likely to be a main effect of *Factor 1* and possibly an interaction between *Factor 1* and *Factor 2*. It's hard to tell more at this point.
+
+```{r}
+ggplot(dataOrd, aes(x=factor1,y=rating)) + geom_boxplot(aes(fill=factor2)) + scale_y_continuous(breaks=c(1:7)) + ggtitle("Latin square rating data")
+```
+
+```{r}
+ggplot(dataOrd, aes(x=factor1,y=rating)) + geom_boxplot(aes(fill=factor1)) + scale_y_continuous(breaks=c(1:7)) + ggtitle("Main effect of Factor 1")
+ggplot(dataOrd, aes(x=factor2,y=rating)) + geom_boxplot(aes(fill=factor2)) + scale_y_continuous(breaks=c(1:7)) + ggtitle("Main effect of Factor 2")
+```
+
+# Ordinal regressions
+
+When we summarise a linear mixed effect model of this rating data, this is what we get.
+
+```{r}
+lmer.rate.max <- lmer(rating ~ factor1*factor2 + (1|subject)+(1|item),data=dataOrd, REML=FALSE)
+summary(lmer.rate.max)
+```
+
+The following model is an cumulative link mixed model, which operates in a very similar way to a linear mixed effect model on the surface, but takes into account the possibility that each level of the rating scale could be a different size or distance from its neighbors.
+
+```{r}
+clmm.max <- clmm(as.factor(rating) ~ factor1*factor2 + (1|subject)+(1|item),data=dataOrd)
+summary(clmm.max)
+```
+
+Just like you might with a LMER, you can do a model comparison to determine the contribution of each main effect and their interaction.
+
+```{r eval=FALSE}
+clmm.int <- clmm(as.factor(rating) ~ factor1+factor2 + (1|subject)+(1|item),data=dataOrd)
+clmm.one <- clmm(as.factor(rating) ~ factor2 + (1|subject)+(1|item),data=dataOrd)
+clmm.two <- clmm(as.factor(rating) ~ factor1 + (1|subject)+(1|item),data=dataOrd)
+```
+```{r}
+anova(clmm.max,clmm.int)
+```
+
+```{r}
+anova(clmm.int,clmm.one)
+```
+
+```{r}
+anova(clmm.int,clmm.two)
+```
+
+These suggest both main effects and their interaction all contribute significantly to the fit of the model.
+
+# Visualising the ratings
+
+If we visualise the ratings as probabilities, we can see subtle differences that aren't visible in box plots or bar charts. In the graph below, the coloured lines indicate the estimated probability each of the conditions will be assigned a certain rating. 
+
+```{r tidy=TRUE}
+# script adapted from Jalal Al Tamimi
+par(oma=c(0, 0, 0, 1)) # ,mfrow=c(1,1))
+xlim = c(min(clmm.max$beta)-.5,max(clmm.max$beta)+.5)
+ylim = c(0,1)
+plot(0,0,xlim=xlim, ylim=ylim, type="n", ylab="Probability", xlab="", xaxt = "n",main="Predicted curves")
+axis(side = 1, labels = c("Treatment   \nPresent","Baseline   \nAbsent","Treatment   \nAbsent","Baseline   \nPresent"), 
+     at = c(clmm.max$beta,0),las=2,cex.axis=.7)
+xs = seq(xlim[1], xlim[2], length.out=100)
+lines(xs, plogis(clmm.max$Theta[1] - xs), col='red',lwd=3)
+lines(xs, plogis(clmm.max$Theta[2] - xs)-plogis(clmm.max$Theta[1] - xs), col='orange',lwd=3)
+lines(xs, plogis(clmm.max$Theta[3] - xs)-plogis(clmm.max$Theta[2] - xs), col='yellow',lwd=3)
+lines(xs, plogis(clmm.max$Theta[4] - xs)-plogis(clmm.max$Theta[3] - xs), col='green',lwd=3)
+lines(xs, plogis(clmm.max$Theta[5] - xs)-plogis(clmm.max$Theta[4] - xs), col='blue',lwd=3)
+lines(xs, plogis(clmm.max$Theta[6] - xs)-plogis(clmm.max$Theta[5] - xs), col='purple',lwd=3)
+lines(xs, 1-(plogis(clmm.max$Theta[6] - xs)), col='black',lwd=3)
+abline(v=c(0,clmm.max$beta[1:4]),lty=3)
+abline(h=0, lty="dashed")
+abline(h=1, lty="dashed")
+legend(par('usr')[2], par('usr')[4], bty='n', xpd=NA,lty=1, col=c("red", "orange", "yellow", "green", "blue", "purple", "black"),
+       legend=c("1", "2", "3", "4", "5", "6", "7"),cex=0.75)
+```
+
+In this graph, we can see the probability curves for each of the seven ratings. In particular, we can now see that the *Baseline+Present* condition and the *Baseline+Absent* condition are not rated in precisely the same manner: *Baseline+Present* is more likely to receive a rating of 7 and less like to receive a rating of 5 than *Baseline+Absent*. In some cases, when this difference ends up being significant, it will not be visible in a box plot but will be visible in this sort of probability curve plot.
+

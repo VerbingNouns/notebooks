@@ -33,9 +33,9 @@ packages that do not automatically come with the basic R software. These package
 First, make sure you are connected to the internet. Install the following packages now, by executing the code below as you did in the previous cell.
 
 ```{r}
-# install.packages("ggplot2")
-# install.packages("dplyr")
-# install.packages("lme4")
+install.packages("ggplot2")
+install.packages("dplyr")
+install.packages("lme4")
 ```
 
 While this code is running, a red square (the 'stop' symbol) will appear in the upper right corner of the code cell. When it has finished running, the green triangle (the 'run' symbol) will reappear. Wait for the code to finish before moving on. This may take a while. Make sure to give yourself plenty of time to run this code, and if you have any trouble, contact one of the workshop organisers.

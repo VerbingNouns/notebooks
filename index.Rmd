@@ -1,7 +1,7 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "2/26/2018"
+date: "3/12/2018"
 output: 
   html_notebook:
     toc: true
@@ -13,4 +13,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## [Setting up RStudio](1_Setting_Up.nb.html)
+
+* A very introductory description of how to get RStudio set up in advance of a tutorial or workshop.
+
+## [Reporting statistics in prose](prose_statistics.nb.html)
+
+* A tutorial on how to find the numbers one typically needs to report when conducting certain statistical tests.
+* Includes examples of wording for writing about statistical tests in academic prose.
+
+## [Dealing with ordinal data](ordinal_data.nb.html)
+
+* A description of why ordinal regressions are useful and how to use them.
+
 ## [Processing Ibex Farm Output](bash_processing.html)
+
+* A description of bash script used to process the results file from an Ibex Farm experiment.

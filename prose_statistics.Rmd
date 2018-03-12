@@ -1,0 +1,214 @@
+---
+title: "Reporting statistics in prose"
+output: 
+  html_notebook:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+# Introduction
+
+When you've run your statistical models and gathered all the numbers, how do you report them in-line in your text? In this tutorial, I will show you which numbers are most commonly reported in academic prose (e.g., in articles), and what the conventions are for formatting them in-line. This is certainly not the only way to report your statistics, but it is how I have done so and what I most commonly have seen in the literature. Please feel free to send me feedback or comments if you think there is a better way to report any of these tests!
+
+```{r}
+library(lme4,ordinal)
+# Load in three data sets to try out
+# 1) dataBin = binomial data from a simulated forced-choice task
+# 2) dataOrd = ordinal rating data from a simulated Likert scale task
+# 3) dataCon = continuous numeric data from a simulated reaction time task
+
+dataBin <- read.csv("binomial-data.csv",header=TRUE)
+head(dataBin)
+```
+
+The dataset I'm using here has a binomial dependent variable `selection` (which is coded as hits with `1`s and misses with `0`s in the column called selectCode`). This data frame was designed to mimic a forced-choice task, such as selecting which of two sentences sounds more natural. There are two levels of the primary independent variable:
+
+```{r}
+levels(dataBin$condition)
+```
+
+In this simulated data set, the same task was carried out in three different experiments, which are labled as below:
+
+```{r}
+levels(dataBin$experiment)
+```
+
+Finally, let's take a look at what our data look like. These graphs displays the selection of Options 1 and 2 by condition and experiment, and their interaction. This is not the only way to visualise this data, but it will be particularly helpful in the interpretation of interactions later on.
+
+```{r}
+library(ggplot2)
+ggplot(dataBin, aes(x=condition)) + geom_bar(aes(fill=selection),position="stack") + ggtitle("Selection across Condition only")
+ggplot(dataBin, aes(x=experiment)) + geom_bar(aes(fill=selection),position="stack") + ggtitle("Selection across Experiment only")
+ggplot(dataBin, aes(x=condition)) + geom_bar(aes(fill=selection),position="stack") + facet_wrap(~experiment) + ggtitle("Selection across Condition and Experiment")
+```
+
+# Linear mixed effects models
+
+Typically, I report my statistical calculations for comparison of mixed effects models, which requires both the summary of the maximal model and the results of the model comparison (next section, below). However, if you are going to report just the results of the mixed effects model, here are templates you might use.
+
+Interpreting the estimate and standard error of binomial data can be tricky, but reporting it clearly is straightforward and very similar to reporting LMEMs from other types of data.
+
+```{r}
+lmer.bin <- glmer(selectCode ~ condition + (1|subject) + (1|item), data=dataBin, family="binomial")
+summary(lmer.bin)
+```
+
+#### Template:
+
+> We find a main effect of *Condition*, with hits more likely to occur in the *Treatment* condition than in the *Baseline* condition (β=`Estimate`, SE=`Std. Error`, z(`Number of obs.`)=`z value`, p=`Pr(>|z|)`).
+
+#### Example:
+
+> We find a main effect of *Condition*, with hits more likely to occur in the *Treatment* condition than in the *Baseline* condition (β=0.74, SE=0.11, z(1440)=6.93, p<0.0001).
+
+The values reported are taken from the line containg the level of Condition that is being compared to our baseline (conveniently called *Baseline* in this example). This gets more complicated when there are more than two levels being compared. This is one reason why **model comparison** (below) may be a better choice.
+
+# LMER model comparison
+
+Barr et al. (2013) and Bates et al. (2015) set out arguments for structuring and analysing your data using either maximally complex or parsimonious random effects structures. They further discuss how to analyse such models. By doing model comparison, what you are reporting is the contribution of a component of the model to the overall model fit. This is a slightly more conservative method of evaluating the significance of a given effect, which means there is a lower chance of false positives. 
+
+I personally think the most compelling reason to use this method for evaluating significance is that it allows you to easily report main effects when a condition has more than two levels.
+
+To give a better idea of how model comparison might work for more complex experimental designs, this example will check for a main effect of *Condition* (Baseline vs Treatment) and of *Experiment* (First vs Second vs Third), as well as checking for an interaction of these two factors.
+
+```{r}
+# maximal model
+lmer.bin.max <- glmer(selectCode ~ condition*experiment + (1|subject) + (1|item), data=dataBin, family="binomial")
+#
+# model with contribution of the interaction removed
+lmer.bin.int <- glmer(selectCode ~ condition+experiment + (1|subject) + (1|item), data=dataBin, family="binomial")
+#
+# model with contribution of condition removed
+lmer.bin.con <- glmer(selectCode ~ experiment + (1|subject) + (1|item), data=dataBin, family="binomial")
+#
+#model with contribution of experiment removed
+lmer.bin.exp <- glmer(selectCode ~ condition + (1|subject) + (1|item), data=dataBin, family="binomial")
+#
+# description of the maximal model (used for reporting estimates and standard errors)
+summary(lmer.bin.max)
+```
+
+Because *Experiment* is a factor with three levels, we can see the estimates for *Second* and *Third* as they compare to the baseline, which is *First* because it is alphabetically first. It is difficult to interpret the interactions in this summary because it's not necessarily clear what the intercept refers to because it is more abstract than in a 2 × 2 design. 
+
+## Interaction effect
+
+We can compare the maximal model directly to the depleted model with the interaction term removed. Notice that degrees of freedom = `2`, since there are two levels in the *Experiment* factor, which complicates the model. 
+
+```{r}
+# evaluate the contribution of the interaction to the overall fit
+anova(lmer.bin.max,lmer.bin.int)
+```
+
+#### Template:
+
+> The interaction between *Condition* and *Experiment* was found to be significant, with both the Second and Third experiments differing from the First experiment (β~Second~=`Estimate`, SE=`Std. Error`, β~Third~=`Estimate`, SE=`Std. Error`, χ²(`Df`)=`Chisq`, p=`Pr(>Chisq)`).
+
+#### Example:
+
+> The interaction between *Condition* and *Experiment* was found to be significant, with both the Second and Third experiments differing from the First experiment (β~Second~=1.53, SE=0.32, β~Third~=-1.58, SE=0.29, χ²(2)=103.1, p<0.0001).
+
+## Main effect of Factor 1 (Condition)
+
+```{r}
+# evaluate the contribution of the main effect of condition to the overall fit
+anova(lmer.bin.int,lmer.bin.con)
+```
+
+Notice that we are comparing the depleted model with *Condition* removed to the depleted model with *Interaction* removed and **not** to the maximal model. This is because a comparison involving the maximal model will include both the contribution of the interaction and the main effect if we compare it directly.
+
+#### Template:
+
+> A main effect of *Condition* obtains, with the *Treatment* condition more likely to result in a hit than the *Baseline* condition (β=`Estimate`, SE=`Std. Error`, χ²(`Df`)=`Chisq`, p=`Pr(>Chisq)`).
+
+#### Example:
+
+> A main effect of *Condition* obtains, with the *Treatment* condition more likely to result in a hit than the *Baseline* condition (β=0.96, SE=0.20, χ²(1)=27.3, p<0.0001).
+
+## Main effect of Factor 2 (Experiment)
+
+Finally, we can evaluate the contribution of the main effect of *Experiment* to the overall fit of the model.
+
+```{r}
+# evaluate the contribution of the main effect of condition to the overall fit
+anova(lmer.bin.int,lmer.bin.exp)
+```
+
+As before, we must compare this model against the model with the interaction term removed rather than the maximal model. The degrees of freedom again are `2` because of the three levels of the factor *Experiment* increasing the complexity of the comparison.
+
+#### Template:
+
+> We observe a main effect of *Experiment* (χ²(`Df`)=`Chisq`, p=`Pr(>Chisq)`).
+
+#### Example:
+
+> We observe a main effect of *Experiment* (χ²(2)=190.7, p<0.0001).
+
+If we want to report in more detail about how the three different experiments relate to each other, we must do one more comparison. This is because the baseline for these summaries has been set at the alphabetically first level (conveniently, *First*). However, this means we have not compared the *Second* experiment to the *Third* experiment yet. To do so, we can run another model comparison, but then we will be "double dipping" into our data (i.e., running the same test on the same sample more than once). This inflates the chance of a false positive, so instead of setting the significance level (alpha) at 0.05, we divide that by the number of tests we're running (two), to get α=0.025. This means a p-value must be below 0.025 to be considered significant. You can either specify the new alpha level and report the raw p-value or adjust the p-value and mention that it's correct for whatever number of evaluations you've done.
+
+## Pairwise comparison of three levels within Factor 2
+
+```{r}
+# set a new reference level for the factor 'experiment'
+dataBin$expRelvl = relevel(dataBin$experiment, ref="second")
+#
+# maximal model with releveled experiment factor
+lmer.bin.max2 <- glmer(selectCode ~ condition*expRelvl + (1|subject) + (1|item), data=dataBin, family="binomial")
+#
+# model with contribution of the interaction removed, as a baseline for our releveled comparison
+lmer.bin.int2 <- glmer(selectCode ~ condition+expRelvl + (1|subject) + (1|item), data=dataBin, family="binomial")
+#
+#model with contribution of experiment (releveled) removed
+lmer.bin.exp2 <- glmer(selectCode ~ condition + (1|subject) + (1|item), data=dataBin, family="binomial")
+#
+# summary of our releveled reference model
+summary(lmer.bin.max2)
+```
+
+First off, we can see that p-values for the releveled factor are much smaller than before. This suggests that while we already knew the *First* and *Second* experiment had closer estimates than the *First* and *Third* did, we now see that *Second* and *Third* may not actually significantly differ. This is likely part of the reason we find a significant interaction in our overall model comparison. To report these pair-wise comparisons, we go back to the description
+
+#### Template:
+
+> Using a Bonferroni correction, we compensate for the second evaluation of the factor *Experiment*. This analysis suggests that the *First* and *Third* experiments significantly differ (β=`Estimate`, SE=`Std. Error`, z(`Number of obs.`)=`z value`, p=`Pr(>|z|)*2`), but after correction, there is no significant difference between either the *First* and *Second* experiments (β=`Estimate`, SE=`Std. Error`, z(`Number of obs.`)=`z value`, p=`Pr(>|z|)*2`) nor the *Second* and *Third* experiments (β=`Estimate`, SE=`Std. Error`, z(`Number of obs.`)=`z value`, p=`Pr(>|z|)*2`).
+
+#### Example:
+
+> Using a Bonferroni correction, we compensate for the second evaluation of the factor *Experiment*. This analysis suggests that the *First* and *Third* experiments significantly differ (β=-0.79, SE=0.19, z(1440)=-4.20, p<0.0001), but after correction, there is no significant difference between either the *First* and *Second* experiments (β=-0.40, SE=0.19, z(1440)=-2.19, p=0.056) nor the *Second* and *Third* experiments (β=-0.39, SE=0.19, z(1140)=-2.05, p=0.08).
+
+**NB:** In this example, I have multiplied the p-values by 2 to report the Bonferroni-corrected levels. You may also specify that a different alpha was used, but in my experience, fewer people are aware of how this works and thus it is simpler to correct the value rather than report a different alpha. Just be clear in your text what you've done.
+
+```{r}
+anova(lmer.bin.int2,lmer.bin.exp2)
+```
+
+Notice how this model comparison is identical to the one above. This is because they're comparing the exact same thing. They should absolutely be identical. If they are not, it means you have altered your dataset in some way.
+
+# 1-sample proportions tests
+
+This test is used to test whether the proportion of hits in your binomial data (coded as `1`s, with misses as `0`s) differs from a baseline level. The benefit of this test is that you can set your own level against which you are testing your data.
+
+If you want to see if you data differ from chance and chance is at 50%, you can specify `p=0.5` in the `prop.test()` code. (You can read more about conducting and graphing in [my 1-sample proportions tutorial](), which can be [forked on Kaggle](https://www.kaggle.com/lmackerman/practice-binomial-data).)
+
+```{r}
+hits <- sum(dataBin$selectCode[dataBin$condition=="Treatment"])
+len  <- length(dataBin$selectCode[dataBin$condition=="Treatment"])
+prop.test(hits,len,p=0.5)
+```
+
+With this output, we can report the estimate (β), χ² value, the degrees of freedom (df), the p-value, and the bounds of the 95% confidence interval (95%CI).
+
+#### Template:
+
+> The *Treatment* condition significantly differs from the *Baseline* condition, with Option 1 selected more frequently than chance (β=`sample estimate`, χ²(`df`)=`X-squared`, p=`p-value`; 95%CI: `CI lower bound`--`CI upper bound`).
+
+#### Example:
+
+> The *Treatment* condition significantly differs from the *Baseline* condition, with Option 1 selected more frequently than chance (β=62.78%, χ²(1)=46.5, p<0.0001; 95%CI: 59.1%--66.30%).
+
+If you have a few 1-sample proportions tests, the results can be easily reported in a table format as well.
+
+|Condition|Estimate|χ²(df=1)|p-value|95% Confidence Interval|
+|:-------:|-------:|-------:|------:|:----------:|
+| Baseline|  0.4444|     8.7|  0.003|0.408--0.481|
+|Treatment|  0.6278|    46.5| 0.0001|0.591--0.663|
+
