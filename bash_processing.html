@@ -239,14 +239,14 @@ div.tocify {
 ## logic: enter directory, grab the thing in a sub-directory, and pull it out to bigger directory
 cd /Users/yourcomputer/Documents/Experiments/Experiment_Folder</code></pre>
 <p>Next, we want to <em>copy</em> them to a new location so that we don’t accidentally mess them up and lose or damage our data. This will also add a file extension to the file name. Each line of code says to <em>move</em> <code>mv</code> the file located at the specified path to a new file named something like <code>output.txt</code>. Since this example experiment had eight lists (i.e., eight separate entries in Ibex Farm), we need to do this eight times. You might only need to do this once, though. (After this next cell of code, I’ll only show you code for <code>output1.txt</code>, so you would need to repeat this with the seven other file names if you had eight total files.)</p>
-<pre class="bash"><code>mv ibex-1/results/raw_results output1.txt
-mv ibex-2/results/raw_results output2.txt
-mv ibex-3/results/raw_results output3.txt
-mv ibex-4/results/raw_results output4.txt
-mv ibex-5/results/raw_results output5.txt
-mv ibex-6/results/raw_results output6.txt
-mv ibex-7/results/raw_results output7.txt
-mv ibex-8/results/raw_results output8.txt
+<pre class="bash"><code>cp ibex-1/results/raw_results output1.txt
+cp ibex-2/results/raw_results output2.txt
+cp ibex-3/results/raw_results output3.txt
+cp ibex-4/results/raw_results output4.txt
+cp ibex-5/results/raw_results output5.txt
+cp ibex-6/results/raw_results output6.txt
+cp ibex-7/results/raw_results output7.txt
+cp ibex-8/results/raw_results output8.txt
 
 ## (there were many files… and so forth)</code></pre>
 <p>Now we need to do some manipulation of the text <em>inside</em> the file. Since these operations aren’t reversible, we want to make sure we aren’t messing up your original files. To do that, we’ll duplicate the file with <em>copy</em> <code>cp</code> before we make any changes.</p>
