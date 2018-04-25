@@ -32,14 +32,14 @@ cd /Users/yourcomputer/Documents/Experiments/Experiment_Folder
 Next, we want to *copy* them to a new location so that we don't accidentally mess them up and lose or damage our data. This will also add a file extension to the file name. Each line of code says to *move* `mv` the file located at the specified path to a new file named something like `output.txt`. Since this example experiment had eight lists (i.e., eight separate entries in Ibex Farm), we need to do this eight times. You might only need to do this once, though. (After this next cell of code, I'll only show you code for `output1.txt`, so you would need to repeat this with the seven other file names if you had eight total files.)
 
 ```{bash eval=FALSE}
-mv ibex-1/results/raw_results output1.txt
-mv ibex-2/results/raw_results output2.txt
-mv ibex-3/results/raw_results output3.txt
-mv ibex-4/results/raw_results output4.txt
-mv ibex-5/results/raw_results output5.txt
-mv ibex-6/results/raw_results output6.txt
-mv ibex-7/results/raw_results output7.txt
-mv ibex-8/results/raw_results output8.txt
+cp ibex-1/results/raw_results output1.txt
+cp ibex-2/results/raw_results output2.txt
+cp ibex-3/results/raw_results output3.txt
+cp ibex-4/results/raw_results output4.txt
+cp ibex-5/results/raw_results output5.txt
+cp ibex-6/results/raw_results output6.txt
+cp ibex-7/results/raw_results output7.txt
+cp ibex-8/results/raw_results output8.txt
 
 ## (there were many files… and so forth)
 ```
