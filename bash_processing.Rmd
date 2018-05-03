@@ -1,5 +1,7 @@
 ---
 title: "Processing Ibex Farm Output"
+author: "Lauren M Ackerman"
+date: "Last updated: 03 May 2018"
 output: 
   html_document:
     toc: true

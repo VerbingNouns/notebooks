@@ -1,14 +1,12 @@
 ---
 title: "Dealing with ordinal data"
+author: "Lauren M Ackerman"
+date: "Last updated: 03 May 2018"
 output:
   html_notebook:
     toc: yes
     toc_depth: 2
     toc_float: yes
-  html_document:
-    df_print: paged
-    toc: yes
-    toc_depth: '2'
 ---
 ```{r echo=FALSE,message=FALSE}
 library(ggplot2)

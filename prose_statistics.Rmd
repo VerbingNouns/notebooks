@@ -1,5 +1,7 @@
 ---
 title: "Reporting statistics in prose"
+author: "Lauren M Ackerman"
+date: "Last updated: 03 May 2018"
 output: 
   html_notebook:
     toc: true
