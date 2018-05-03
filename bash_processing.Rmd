@@ -8,7 +8,7 @@ output:
     number_sections: true
 ---
 
-In this tutorial, we will take the output of an [Ibex Farm](http://spellout.net/ibexfarm/) experiment and process it into a form that we can analyse in [R](https://www.stats.bris.ac.uk/R/). The code in this tutorial is adapted from code by [Laurel E. Brehm](http://www.mpi.nl/people/brehm-laurel-ellen/research). It's a unix `bash` script, which can be run in **Terminal** on a Mac (and possibly **Console** on Windows, though [I haven't tested it yet](https://docs.microsoft.com/en-us/windows/wsl/install-win10), but I hear [cygwin](https://www.cygwin.com/) is a good way to do it).
+In this tutorial, we will take the output of an [Ibex Farm](http://spellout.net/ibexfarm/) experiment and process it into a form that we can analyse in [R](https://www.stats.bris.ac.uk/R/). The code in this tutorial is adapted from code by [Laurel E. Brehm](http://www.mpi.nl/people/brehm-laurel-ellen/research). It's a unix `bash` script, which can be run in **Terminal** on a Mac and [**cygwin**](https://www.cygwin.com/). One note about **cygwin**: it seems to create a shell around your C: drive that allows it to index and search for directory paths. This means your home path may look something like this: `cygdrive/c/...`. (It's possible **Console** on Windows is also useful, though [I haven't tested it  yet](https://docs.microsoft.com/en-us/windows/wsl/install-win10)).
 
 # Downloading your data…
 
@@ -29,7 +29,7 @@ The format of the raw_results files is not in an easy form to deal with, so we m
 cd /Users/yourcomputer/Documents/Experiments/Experiment_Folder
 ```
 
-Next, we want to *copy* them to a new location so that we don't accidentally mess them up and lose or damage our data. This will also add a file extension to the file name. Each line of code says to *move* `mv` the file located at the specified path to a new file named something like `output.txt`. Since this example experiment had eight lists (i.e., eight separate entries in Ibex Farm), we need to do this eight times. You might only need to do this once, though. (After this next cell of code, I'll only show you code for `output1.txt`, so you would need to repeat this with the seven other file names if you had eight total files.)
+Next, we want to *copy* them to a new location so that we don't accidentally mess them up and lose or damage our data. This will also add a file extension to the file name. Each line of code says to *copy* `cp` the file located at the specified path to a new file named something like `output.txt`. Since this example experiment had eight lists (i.e., eight separate entries in Ibex Farm), we need to do this eight times. You might only need to do this once, though, if you only have one experiment .ZIP file. (After this next cell of code, I'll only show you code for `output1.txt`, so you would need to repeat this with the seven other file names if you had eight total files.)
 
 ```{bash eval=FALSE}
 cp ibex-1/results/raw_results output1.txt
@@ -148,6 +148,10 @@ We still have all of those Ibex Farm indices that we don't actually need. Once w
 * `[7]` contains an empty field indicating a click to continue
 * `[8]` contains the text of the question
 * etc… (you will have to interpret your columns on your own, since the content depends on what kind of design you used)
+
+The order of the following lines of code is very important, although you may not need to use them all. The logic is that each line searches for a string, but since `11` begins with a `1`, the line that looks for a `1` will target `11` in a way that prevents us from distinguishing them in the future. Therefore, it's important to deal with your double digit columns before your single digits.
+
+**NB**: the last two lines of this code cell are absolutely crucial because they remove the unnecessary `"`s, which will help simplify the following code a lot.
 
 ```{bash eval=FALSE}
 ## subsetting with ‘awk’:

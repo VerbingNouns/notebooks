@@ -220,7 +220,7 @@ div.tocify {
 </div>
 
 
-<p>In this tutorial, we will take the output of an <a href="http://spellout.net/ibexfarm/">Ibex Farm</a> experiment and process it into a form that we can analyse in <a href="https://www.stats.bris.ac.uk/R/">R</a>. The code in this tutorial is adapted from code by <a href="http://www.mpi.nl/people/brehm-laurel-ellen/research">Laurel E. Brehm</a>. It’s a unix <code>bash</code> script, which can be run in <strong>Terminal</strong> on a Mac (and possibly <strong>Console</strong> on Windows, though <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">I haven’t tested it yet</a>, but I hear <a href="https://www.cygwin.com/">cygwin</a> is a good way to do it).</p>
+<p>In this tutorial, we will take the output of an <a href="http://spellout.net/ibexfarm/">Ibex Farm</a> experiment and process it into a form that we can analyse in <a href="https://www.stats.bris.ac.uk/R/">R</a>. The code in this tutorial is adapted from code by <a href="http://www.mpi.nl/people/brehm-laurel-ellen/research">Laurel E. Brehm</a>. It’s a unix <code>bash</code> script, which can be run in <strong>Terminal</strong> on a Mac and <a href="https://www.cygwin.com/"><strong>cygwin</strong></a>. One note about <strong>cygwin</strong>: it seems to create a shell around your C: drive that allows it to index and search for directory paths. This means your home path may look something like this: <code>cygdrive/c/...</code>. (It’s possible <strong>Console</strong> on Windows is also useful, though <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">I haven’t tested it yet</a>).</p>
 <div id="downloading-your-data" class="section level1">
 <h1><span class="header-section-number">1</span> Downloading your data…</h1>
 <p>At the end of gathering data, you will have several files in the <strong>results</strong> section of your experiment(s). You only need the raw_results files in order to process your data, but it’s good to archive and preserve the whole experiment in its end state, so I recommend that you download the entire experiment by clicking on the link for the <strong>zip archive</strong>.</p>
@@ -238,7 +238,7 @@ div.tocify {
 
 ## logic: enter directory, grab the thing in a sub-directory, and pull it out to bigger directory
 cd /Users/yourcomputer/Documents/Experiments/Experiment_Folder</code></pre>
-<p>Next, we want to <em>copy</em> them to a new location so that we don’t accidentally mess them up and lose or damage our data. This will also add a file extension to the file name. Each line of code says to <em>move</em> <code>mv</code> the file located at the specified path to a new file named something like <code>output.txt</code>. Since this example experiment had eight lists (i.e., eight separate entries in Ibex Farm), we need to do this eight times. You might only need to do this once, though. (After this next cell of code, I’ll only show you code for <code>output1.txt</code>, so you would need to repeat this with the seven other file names if you had eight total files.)</p>
+<p>Next, we want to <em>copy</em> them to a new location so that we don’t accidentally mess them up and lose or damage our data. This will also add a file extension to the file name. Each line of code says to <em>copy</em> <code>cp</code> the file located at the specified path to a new file named something like <code>output.txt</code>. Since this example experiment had eight lists (i.e., eight separate entries in Ibex Farm), we need to do this eight times. You might only need to do this once, though, if you only have one experiment .ZIP file. (After this next cell of code, I’ll only show you code for <code>output1.txt</code>, so you would need to repeat this with the seven other file names if you had eight total files.)</p>
 <pre class="bash"><code>cp ibex-1/results/raw_results output1.txt
 cp ibex-2/results/raw_results output2.txt
 cp ibex-3/results/raw_results output3.txt
@@ -339,6 +339,8 @@ rm output_data4.txt</code></pre>
 <li><code>[8]</code> contains the text of the question</li>
 <li>etc… (you will have to interpret your columns on your own, since the content depends on what kind of design you used)</li>
 </ul>
+<p>The order of the following lines of code is very important, although you may not need to use them all. The logic is that each line searches for a string, but since <code>11</code> begins with a <code>1</code>, the line that looks for a <code>1</code> will target <code>11</code> in a way that prevents us from distinguishing them in the future. Therefore, it’s important to deal with your double digit columns before your single digits.</p>
+<p><strong>NB</strong>: the last two lines of this code cell are absolutely crucial because they remove the unnecessary <code>&quot;</code>s, which will help simplify the following code a lot.</p>
 <pre class="bash"><code>## subsetting with ‘awk’:
 ## -F’\t’ specifies that it’s tab delimited
 ## $NUMBER is the whateverth column
