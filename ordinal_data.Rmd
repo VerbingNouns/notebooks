@@ -1,11 +1,20 @@
 ---
 title: "Dealing with ordinal data"
-output: 
+output:
   html_notebook:
-    toc: true
+    toc: yes
     toc_depth: 2
-    toc_float: true
+    toc_float: yes
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '2'
 ---
+```{r echo=FALSE,message=FALSE}
+library(ggplot2)
+library(lme4)
+library(ordinal)
+```
 
 > ★ DRAFT ★  
 > (A work in progress…)
@@ -27,7 +36,7 @@ That's where the `ordinal` package comes in.
 ```{r}
 library(ordinal)
 
-dataOrd <- read.csv("ordinal_data.csv",header=TRUE)
+dataOrd <- read.csv("data/ordinal_data.csv",header=TRUE)
 head(dataOrd)
 ```
 
@@ -60,7 +69,7 @@ summary(clmm.max)
 
 Just like you might with a LMER, you can do a model comparison to determine the contribution of each main effect and their interaction.
 
-```{r eval=FALSE}
+```{r}
 clmm.int <- clmm(as.factor(rating) ~ factor1+factor2 + (1|subject)+(1|item),data=dataOrd)
 clmm.one <- clmm(as.factor(rating) ~ factor2 + (1|subject)+(1|item),data=dataOrd)
 clmm.two <- clmm(as.factor(rating) ~ factor1 + (1|subject)+(1|item),data=dataOrd)
@@ -83,7 +92,7 @@ These suggest both main effects and their interaction all contribute significant
 
 If we visualise the ratings as probabilities, we can see subtle differences that aren't visible in box plots or bar charts. In the graph below, the coloured lines indicate the estimated probability each of the conditions will be assigned a certain rating. 
 
-```{r tidy=TRUE}
+```{r, eval=TRUE}
 # script adapted from Jalal Al Tamimi
 par(oma=c(0, 0, 0, 1)) # ,mfrow=c(1,1))
 xlim = c(min(clmm.max$beta)-.5,max(clmm.max$beta)+.5)

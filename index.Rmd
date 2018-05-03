@@ -1,7 +1,7 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "3/12/2018"
+date: "Last updated: 03 May 2018"
 output: 
   html_notebook:
     toc: true
@@ -25,6 +25,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 * A description of why ordinal regressions are useful and how to use them.
 
-## [Processing Ibex Farm Output](bash_processing.html)
+## [Using and graphing prop.test()](forced_choice.nb.html)
+
+* Some quick snippets and instructions for performing 1-sample proportions tests.
+* Base graphics code for producing stacked proportions bar charts with error bars (CI 95%).
+
+## [Processing Ibex Farm output](bash_processing.html)
 
 * A description of bash script used to process the results file from an Ibex Farm experiment.
+

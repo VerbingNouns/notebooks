@@ -18,7 +18,7 @@ library(lme4,ordinal)
 # 2) dataOrd = ordinal rating data from a simulated Likert scale task
 # 3) dataCon = continuous numeric data from a simulated reaction time task
 
-dataBin <- read.csv("binomial-data.csv",header=TRUE)
+dataBin <- read.csv("data/binomial-data.csv",header=TRUE)
 head(dataBin)
 ```
 
