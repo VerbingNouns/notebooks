@@ -7,6 +7,7 @@ output:
     toc: true
     toc_float: true
 ---
+[🔙 Home](https://verbingnouns.github.io/notebooks/)
 
 ```{r echo=FALSE,message=FALSE}
 library(ggplot2)

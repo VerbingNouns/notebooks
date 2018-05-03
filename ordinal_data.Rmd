@@ -8,6 +8,8 @@ output:
     toc_depth: 2
     toc_float: yes
 ---
+[🔙 Home](https://verbingnouns.github.io/notebooks/)
+
 ```{r echo=FALSE,message=FALSE}
 library(ggplot2)
 library(lme4)

@@ -5,6 +5,7 @@ output:
     toc: true
     toc_float: true
 ---
+[🔙 Home](https://verbingnouns.github.io/notebooks/)
 
 Congratulations! You have downloaded [R](https://www.stats.bris.ac.uk/R/) and [RStudio](https://www.rstudio.com/products/rstudio/download/#download).
 
