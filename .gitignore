@@ -2,3 +2,5 @@
 .DS_Store
 .Rproj.user
 *.Rproj alias
+.RData
+.Rhistory
