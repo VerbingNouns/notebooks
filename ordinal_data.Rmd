@@ -14,6 +14,7 @@ output:
 library(ggplot2)
 library(lme4)
 library(ordinal)
+library(formatR)
 ```
 
 > ★ DRAFT ★  
@@ -92,7 +93,7 @@ These suggest both main effects and their interaction all contribute significant
 
 If we visualise the ratings as probabilities, we can see subtle differences that aren't visible in box plots or bar charts. In the graph below, the coloured lines indicate the estimated probability each of the conditions will be assigned a certain rating. 
 
-```{r, eval=TRUE}
+```{r, eval=TRUE,collapse=TRUE,tidy=TRUE}
 # script adapted from Jalal Al Tamimi
 par(oma=c(0, 0, 0, 1)) # ,mfrow=c(1,1))
 xlim = c(min(clmm.max$beta)-.5,max(clmm.max$beta)+.5)
