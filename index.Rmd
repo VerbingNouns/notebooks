@@ -34,3 +34,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 * A description of bash script used to process the results file from an Ibex Farm experiment.
 
+## [Eye-tracking workflow](eye-tracking-workflow.nb.html)
+
+* Documentation for how to take .EDF files exported from [EyeTrack](https://blogs.umass.edu/eyelab/software/) and turn them into an analyzable dataset
+* Includes workflow for using:
+    1. fix_align_v0p92.R
+    2. Robodoc.py and associated scripts
+    3. SideEye (beta)
+    4. Failed attempts and depricated code
+
