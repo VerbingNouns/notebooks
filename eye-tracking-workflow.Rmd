@@ -501,8 +501,9 @@ I don't know what numbers are appropriate for cutoffs, region measures or trial 
 Region output and trial output seem fine as is.
 
 I've changed a few things:
-* For calculating region length: `region_start` and `region_end` = TRUE
-* For information: `region_text` = TRUE
+
+* For calculating region length: `region_start` and `region_end` = `TRUE`  
+* For information: `region_text` = `TRUE`
 
 ## Running side-eye
 
@@ -520,6 +521,29 @@ Item number 1 , condition 1 does not exist. It was not added to the Experiment o
 ````
 
 This output means item 1 (which happens to be the instructions and practice questions, thus not a real item) is excluded from this dataset. The output is a `.csv` file. Brian says: [Regions listed as `NA` are] used for the region field for trial level calculations (total viewing time, for example).
+
+# Data set
+
+After all this, what does the data set actually look like? What does it contain? The following dataset has issues, but they can easily be resolved through find-and-replace functions outside of R. For instance, `region_start` and `region_end` encode the coordinates incorrectly, which pushes all information two cells to the right. This is why `skip` is under `experiment_name` in the first column.
+
+````{r}
+#library(dplyr)
+df.eyetrack <- read.csv(file.choose(), header=TRUE)
+df.eyetrack %>%
+  as_tibble() %>%
+  group_by(experiment_name)
+````
+
+Once it's been properly edited (by hand or text processing), this is what we might see. In the below output, the region coordinates have been fixed and I've changed some of the column names to suit me. I've also excluded some columns that I don't find useful (e.g., `filename`). However, notice how `$value` is a factor and contains both python booleans (`True`) and numerics. This can be recoded once measure type is subsetted out.
+
+```{r}
+df.eyetrack <- read.csv(file.choose(), header=TRUE)
+df.eyetrack %>%
+  as_tibble() %>%
+  group_by(subj)
+```
+
+
 
 ***
 
