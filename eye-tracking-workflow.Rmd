@@ -15,10 +15,10 @@ output:
 
 All work associated with the [Centre for Behaviour and Evolution](http://www.ncl.ac.uk/cbe/), including this documentation, is supported by a Wellcome Trust Capital Award to Newcastle (grant ref: 092504).
 
-```{r, echo=FALSE,message=FALSE}
+````{r, echo=FALSE,message=FALSE}
 library(reticulate)
 use_python(python="/usr/local/bin/python3", required = TRUE) # this needs to be FIRST because only one version can be loaded per R session
-```
+````
 
 # Purpose
 
@@ -41,10 +41,10 @@ This section takes the prose information from Cohen (2013) and puts in it lists 
 
 In order to use fix_align properly, it's good to understand what arguments it takes and what it does with those arguments. I present information condensed from Cohen (2013) and my own interpretations and experiences with using it.
 
-```{r}
+````{r}
 library(knitr)
 source('fix_align_v0p92.R')
-```
+````
 
 ````
 fix_align <- function(start_pts,                      # where does each line start
