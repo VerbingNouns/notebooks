@@ -186,6 +186,18 @@ p3 <- snail %>%
 multiplot(p1,p2,p3,cols = 3)
 ````
 
+Here's another way to visualize the way these snail races tend to turn out:
+
+````{r}
+snail %>%
+  melt(measure.vars=c("snailA","snailB","snailC","snailD")) %>%
+  ggplot(aes(x=variable,y=value/100)) +
+    geom_boxplot(aes(fill=variable)) +
+    scale_y_continuous(labels=scales::percent) +
+    ggtitle("Distribution of snail race results in quartiles") +
+    ylab("percent of responses") + xlab("")
+````
+
 
 # Further info
 
