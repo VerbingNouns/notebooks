@@ -134,7 +134,9 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
 }
 ```
 
-# Plot
+# Plots
+
+## Bar plots
 
 Here is a nice summary of what I'll be plotting:
 
@@ -186,6 +188,8 @@ p3 <- snail %>%
 multiplot(p1,p2,p3,cols = 3)
 ````
 
+## Box plots
+
 Here's another way to visualize the way these snail races tend to turn out:
 
 ````{r}
@@ -197,6 +201,8 @@ snail %>%
     ggtitle("Distribution of snail race results in quartiles") +
     ylab("percent of responses") + xlab("")
 ````
+
+## Raincloud plots
 
 Let's see how a [raincloud plot](https://orchid00.github.io/tidy_raincloudplot) works with these data:
 
@@ -263,3 +269,6 @@ howpublished={\url{https://verbingnouns.github.io/notebooks/snail_race.nb.html}}
 }
 ```
 
+***
+
+![](snail-race-shells.png)
