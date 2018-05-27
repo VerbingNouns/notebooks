@@ -1,7 +1,7 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "Last updated: 03 May 2018"
+date: "Last updated: 27 May 2018"
 output: 
   html_notebook:
     toc: true
@@ -43,3 +43,7 @@ knitr::opts_chunk$set(echo = TRUE)
     3. SideEye (beta)
     4. Failed attempts and depricated code
 
+## [Snail races](snail_race.nb.html)
+
+* A quick and dirty analysis of how people respond to Twitter "snail races".
+* Can be used to compensate for order effects in 4-point multiple choice questions (MCQs).

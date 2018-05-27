@@ -1,0 +1,209 @@
+---
+title: "Snail Race"
+author: "Lauren M Ackerman"
+date: "Last updated: 27 May 2018"
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+[🔙 Home](https://verbingnouns.github.io/notebooks/)
+
+Packages used:  
+```{r}
+library(tidyverse)
+library(lme4)
+library(reshape2)
+```
+```{r echo=FALSE}
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+# Read in the data
+
+As a way of procrastinating, I assembled the results of 68 "snail races" on [Twitter](https://twitter.com/search?q=snail%20race&src=typd).
+
+![](snail-race-search.png)
+
+```{r}
+snail <- read.csv("data/snail_race.csv",header=TRUE,as.is=TRUE)
+
+snail %>%
+  group_by(twitteruser)
+```
+
+But what we really want is to melt the four snail types into a single column.
+
+```{r}
+snail %>%
+  melt(measure.vars=c("snailA","snailB","snailC","snailD")) %>%
+  group_by(twitteruser)
+```
+
+
+# Create summary function
+
+I got this function from [Cookbook for R](http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)). It uses `plyr`, but I've adapted the function to call it directly (`plyr::`) so that it doesn't interfere with `dplyr` elsewhere.
+
+```{r}
+## Summarizes data.
+## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
+##   data: a data frame.
+##   measurevar: the name of a column that contains the variable to be summariezed
+##   groupvars: a vector containing names of columns that contain grouping variables
+##   na.rm: a boolean that indicates whether to ignore NA's
+##   conf.interval: the percent range of the confidence interval (default is 95%)
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+#    library(plyr)
+
+    # New version of length which can handle NA's: if na.rm==T, don't count them
+    length2 <- function (x, na.rm=FALSE) {
+        if (na.rm) sum(!is.na(x))
+        else       length(x)
+    }
+
+    # This does the summary. For each group's data frame, return a vector with
+    # N, mean, and sd
+    datac <- plyr::ddply(data, groupvars, .drop=.drop,
+      .fun = function(xx, col) {
+        c(N    = length2(xx[[col]], na.rm=na.rm),
+          mean = mean   (xx[[col]], na.rm=na.rm),
+          sd   = sd     (xx[[col]], na.rm=na.rm)
+        )
+      },
+      measurevar
+    )
+
+    # Rename the "mean" column    
+    datac <- plyr::rename(datac, c("mean" = measurevar))
+
+    datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+
+    # Confidence interval multiplier for standard error
+    # Calculate t-statistic for confidence interval: 
+    # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+    ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+    datac$ci <- datac$se * ciMult
+
+    return(datac)
+}
+```
+
+# Plot
+
+Here is a nice summary of what I'll be plotting:
+
+```{r}
+snail %>%
+  melt(measure.vars=c("snailA","snailB","snailC","snailD")) %>%
+  summarySE(measurevar="value", groupvars="variable")
+```
+
+Using the [`multiplot()` function](http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/), we can put all three varieties of error bars in one compound figure.
+
+```{r fig.width=4.75, fig.asp=0.5}
+p1 <- snail %>%
+  melt(measure.vars=c("snailA","snailB","snailC","snailD")) %>%
+  summarySE(measurevar="value", groupvars="variable") %>%
+  ggplot(aes(x=variable,y=(value/100))) +
+    geom_bar(aes(fill=variable),stat="identity") +
+    geom_errorbar(aes(ymin=(value-ci)/100, ymax=(value+ci)/100), colour="black", width=.1) +
+    scale_y_continuous(labels=scales::percent, limits=c(0,.50)) +
+    ggtitle("With 95% Confidence Interval") +
+    ylab("percent of responses") + xlab("") +
+  theme(legend.position = "none",
+           axis.text.x  = element_text(angle=90, vjust=0.5))
+
+p2 <- snail %>%
+  melt(measure.vars=c("snailA","snailB","snailC","snailD")) %>%
+  summarySE(measurevar="value", groupvars="variable") %>%
+  ggplot(aes(x=variable,y=(value/100))) +
+    geom_bar(aes(fill=variable),stat="identity") +
+    geom_errorbar(aes(ymin=(value-sd)/100, ymax=(value+sd)/100), colour="black", width=.1) +
+    scale_y_continuous(labels=scales::percent, limits=c(0,.50)) +
+    ggtitle("With standard deviation") +
+    ylab("percent of responses") + xlab("") +
+  theme(legend.position = "none",
+           axis.text.x  = element_text(angle=90, vjust=0.5))
+
+p3 <- snail %>%
+  melt(measure.vars=c("snailA","snailB","snailC","snailD")) %>%
+  summarySE(measurevar="value", groupvars="variable") %>%
+  ggplot(aes(x=variable,y=(value/100))) +
+    geom_bar(aes(fill=variable),stat="identity") +
+    geom_errorbar(aes(ymin=(value-se)/100, ymax=(value+se)/100), colour="black", width=.1) +
+    scale_y_continuous(labels=scales::percent, limits=c(0,.50)) +
+    ggtitle("With standard error") +
+    ylab("percent of responses") + xlab("") +
+  theme(legend.position = "none",
+           axis.text.x  = element_text(angle=90, vjust=0.5))
+
+multiplot(p2,p1,p3,cols = 3)
+```
+
+
+# Further info
+
+**Next steps:** After the latest huge-N twitter poll closes, I'll add it in and figure out how to weight each poll by how many responses were received.
+
+Please cite as:
+
+> Ackerman, L.M. (2018, May 27). *Snail Race*. Retrieved from: [https://verbingnouns.github.io/notebooks/snail_race.nb.html]()
+
+BibTeX:
+
+```
+@MISC{snailRace,
+author = {Ackerman, Lauren M.},
+title = {Snail Race},
+month = may,
+year = {2018},
+howpublished={\url{https://verbingnouns.github.io/notebooks/snail_race.nb.html}}
+}
+```
+
