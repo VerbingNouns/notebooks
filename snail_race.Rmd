@@ -9,7 +9,7 @@ output:
 ---
 [🔙 Home](https://verbingnouns.github.io/notebooks/)
 
-Snail races are a phenomenon on Twitter in which a Twitter poll is created in which all four of the possible options are labeled simply with the snail emoji (). These polls can get very popular, and are noted to consistently have the same shape of responses. This notebook explores the consistency of Snail Race polls.
+Snail races are a phenomenon on Twitter in which a Twitter poll is created in which all four of the possible options are labeled simply with the snail emoji (🐌). These polls can get very popular, and are noted to consistently have the same shape of responses. This notebook explores the consistency of Snail Race polls.
 
 ![](images/419vince.png)
 
