@@ -1,7 +1,7 @@
 ---
 title: "Snail Race"
 author: "Lauren M Ackerman"
-date: "Last updated: 27 May 2018"
+date: "Last updated: 28 May 2018"
 output: 
   html_notebook:
     toc: true
@@ -9,12 +9,18 @@ output:
 ---
 [🔙 Home](https://verbingnouns.github.io/notebooks/)
 
+Snail races are a phenomenon on Twitter in which a Twitter poll is created in which all four of the possible options are labeled simply with the snail emoji (). These polls can get very popular, and are noted to consistently have the same shape of responses. This notebook explores the consistency of Snail Race polls.
+
+![](images/419vince.png)
+
 Packages used:  
 ```{r}
 library(tidyverse)
 library(lme4)
 library(reshape2)
+library(magick)
 ```
+
 ```{r echo=FALSE}
 # Multiple plot function
 #
@@ -65,9 +71,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 # Read in the data
 
-As a way of procrastinating, I assembled the results of 68 "snail races" on [Twitter](https://twitter.com/search?q=snail%20race&src=typd).
+As a way of procrastinating, I recorded the results of 150 "snail races" on [Twitter](https://twitter.com/search?q=snail%20race&src=typd). Not all of these polls had closed, and the poll status is recorded in this dataset. In the future, the open polls can be updated.
 
-![](snail-race-search.png)
+![](images/snail-race-search.png)
 
 ```{r}
 snail <- read.csv("data/snail_race.csv",header=TRUE,as.is=TRUE)
@@ -248,14 +254,36 @@ snail %>%
     raincloud_theme
 ````
 
+Hmm… I wonder if I can include a dimension for how many votes each poll got? I'll try do to that with the `size` aesthetic, but since there's such a wide range (21 to over 3 million), I'll have to take the log of the number of votes.
+
+```{r}
+snail %>%
+  melt(measure.vars=c("snailA","snailB","snailC","snailD")) %>% 
+    ggplot(aes(x = variable, y = value/100, fill = variable)) +
+  ggtitle("Snowcloud plot of Twitter Snail Race outcomes") +
+    geom_flat_violin(position = position_nudge(x = .29, y = 0), alpha = .8) +
+    geom_point(aes(y = value/100, color = variable, size=log10(votes)), 
+              position = position_jitter(width = .2), alpha = 0.35) +
+    geom_boxplot(width = .1, outlier.shape = NA, alpha = 0.5) +
+    scale_x_discrete(limits=c("snailD","snailC","snailB","snailA")) + xlab("") +
+    scale_y_continuous(labels=scales::percent) + ylab("percent of responses") +
+    expand_limits(x = 5.25) +
+    guides(fill = FALSE) +
+    guides(color = FALSE) +
+    #scale_color_brewer(palette = "Spectral") +
+    #scale_fill_brewer(palette = "Spectral") +
+    coord_flip() + # flip or not
+    theme_bw() +
+    raincloud_theme
+```
 
 # Further info
 
-**Next steps:** After the latest huge-N twitter poll closes, I'll add it in and figure out how to weight each poll by how many responses were received.
+**Next steps:** I'd like to figure out how to weight each poll by how many responses were received.
 
 Please cite as:
 
-> Ackerman, L.M. (2018, May 27). *Snail Race*. Retrieved from: [https://verbingnouns.github.io/notebooks/snail_race.nb.html]()
+> Ackerman, L.M. (2018, May 28). *Snail Race*. Retrieved from: [https://verbingnouns.github.io/notebooks/snail_race.nb.html]()
 
 BibTeX:
 
@@ -271,4 +299,19 @@ howpublished={\url{https://verbingnouns.github.io/notebooks/snail_race.nb.html}}
 
 ***
 
-![](snail-race-shells.png)
+From the [first 68 gathered polls](https://twitter.com/VerbingNouns/status/1000775095294586880):
+
+````{r}
+# Now call back the plot
+background <- image_read("images/snail-race-shells.png")
+# And bring in a logo
+logo_raw <- image_read("images/slug.gif") 
+frames <- lapply(logo_raw, function(frame) {
+  image_composite(background, frame, offset = "+700+500")
+})
+animation <- image_animate(image_join(frames))
+image_write(animation, "images/slug-graph.gif") # 12 minutes to run?!
+beepr::beep()
+````
+
+![](images/slug-graph.gif)
