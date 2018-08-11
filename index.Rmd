@@ -1,9 +1,11 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "Last updated: 27 May 2018"
+date: "Last updated: 11 Aug 2018"
 output: 
-  html_notebook:
+  html_document:
+    theme: cerulean
+    highlight: default
     toc: true
     toc_float: true
 ---
@@ -11,6 +13,9 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## <span style="background-color: #FFFF00">[RfficeHours](rfficehours/info.html)</span>
+* Information about my drop-in R seminars, being trialed in September 2018.
 
 ## [Setting up RStudio](1_Setting_Up.nb.html)
 
