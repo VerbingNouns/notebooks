@@ -7,7 +7,7 @@ output:
     toc: false
     toc_float: true
 ---
-[🔙 Home](https://verbingnouns.github.io/notebooks/)
+[🔙 Home](https://verbingnouns.github.io/notebooks/) || [Tutorial 1 ⇢](tutorial-1.html)
 
 ```{r, echo=FALSE}
 htmltools::img(src = knitr::image_uri("header.png"), 
@@ -32,7 +32,7 @@ Week beginning **17 September**:
 1. *File management and datasets*  
     * Navigating files structures in RStudio  
     * Reading and writing files  
-    * Rmarkdown and verbose programming  
+    * Rmarkdown and literate programming  
 * Monday 17 Sept 13:00  
 * Tuesday 18 Sept 14:00
 * Thursday 20 Sept 11:00
