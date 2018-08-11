@@ -25,8 +25,37 @@ knitr::opts_chunk$set(echo = TRUE)
 # Planning code
 Thinking like a programmer
 
+## Strategise
+
+## Test
+
+## Run
+
 # CRAN documentation
 Reading CRAN documentation
 
+## Formulas
+
+## Arguments
+
+## Examples
+
 # Online resources
 Intro to GitHub and StackOverflow
+
+## StackOverflow
+
+### Searching for answers
+
+### Asking questions
+
+### Pitfalls
+
+## GitHub
+
+### What is GitHub?
+
+### Basics
+What do you actually need to know to make use of GitHub?
+
+### Getting help

@@ -22,8 +22,62 @@ htmltools::img(src = knitr::image_uri("header.png"),
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# What is Tidyverse?
+
 # Basic data manipulation
+
+## Piping
+
+## Mutate
+
+## Filter
+
+## Transmute
+
+## Gather / Melt
+
+## Spread
 
 # Summarising a data table
 
+## Group by
+
+## Summarise
+
+### Count
+
+### Mean
+
+### Standard deviation
+
+### Custom value
+
 # Ingredients of a ggplot
+
+## Base plot
+
+### Aesthetics
+
+#### X-axis
+
+#### Y-axis
+
+#### Colour
+
+#### Fill
+
+#### Size
+
+#### Alpha
+
+## Geom
+
+### Point
+
+### Bar
+
+### Boxplot
+
+### Hist
+
+### Smooth
