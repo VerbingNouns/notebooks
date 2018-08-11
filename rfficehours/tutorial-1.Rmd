@@ -1,0 +1,67 @@
+---
+title: "File management and datasets"
+output: 
+  html_document:
+    theme: cerulean
+    highlight: default
+    toc: true
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+---
+[⇠ RfficeHours Home](info.html) || [Tutorial 2 ⇢](tutorial-2.html)
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("header.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:20px;')
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# File structure
+Navigating file structures in RStudio
+
+## R vs RStudio
+What is the difference between R and RStudio?
+
+## Scripts
+What is the point of a script?
+
+## Best practices
+Best practices for file organisation
+
+# Reading and writing
+Reading and writing files
+
+## Scripts
+Opening and creating scripts
+
+## Datasets
+Opening datasets
+
+### Tab-delimited files (.txt)
+
+### Comma separated values (.csv)
+
+### Why not Excel? (.xls/.xlsx)
+
+# Literate programming
+Rmarkdown and literate programming
+
+## Annotation
+Why do we annotate code?
+
+## Prose
+What is literate programming?
+
+## R Notebooks
+
+### Organising code
+
+### Sharing code
+
+### Publishing code

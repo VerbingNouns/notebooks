@@ -1,0 +1,32 @@
+---
+title: "Exploration and Troubleshooting"
+output: 
+  html_document:
+    theme: cerulean
+    highlight: default
+    toc: true
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+---
+[⇠ Turorial 2](tutorial-2.html)
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("header.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:20px;')
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Planning code
+Thinking like a programmer
+
+# CRAN documentation
+Reading CRAN documentation
+
+# Online resources
+Intro to GitHub and StackOverflow
