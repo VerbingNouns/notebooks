@@ -22,6 +22,15 @@ htmltools::img(src = knitr::image_uri("header.png"),
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+|  | Learning Outcomes |
+|--|----------|
+| 1|You will know how to plan out code in a step-wise manner|
+| 2|You will be able to navigate the CRAN documentation pages|
+| 3|You will know how to search online for solutions|
+| 4|You will realise that being good at R is just being good at Google|
+|||
+
+
 # Planning code
 Thinking like a programmer
 
