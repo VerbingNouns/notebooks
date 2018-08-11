@@ -37,6 +37,8 @@ Week beginning **17 September**:
 * Tuesday 18 Sept 14:00
 * Thursday 20 Sept 11:00
 
+---
+
 Week beginning **24 September**:
 
 2. *Intro to Tidyverse*  
@@ -47,6 +49,8 @@ Week beginning **24 September**:
 * Tuesday 25 Sept 14:00
 * Thursday 27 Sept 11:00
 
+---
+
 Week beginning **1 October** (yes I know this is term-time...):
 
 3. *Exploration and troubleshooting*  
@@ -56,6 +60,8 @@ Week beginning **1 October** (yes I know this is term-time...):
 * Monday 1 Oct 13:00  
 * Tuesday 2 Oct 14:00
 * Thursday 4 Oct 11:00
+
+---
 
 ## Location
 
