@@ -33,9 +33,9 @@ Week beginning **17 September**:
     * Navigating files structures in RStudio  
     * Reading and writing files  
     * Rmarkdown and literate programming  
-* Monday 17 Sept 13:00  
-* Tuesday 18 Sept 14:00
-* Thursday 20 Sept 11:00
+* Monday 17 Sept 11:00 in Percy 1.05  
+* Tuesday 18 Sept 13:00 in Percy 1.05
+* Wednesday 19 Sept 13:00 in Percy 1.05
 
 ---
 
@@ -45,9 +45,9 @@ Week beginning **24 September**:
     * Basic data manipulation  
     * Summarising a data table  
     * Ingredients of a ggplot  
-* Monday 24 Sept 13:00  
-* Tuesday 25 Sept 14:00
-* Thursday 27 Sept 11:00
+* Monday 24 Sept 11:00 in Percy 1.05  
+* Tuesday 25 Sept 13:00 in Percy 1.05
+* Wednesday 26 Sept 13:00 in Percy 1.05
 
 ---
 
@@ -57,20 +57,29 @@ Week beginning **1 October** (yes I know this is term-time...):
     * Thinking like a programmer  
     * Reading CRAN documentation  
     * Intro to GitHub and StackOverflow  
-* Monday 1 Oct 13:00  
-* Tuesday 2 Oct 14:00
-* Thursday 4 Oct 11:00
+* Monday 1 Oct 11:00 in TBD  
+* Tuesday 2 Oct 13:00 in TBD
+* Wednesday 3 Oct 13:00 in Percy 1.05
 
 ---
 
+![](schedule.png)
+
+
 ## Location
 
-**Mondays**: TBD  
-**Tuesdays**: TBD  
-(it will depend on when timetables are released, how much interest is expressed, and whether I can book a room on campus)
+* Week 1:  
+**17, 18, 19 September**: Percy 1.05  
 
-**Thursdays**: Percy Building 2.05  
+* Week 2:  
+**24, 25, 26 September**: Percy 1.05  
 
+* Week 3:  
+**1, 2, October**: TBD (it will depend on when timetables are released   
+**3 October**: Percy 1.05  
+
+![](percy.png)
+*An official map of campus can be found [here](https://www.ncl.ac.uk/about/visit/maps/).*
 
 # Contact
 
@@ -78,5 +87,3 @@ If you are interested in hearing more about this as the time approaches, email m
 
 
 ---
-
-![](schedule.png)
