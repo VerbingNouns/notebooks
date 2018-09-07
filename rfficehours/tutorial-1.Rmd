@@ -90,13 +90,15 @@ The pane in the lower right has five tabs by default.
 5. **Viewer**  
     - I've never used this.  
 
-### How do you keep all your related files organised?
+## Best practices
+
+How do you keep all your related files organised?
 
 Keeping your files organised will make your life infinitely easier and will help you ease back into using R if you come back to it after a hiatus. The RStudio interface will help with this, but there is no better foundation than good file management.
 
-#### Your project folder
+### Your project folder
 
-[Danielle Turton]() and I suggest the following as a best practice:
+[Danielle Turton](https://www.staff.ncl.ac.uk/danielle.turton/) and I suggest the following as a best practice:
 
 1. Create a folder with the name of your project.  
     - If possible, do not use SPACES or SPECIAL CHARACTERS. These can cause issues across platforms.  
@@ -113,7 +115,7 @@ Keeping your files organised will make your life infinitely easier and will help
 ![](gui/folder.png)
 
 
-#### Creating an .RProj
+### Creating an .RProj
 
 RStudio offers a neat feature called a *project* (file type `.Rproj`). A project keeps all your scripts and datasets handy and can save variables for use later, even if you quit and restart RStudio. This can be useful if you are running complex models, for instance.
 
@@ -131,7 +133,7 @@ Since we have already created a folder (i.e., a directory) for our project, we c
 
 From this window, we can browse our computers for the location of the folder we've set up.
 
-#### Troubleshooting
+### Troubleshooting
 
 I have noticed that sometimes students whose computers are set up with a non-English language, particularly with a non-Latin alphabet, can run into problems with setting up these folders. It is important to instruct them to use only Latin characters for the folders that R and RStudio will access, as non-Latin characters use a type of encoding that not all programs can read.
 
@@ -208,21 +210,178 @@ Your console should end up looking like this:
 >
 ```
 
-**What does `[1]` mean?**
+(In the rest of this document, instead of output starting with `>`, it may start with `##`. This is due to how R compiles a script to an HTML document and does not change anything in the script, code, or contentful output.)
 
-The number in square brackets to the left of the output indicates the number of values that have been printed by index number. That is, if there are multiple outputs on one line, [1] will appear. If the seventh output wraps around and appears on the second line, both [1] and [7] will appear. This is useful when trying to make sense of long lists of numbers, for instance.
+#### What does `[1]` mean?
 
-## Best practices
-Best practices for file organisation
+The number in square brackets to the left of the output indicates the number of values that have been printed by index number. That is, if there are multiple outputs on one line, [1] will appear. If the seventh item in the output wraps around and appears on the second line, both [1] and [7] will appear. This is useful when trying to make sense of long lists of numbers, for instance.
+
+Below, I saved two longer strings of text into one variable called `longText`. Then when it's printed, it appears on two lines. The `[1]` indicates the first item in the list is the first item on the line and the `[2]` indicates the second item in the list is the first item that appears on that line.
+
+```{r}
+longText <- c("i don't think we'll be able to fit this text on one line of the output console","so that it might wrap around and display on two lines")
+print(longText)  
+```
+
+#### What is a variable?
+
+One of the most important components of (almost) any programming language is a *variable*. A variable is an object that can be assigned a value, a list of values, a matrix of values, or something along those lines. A variable in R can be named almost anything with a few exceptions:
+
+A variable name…  
+
+- Cannot start with a number  
+- Cannot contain white space (i.e., spaces, tabs, line breaks)  
+- Can contain `.` or `_` but cannot contain other non-alphanumeric characters  
+- Should begin with a lowercase letter  
+- Should be memorable and descriptive  
+- Should not be too long or difficult to type  
+- Should not be too vague or general  
+
+To assign a value (etc) to a variable, there are three possible operators: `=`, `<-`, or occasionally `->` (the latter two look like arrows).
+
+First we assign the value of 3 to the variable `x`. Notice that spaces between the numbers and the operator are optional. I like to use them to help see each component more clearly.
+
+```{r}
+x = 3 # or x=3
+x
+```
+
+We can also use one of the arrow operators. The two characters that comprise the arrow cannot have space between them. They act as a single unit. For the leftward-facing arrow, the value(s) on the right are assigned to the variable on the left.
+
+```{r}
+y <- 4 # or y<-4
+y
+```
+
+Now that we've assigned values to `x` and `y`, we can do things to them. Below, I demonstrate some basic arthimetic operators that allow R to act like a calculator.
+
+```{r}
+x + y
+x * y
+x / y
+x ^ y
+```
+
+Finally, the rightward-pointing arrow is used very rarely, but functions in a similar way to the other two assignment operators. The value(s) on the left are assigned to the variable on the right.
+
+```{r}
+x + y -> z # or z <- x + y or z<-x+y
+z
+```
+
+To assign more than one value to a variable, there are several functions we can use, but the most common and easiest is `c()`. To read more about the function `c()`, you can type `c` into the search bar in the help tab in the lower right pane, *or* you can input the following into your console:
+```{r}
+?c
+```
+
+In short, this function *combines* a series of values into a vector or list.
+
+```{r, message=TRUE, error=TRUE}
+c(1,2,3)
+c("1","2","3")
+c("one","two","three")
+c(one,two,three)
+```
+
+Note that bare numbers are green and are output without quotation marks, numbers and words in quotation marks are output as such, but *words without quotation marks produce an error*. This is because R assumes that all words without quotation marks are variables, but we haven't created variables named `one`, `two`, or `three`.
+
+```{r}
+one = 1
+two = 2
+three = 3
+c(one,two,three)
+```
 
 # Reading and writing
-Reading and writing files
+
+Now that we've gone through the fundamentals of organisation and basic R operators, we can get into the more important task of reading data and writing output (i.e., saving our work).
 
 ## Scripts
-Opening and creating scripts
+
+Once you've created a project (.Rproj), you can open the project and it should open right to where you left off. This means your scripts will open as well, as long as you did not close them the last time you worked on the project. However, if you want to open a script that isn't currrently open but does exist, you can do so in the Files tab of the lower right pane. Click on the name of the script, and it will open in a new tab of your scripts pane (top left by default).
+
+![](gui/new-script.png)
 
 ## Datasets
-Opening datasets
+
+In your script (or, if you don't take my advice, in your console), you can open and manipulate a dataset.
+
+Right click and save [this file](https://raw.githubusercontent.com/VerbingNouns/notebooks/master/data/binomial-data.csv) to your folder named `data`.
+
+```{r, echo=FALSE}
+data <- read.csv("../data/binomial-data.csv")
+```
+
+```{r, error=TRUE, eval=FALSE}
+data <- read.csv("data/binomial-data.csv")
+```
+
+Now, if you want to view the first six rows of the dataset to see what types of things are in it, you can use the function `head()`.
+
+```{r, asis=TRUE}
+head(data)
+```
+
+You can also look at the bottom six rows with `tail()`
+
+```{r}
+tail(data)
+```
+
+#### Basic querying functions
+
+If we want to find out what each of the experiments are called, or how many conditions there are, we can use the function `unique()`. 
+
+Note that we must specify what variable name we've given our dataset (`data`) and what column we want to query (`experiment`). The relationship between the dataset and the column in the dataset is specified with the `$` operator.
+
+```{r}
+unique(data$experiment)
+```
+
+There are three experiments, and their names are `"first"`, `"second"`, and `"third"`. 
+
+If we want to know *how many* unique values there are in a column, we can embed the `unique()` function in the `length()` function.
+
+```{r}
+length(unique(data$experiment))
+```
+
+There are three different experiments in this dataset.
+
+#### Indices
+
+Finally, if we want to find out how many unique items there are in experiment "first" only, we can specify a subset of the dataset using square brackets `[]`. Before we do that, though, let's go through what the arguments for the square brackets are.
+
+An **index** refers to the location of an item in a list, vector, or matrix.
+
+If you have a list that looks like the one below, *green* is at index `4` (in the R programming language).
+
+`["red", "orange", "yellow", "green", "blue", "indigo", "violet"]`
+
+If you have a matrix like the one below, you must specify the index of the row and/or column (`[row,column]`).
+
+| colour | wordLength | waveLengthNM |
+|--------|------------|------------|
+| red    | 3          | 700        |
+| orange | 6          | 630        |
+| yellow | 6          | 600        |
+| green  | 5          | 550        |
+| blue   | 4          | 470        |
+| indigo | 6          | 425        |
+| violet | 6          | 400        |
+
+The location of *green* is in the fourth row and the first column, so we can identify it as `[4,1]`. If we only specify the row (`[4,]`), we will get everything in the fourth row (`"green", 4, 470`). If we only specify the first column, we will get a list of colours, like we did above: 
+
+(`"red", "orange", "yellow", "green", "blue", "indigo", "violet"`)
+
+Now, going back to our dataset, if we want to view the content of one column, such as ``,
+
+```{r}
+data[data$experiment=="second",]
+```
+
+
+query how many items are in the first experiment only, we could do so by specifying a subset
 
 ### Tab-delimited files (.txt)
 

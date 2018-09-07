@@ -33,6 +33,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # What is Tidyverse?
 
+```{r}
+library(tidyverse)
+```
+
+
 # Basic data manipulation
 
 ## Piping
