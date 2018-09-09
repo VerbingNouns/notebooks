@@ -70,7 +70,11 @@ The environment is a set of three tabs that effectively lets us see into "R's br
 
 If we click on `Global Environment`, we can see what packages have automatically be loaded into this R session. Once you load other packages in, you will see them here too.
 
-![](gui/global_environment.png)
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("gui/global_environment.png"), 
+               alt = 'logo', 
+               style = 'position:relative; top:0; right:0; padding:10px; width:70%')
+```
 
 #### Files etc
 
@@ -265,7 +269,7 @@ x ^ y
 Finally, the rightward-pointing arrow is used very rarely, but functions in a similar way to the other two assignment operators. The value(s) on the left are assigned to the variable on the right.
 
 ```{r}
-x + y -> z # or z <- x + y or z<-x+y
+x + y -> z # or z <- x + y or z=x+y
 z
 ```
 
@@ -374,18 +378,75 @@ The location of *green* is in the fourth row and the first column, so we can ide
 
 (`"red", "orange", "yellow", "green", "blue", "indigo", "violet"`)
 
-Now, going back to our dataset, if we want to view the content of one column, such as ``,
+Now, going back to our dataset, if we want to view the content of one column, such as `experiment`, we can specify that column with the `$` operator. But if you want to view a subset of a column, we can also specify what criteria we want to view (or don't want to view).
 
-```{r}
+For instance, if we want to view only the second experiment (which is called `second` in the `experiment` column, helpfully enough), we can use the code below:
+
+```{r, eval=FALSE, message=FALSE}
 data[data$experiment=="second",]
+```
+```{r, echo=FALSE}
+head(data[data$experiment=="second",],10)
 ```
 
 
-query how many items are in the first experiment only, we could do so by specifying a subset
+Let's break the syntax of this code down.
+
+First, we write `data` because we want to look within our dataset that we've named "data". Then we put in the square brackets `[]` after `data` because we want to look at a subset of the dataset. Inside of the square brackets, we want to specify what column has the information that we can use for identifying the target subset. Do to that, we write `data$experiment` to say that the "experiment"column in "data" has the important information, then `==` to check each value to see if it's the same as `"second"`. We finally put a comma `,` as the last character within the square brackets to specify we want to see all the *rows* that match these criteria (remember: `[row,column]`).
+
+I won't go into this more now, but `==` is a very different operator to `=`. While `=` assigns a value, `==` asks whether or not two things are equal. The opposite of `==` is `!=` (pronounced "bang-equals" or "not-equal-to").
+
+Going back to the `unique()` function, if we want to query how many unique items are in the second experiment only, we can use the following code:
+
+```{r}
+length(unique(data$item[data$experiment=="second"]))
+```
+
+This only differs from the previous example in a small number of ways. Instead of querying a two dimensional matrix (`data` has rows and columns), we want to query a one dimensional vector (`item`), which is a subset of `data`. This is why there is no comma at the end of the expression in the square brackets. That is, we want to query a subset of a subset, so we specify the column with our target information and the column and subset information for the column that will help us narrow down what we're looking at. Then, by using `unique()`, we won't count multiple tokens of an item, just the type count. Finally, by using `length()`, we can find out how many types there are.
+
+It starts to look messy and hard to read pretty quickly though. The [next tutorial](tutorial-2.html) will introduce you to a different way of doing this that is easier to read.
 
 ### Tab-delimited files (.txt)
 
+Tab delimited files use white space (specifically, the tab character, unicode: U+0009 sometimes coded as `\t`) to separate information in columns and line breaks (either "carriage return" or "new line" characters, sometimes coded as `\r` and `\n` respectively). This could result in a text file that looks something like this:
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("gui/txt.png"), 
+               alt = 'logo', 
+               style = 'position:relative; top:0; right:0; padding:10px; width:60%')
+```
+
+
+Note how the columns don't necessarily line up neatly. This is because the tab character is not a fixed width, but rather refers to a location along the horizontal axis of the page (at least in this file type). For a human, this is harder to read than a spreadsheet, but for a computer it's easier.
+
+Importantly, text files can be encoded as UTF-8 (or UTF-16), which will accommodate most characters, even from other languages and alphabets. They can also be encoded as ASCII (a very basic encoding that only allows alphanumeric Latin characters and some punctuation), or certain types of old encodings that are not compatible across platforms. In particular, Microsoft Word will **not** produce a useful encoding. 
+
+> DO NOT USE MICROSOFT WORD (OR SIMILAR) TO EDIT A DATASET  
+> **SERIOUSLY, DO NOT DO IT**
+
+On Windows, [Notepad++]() is one of the best plain text editors, and it's free. On Macintosh, [BBEdit]() is my personal favorite plain text editor. For example, in BBEdit, you can change the encoding of a file (in case the wrong one was chosen initially, or in case you wish to ensure your file has a compatible encoding). I recommend **UTF-8**.
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("gui/encodings.png"), 
+               alt = 'logo', 
+               style = 'position:relative; top:0; right:0; padding:10px; width:40%')
+```
+
+Once you have created and saved your dataset as a `.txt` file, you can load it into R and save it with a variable name using the following code:
+
+```{r, eval=FALSE}
+data <- read.delim("data/20180908-my_data_file.txt", header=TRUE, as.is=TRUE)
+```
+
+The function `read.delim()` takes several arguments, but only one is obligatory. The bare minimum you must give it is the name of your `.txt` file, within quotation marks to signify it is a string of characters and not a variable name. Since our folder for saving datasets is called "data", we preface our dataset's name with `data` and a `/` to indicate that the target file is inside the folder called `data`. This is guaranteed to work on a Macintosh computer, but you may need to replace the `/` character with a `\` character if you are working on a Windows computer.
+
 ### Comma separated values (.csv)
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("gui/csv.png"), 
+               alt = 'logo', 
+               style = 'position:relative; top:0; right:0; padding:10px; width:60%')
+```
 
 ### Why not Excel? (.xls/.xlsx)
 
