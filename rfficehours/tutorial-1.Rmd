@@ -534,14 +534,46 @@ An R Notebook will allow you to easily create a document (e.g., an HTML document
 Create a new R Notebook by clicking the green `+` in the upper left corner and selecting "R Notebook". It will automatically give you a little information about how to write, run, and compile the document. Make sure to save it with a short, descriptive name!
 
 Here are links that contain good cheat sheets and tips for formatting an R Notebook:  
+
 * [Official RStudio documentation and guide](https://rmarkdown.rstudio.com/r_notebooks)  
 * [Official RStudio cheat sheet](https://rmarkdown.rstudio.com/lesson-15.html)  
 * [More detailed explanation of how to use R Notebooks and Rmd files](https://bookdown.org/yihui/rmarkdown/notebook.html)
 
 ### Organising code
 
+When you write your code, it should be kept mostly chronological. This way, the steps you take are in the correct order.
+
+However, there are some circumstances where it makes more sense to go back and add code in the middle rather than at the end of a document. If you re-do a statistical analysis or want to compare two methods, those may be more coherent if placed adjacent in the document rather than in the order you performed them. This is especially the case if you learn a new technique and want to go back and re-do an older analysis. The same thing goes for graphs and other outputs.
+
+If you are working directly in an R script (which I do not recommend if you can use an .Rmd or notebook instead), you can create section headings. To do so, you can type `#### Section Title ####` with at least four hashes on either side of the text, and then you will be able to navigate directly to that heading using the small orange hash symbol in the lower left corner of the scripts pane.
+
+An R Notebook also allows you to create section headings and navigate between them in a similar way, but when you compile and save the document, the section headings are also visually salient.
+
+```
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+```
+
+Furthermore, there are options for creating a table of contents for your notebook, which makes it even easier. Here is an example of what you might put in the document header to create a nice, simple table of contents for your notebook.
+
+```
+---
+title: "Untitled R Notebook"
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+```
+
 ### Sharing code
 
-### Publishing code
+To share your code, you can upload the .Rmd or .R script(s) that you used to do your processing and analysis to any open science site. These include [Open Science Framework](https://osf.io/) (OSF), [GitHub](https://github.com/), or your own personal website. Since each file can automatically generate an HTML file, you can either copy and paste the contents or upload the HTML file directly for others to read your report without necessarily knowing any R or needing to download any files.
+
+I will discuss GitHub more in a later tutorial. It is very difficult to break into but very simple to use effectively once you know the basics.
 
 ---
+
+<big>[Go to Tutorial 2 →](tutorial-2.html)</big>
