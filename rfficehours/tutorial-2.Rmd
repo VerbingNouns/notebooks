@@ -5,6 +5,7 @@ output:
     theme: cerulean
     highlight: default
     toc: true
+    toc_depth: 2
     number_sections: true
     toc_float: 
       smooth_scroll: true
@@ -24,12 +25,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 |  | Learning Outcomes |
 |--|----------|
-| 1|You will be able to load tidyverse and use basic functions|
-| 2|You will be able to relabel and reorganise a dataset|
-| 3|You will be able to summarise a dataset|
-| 4|You will be able to generate a simple plot|
+| 1|<span style="background-color: #FFFF00">You will be able to load tidyverse and use basic functions</span>|
+| 2|<span style="background-color: #FFFF00">You will be able to relabel and reorganise a dataset</span>|
+| 3|<span style="background-color: #FFFF00">You will be able to summarise a dataset</span>|
+| 4|<span style="background-color: #FFFF00">You will be able to generate a simple plot</span>|
 |||
 
+**Datasets to download**:
+
+1. [binomial-data.csv](ExampleProject/data/binomial-data.csv)
+2. [long-data.csv](ExampleProject/data/long-data.csv)
+3. [wide-data.csv](ExampleProject/data/wide-data.csv)
 
 # What is Tidyverse?
 
@@ -37,6 +43,135 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+Tidyverse is a package, or a set of add-on tools, that you can optionally use in R to easily and clearly process and visualise your data. In the tidyverse, there are a number of included packages. You do not need to use them all, nor do you need to load them all, but for simplicity's sake, it's easier to load the whole thing and then not worry about it.
+
+The most important (and exciting!) difference between the way base R functions work and the way tidyverse functions work is the **pipe**: **`%>%`**
+
+As a quick demonstration, the following two chunks of code do the exact same thing, but one has many embedded functions, whereas the tidyverse version is much more legible:
+
+Base R:
+```{r}
+head(iris[iris$Sepal.Length<5 & iris$Species=="versicolor" & iris$Petal.Width > 0.3,])
+```
+
+Tidyverse:
+```{r}
+iris %>%
+  filter(Sepal.Length < 5,
+         Species == "versicolor",
+         Petal.Width > 0.3) %>%
+  head()
+```
+
+In short, the pipe (`%>%`) takes whatever has already been done in the preceding line(s) and funnels it into the next line. This means complex operations can be performed, including changing or manipulating the data.frame, but it is temporary within the piped lines and will not permanently alter the data. Each line that you pipe to will have a function, and the functions defined inside the tidyverse package are typically referred to as `verbs`. I will not use this terminology strictly, but it is good to know.
+
+We'll get into more complex examples later on.
+
+## Main packages
+
+The most useful packages for general data manipulation and visualisation are discussed in this section. To start, let's read in a data.frame so we can practice setting it up. You can download [this dataset](ExampleProject/data/binomial_data.csv) to put in your "data" folder (as we discussed in best practices last time).
+
+```{r, echo=FALSE, message=FALSE}
+data <- read.csv("ExampleProject/data/binomial-data.csv", header=TRUE, as.is=TRUE)
+```
+
+Once you've got your dataset in your data folder, you can read the data into this R session with the following code:
+
+```{r, eval=FALSE}
+data <- read.csv("data/binomial-data.csv", header=TRUE, as.is=TRUE)
+```
+
+We can view the data a few different ways. The function `View()` (note the capidal "V") will open the data as a **`data.frame`** in a new tab and it will look like a spreadsheet. Try that now:
+
+```{r, eval=FALSE}
+View(data)
+```
+
+Note that you can't edit the `data.frame` but you can sort the data by column. This doesn't change anything about the structure of the `data.frame`, which you can see because the row numbers stay with their original rows when you sort the data.
+
+We can also view our data in the console. The function `head()` and `tail()` show us the first or last six rows of a data.frame, respectively. We can view more if you add a number as a second argument:
+
+```{r}
+head(data, 10)
+```
+
+### tibble
+
+When you import a data.frame, there are two arguments I've added in: `header=TRUE` and `as.is=TRUE`. The first one says that the first row is the header row that names the columns. This is optional, but good to specify explicitly. The second argument tells R to not change the **class** of the column. The most common data classes are:
+
+* `int`: integers
+* `dbl`: double (a continuous numerical value)
+* `chr`: character (letters and numbers stored as a string)
+* `fctr`: factor (a categorical value)
+
+If you don't specify `as.is=TRUE` (that is, if `as.is=FALSE`), then all non-numerical values will imported as factors. This often doesn't matter, but it can potentially cause issues later on, so I typically assign the value `TRUE`.
+
+A **tibble** is a massively simplified data.frame. You can read in detail [here](http://r4ds.had.co.nz/tibbles.html) about the way tibbles differ from data.frames. Importantly, using the tidyverse to interact with your data will typically convert your data.frame to a tibble. This won't make much of a difference 99.9% of the time, but you might notice some differences in the way it displays.
+
+```{r}
+as.tibble(data)
+```
+
+### tidyr
+
+The `tidyr` package is designed to help you tidy your data without having to go through it by hand. This cuts down on typos *and* the amount of time and effort needed to put your data into an analysable form. In particular, `gather()` and `spread()` will be useful for turning wide data into long data and vice versa.
+
+Often, what will happen is that you receive data that has something like the following structure (one subject per row, many columns).
+
+```{r, warning=FALSE}
+wide <- read.csv("ExampleProject/data/wide-data.csv")
+wide
+```
+
+This can sometimes be useful, but for data analysis and visuatisation in R, it's best to have one observation per row with very few columns. In this case, we can use `gather()`. The first argument is typically the data.frame we are working with, but since we can start with the name of our data frame (in this case, `wide`), we can pipe it directly into the `gather()` verb and leave the argument defining the data.frame implicit. The next two arguments are the names of the columns we're creating. By default, these are "key" and "value", but we can call them anything we'd like. The last argument picks out which columns to gather. In this case, I want names to stay separate, and I want to gather all other columns into one long column.
+
+```{r, warning=FALSE}
+wide %>%
+  gather("demographic","answer",age:favColour)
+```
+
+This can also go the other direction. If we have long data but we want it to be wide (though this is less common), we can use the `spread` verb.
+
+```{r}
+long <- read.csv("ExampleProject/data/long-data.csv",as.is = TRUE)
+long
+```
+
+```{r}
+long %>%
+  spread(key=measure,value=value)
+```
+
+Although it's less common, this verb is useful for displaying small tables and sometimes it can help generate graphs. In any case, it's good to be aware of.
+
+#### Separate
+
+```{r}
+long %>%
+  spread(key=measure,value=value) %>%
+  separate(Savings,into=c("amount","currency"),sep=" ")
+```
+
+
+### dplyr
+
+#### Combining datasets
+
+[Resource](https://dplyr.tidyverse.org/reference/bind.html)
+
+### ggplot2
+
+## Additional packages
+
+### purrr
+
+### stringr
+
+### forcats
+
+### Not included: tidytext
+
+### Not included: something else
 
 # Basic data manipulation
 

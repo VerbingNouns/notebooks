@@ -5,6 +5,7 @@ output:
     theme: cerulean
     highlight: default
     toc: true
+    toc_depth: 2
     number_sections: true
     toc_float: 
       smooth_scroll: true
@@ -24,10 +25,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 |  | Learning Outcomes |
 |--|----------|
-| 1|You will know how to plan out code in a step-wise manner|
-| 2|You will be able to navigate the CRAN documentation pages|
-| 3|You will know how to search online for solutions|
-| 4|You will realise that being good at R is just being good at Google|
+| 1|<span style="background-color: #FFFF00">You will know how to plan out code in a step-wise manner</span>|
+| 2|<span style="background-color: #FFFF00">You will be able to navigate the CRAN documentation pages</span>|
+| 3|<span style="background-color: #FFFF00">You will know how to search online for solutions</span>|
+| 4|<span style="background-color: #FFFF00">You will realise that being good at R is just being good at Google</span>|
 |||
 
 
