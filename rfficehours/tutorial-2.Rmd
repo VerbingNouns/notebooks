@@ -39,6 +39,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # What is Tidyverse?
 
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-tidyverse.png"), 
+               alt = 'tidyverse', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
 ```{r}
 library(tidyverse)
 ```
@@ -46,6 +53,8 @@ library(tidyverse)
 Tidyverse is a package, or a set of add-on tools, that you can optionally use in R to easily and clearly process and visualise your data. In the tidyverse, there are a number of included packages. You do not need to use them all, nor do you need to load them all, but for simplicity's sake, it's easier to load the whole thing and then not worry about it.
 
 The most important (and exciting!) difference between the way base R functions work and the way tidyverse functions work is the **pipe**: **`%>%`**
+
+"Piping" data from one line to the next does not actually *alter* the data permanently unless you overwrite your original dataset. 
 
 As a quick demonstration, the following two chunks of code do the exact same thing, but one has many embedded functions, whereas the tidyverse version is much more legible:
 
@@ -97,6 +106,13 @@ head(data, 10)
 
 ### tibble
 
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-tibble.png"), 
+               alt = 'tibble', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
 When you import a data.frame, there are two arguments I've added in: `header=TRUE` and `as.is=TRUE`. The first one says that the first row is the header row that names the columns. This is optional, but good to specify explicitly. The second argument tells R to not change the **class** of the column. The most common data classes are:
 
 * `int`: integers
@@ -114,7 +130,92 @@ as.tibble(data)
 
 ### tidyr
 
-The `tidyr` package is designed to help you tidy your data without having to go through it by hand. This cuts down on typos *and* the amount of time and effort needed to put your data into an analysable form. In particular, `gather()` and `spread()` will be useful for turning wide data into long data and vice versa.
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-tidyr.png"), 
+               alt = 'tidyr', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+The `tidyr` package is designed to help you tidy your data without having to go through it by hand. This cuts down on typos *and* the amount of time and effort needed to put your data into an analysable form. In particular, `gather()` and `spread()` will be useful for turning wide data into long data and vice versa. It also provides a number of tools for tidying your data.
+
+### dplyr
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-dplyr.png"), 
+               alt = 'dplyr', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+
+### ggplot2
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-ggplot2.png"), 
+               alt = 'ggplot2', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+## Additional packages
+
+### purrr
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-purrr.png"), 
+               alt = 'purrr', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+### stringr
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-stringr.png"), 
+               alt = 'stringr', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+### forcats
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-forcats.png"), 
+               alt = 'forcats', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+### readr
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-readr.png"), 
+               alt = 'readr', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+### Not included: tidytext
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/hex-tidytext.png"), 
+               alt = 'tidytext', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:20px;')
+```
+
+# Basic data manipulation
+
+## Piping
+
+## Mutate
+
+## Filter
+
+## Transmute
+
+## Gather
 
 Often, what will happen is that you receive data that has something like the following structure (one subject per row, many columns).
 
@@ -130,12 +231,17 @@ wide %>%
   gather("demographic","answer",age:favColour)
 ```
 
+
+## Spread
+
 This can also go the other direction. If we have long data but we want it to be wide (though this is less common), we can use the `spread` verb.
 
 ```{r}
 long <- read.csv("ExampleProject/data/long-data.csv",as.is = TRUE)
 long
 ```
+
+Now, I want the column called "measure" to be **spread** across several columns. 
 
 ```{r}
 long %>%
@@ -144,7 +250,9 @@ long %>%
 
 Although it's less common, this verb is useful for displaying small tables and sometimes it can help generate graphs. In any case, it's good to be aware of.
 
-#### Separate
+## Separate
+
+The last bit of `tidyr` we'll discuss for now is **separate**, which takes a column and splits it into two based on some character (which should be present in most if not all rows of that column). Below, we can take our `long` dataset, once it's been spread, and split the column called "Savings" into the numeric amount and the currency.
 
 ```{r}
 long %>%
@@ -152,40 +260,19 @@ long %>%
   separate(Savings,into=c("amount","currency"),sep=" ")
 ```
 
+Note quickly that "Age" and "amount" contain numbers but are still of class `character`. We can easily change this:
 
-### dplyr
+```{r}
+long %>%
+  spread(key=measure,value=value) %>%
+  separate(Savings,into=c("amount","currency"),sep=" ") %>%
+  mutate(Age = as.integer(Age),
+         amount = as.numeric(amount))
+```
 
-#### Combining datasets
+## Combining datasets
 
 [Resource](https://dplyr.tidyverse.org/reference/bind.html)
-
-### ggplot2
-
-## Additional packages
-
-### purrr
-
-### stringr
-
-### forcats
-
-### Not included: tidytext
-
-### Not included: something else
-
-# Basic data manipulation
-
-## Piping
-
-## Mutate
-
-## Filter
-
-## Transmute
-
-## Gather / Melt
-
-## Spread
 
 # Summarising a data table
 
@@ -193,15 +280,26 @@ long %>%
 
 ## Summarise
 
-### Count
-
-### Mean
-
-### Standard deviation
-
-### Custom value
-
 # Ingredients of a ggplot
+
+```{r}
+data %>%
+  group_by(experiment,condition,selection) %>%
+  summarise(n=n(),
+            y=n()/240) %>%
+  ggplot(aes(x=condition,y=y,fill=selection)) +
+    geom_bar(stat = "identity", position = "stack", colour="grey40") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_bw() +
+    ylab("percent of responses") +
+    ggtitle("Example graph:\nTest one") +
+    facet_wrap(~experiment) -> p
+options <- list(
+  Background=list(roughness=8),
+  GeomCol=list(fill_style="zigzag", angle_noise=0.5, fill_weight=2))
+#get_rough_chart(p, options)
+```
+
 
 ## Base plot
 
