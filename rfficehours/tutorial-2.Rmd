@@ -761,3 +761,7 @@ example.df %>%
     ggtitle("Example graph:\nTest one") +
     facet_wrap(~experiment)
 ```
+
+---
+
+<big>[Go to Tutorial 3 →](tutorial-3.html)</big>
