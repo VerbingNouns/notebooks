@@ -54,24 +54,6 @@ Tidyverse is a package, or a set of add-on tools, that you can optionally use in
 
 The most important (and exciting!) difference between the way base R functions work and the way tidyverse functions work is the **pipe**: **`%>%`**
 
-"Piping" data from one line to the next does not actually *alter* the data permanently unless you overwrite your original dataset. 
-
-As a quick demonstration, the following two chunks of code do the exact same thing, but one has many embedded functions, whereas the tidyverse version is much more legible:
-
-Base R:
-```{r}
-head(iris[iris$Sepal.Length<5 & iris$Species=="versicolor" & iris$Petal.Width > 0.3,])
-```
-
-Tidyverse:
-```{r}
-iris %>%
-  filter(Sepal.Length < 5,
-         Species == "versicolor",
-         Petal.Width > 0.3) %>%
-  head()
-```
-
 In short, the pipe (`%>%`) takes whatever has already been done in the preceding line(s) and funnels it into the next line. This means complex operations can be performed, including changing or manipulating the data.frame, but it is temporary within the piped lines and will not permanently alter the data. Each line that you pipe to will have a function, and the functions defined inside the tidyverse package are typically referred to as `verbs`. I will not use this terminology strictly, but it is good to know.
 
 We'll get into more complex examples later on.
@@ -148,6 +130,7 @@ htmltools::img(src = knitr::image_uri("images/hex-dplyr.png"),
                style = 'position:right; top:0; right:0; padding:20px;')
 ```
 
+Like `tidyr`, the package `dplyr` provide tools for organising and manipulating your data without having to go in and alter anything by hand. Some of the most useful components are `mutate()` and `filter()`, which add columns and reduce rows, respectively. This package also provides a number of ways to summarise your data for ease of display.
 
 ### ggplot2
 
@@ -158,9 +141,13 @@ htmltools::img(src = knitr::image_uri("images/hex-ggplot2.png"),
                style = 'position:right; top:0; right:0; padding:20px;')
 ```
 
+Finally, `ggplot2` is probably the best known package in the tidyverse. It provides a clean, highly flexible, highly customisable way of visualising data. It does so by layering attributes one at a time and synthesising them as a whole so that the appearance and content can be tweaked and adjusted with high granularity.
+
 ## Additional packages
 
-### purrr
+The following packages are also included in tidyverse, but we will not discuss them.
+
+1. `purrr`: supports functional programming in R
 
 ```{r, echo=FALSE}
 htmltools::img(src = knitr::image_uri("images/hex-purrr.png"), 
@@ -169,7 +156,7 @@ htmltools::img(src = knitr::image_uri("images/hex-purrr.png"),
                style = 'position:right; top:0; right:0; padding:20px;')
 ```
 
-### stringr
+2. `stringr`: simplifies working with data of class `string` (i.e., text)
 
 ```{r, echo=FALSE}
 htmltools::img(src = knitr::image_uri("images/hex-stringr.png"), 
@@ -178,7 +165,7 @@ htmltools::img(src = knitr::image_uri("images/hex-stringr.png"),
                style = 'position:right; top:0; right:0; padding:20px;')
 ```
 
-### forcats
+3. `forcats`: helps deal with data of class `factor`
 
 ```{r, echo=FALSE}
 htmltools::img(src = knitr::image_uri("images/hex-forcats.png"), 
@@ -187,7 +174,7 @@ htmltools::img(src = knitr::image_uri("images/hex-forcats.png"),
                style = 'position:right; top:0; right:0; padding:20px;')
 ```
 
-### readr
+4. `readr`: an alternative method for reading in data
 
 ```{r, echo=FALSE}
 htmltools::img(src = knitr::image_uri("images/hex-readr.png"), 
@@ -196,7 +183,7 @@ htmltools::img(src = knitr::image_uri("images/hex-readr.png"),
                style = 'position:right; top:0; right:0; padding:20px;')
 ```
 
-### Not included: tidytext
+* Not included in tidyverse: `tidytext` (see [this page](https://www.tidytextmining.com/) for more information)
 
 ```{r, echo=FALSE}
 htmltools::img(src = knitr::image_uri("images/hex-tidytext.png"), 
@@ -207,28 +194,143 @@ htmltools::img(src = knitr::image_uri("images/hex-tidytext.png"),
 
 # Basic data manipulation
 
+When you initially read data into your R session, it may not yet be in the most useful or appropriate form. Therefore, we must pre-process the data before we can analyse or visualise it. This is where basic data manipulation can come in handy.
+
 ## Piping
 
-## Mutate
+"Piping" data from one line to the next does not actually *alter* the data permanently unless you overwrite your original dataset. 
+
+As a quick demonstration, the following two chunks of code do the exact same thing, but one has many embedded functions, whereas the tidyverse version is much more legible. Each chunk of code finds within the `iris` dataset the rows that contain irises of species "versicolor" with sepal lengths of less than 5 and petal widths of greater than .3 (of which there is one).
+
+Base R:
+```{r}
+head(iris[iris$Sepal.Length<5 & iris$Species=="versicolor" & iris$Petal.Width > 0.3,])
+```
+
+Tidyverse:
+```{r}
+iris %>%
+  filter(Sepal.Length < 5,
+         Species == "versicolor",
+         Petal.Width > 0.3) %>%
+  head()
+```
+
+In the first chunk (base R), the functions and logical operators are embedded within each other. This can cause problems if the brackets mismatch in type or number. It also can get confusing as the row specification is very long and complex so it can be easy to lose your place when reading (or for that matter, when writing it).
+
+In the second chunk (tidyverse), the functions are ordered and laid out neatly. Because there is very little embedding, it is easier to keep track of brackets. It is also much easier to read because the verbs (i.e., functions) are explicitly named rather than having to remember what the square brackets `[]` do in contrast with the round parentheses `()`.
+
+Let's say we're working with our imported data which has three experiments in it...
+
+```{r}
+data %>%
+  head() # show the first 6 lines of the data.frame
+```
+
+* NB: I'll be using the hash symbol `######` to set off the *new code* we're adding in as we build up our data manipulation workflow.
 
 ## Filter
 
+What if we only want to work with a subset of our data.frame? This is where **filter()** comes in. As the name implies, this function filters your dataset based on the specified set of criteria, but we only want to work with the second experiment. In that case, we can do the following:
+
+```{r}
+data %>%
+######
+  filter(experiment == "second") %>% # only include the rows in which "experiment" contains the string "second"
+######
+  head() # show the first 6 lines of the data.frame
+```
+
+Now, we can "pipe" this data to our next operations for visualisation or analysis and only the second experiment will available to the next operation.
+
+## Mutate
+
+The verb **mutate()** allows us to add and change columns. The current dataset we're working with doesn't have a lot going on, but we can add a column renaming the conditions contingent on the experiment they're in.
+
+```{r}
+data %>%
+######
+  mutate(condition = case_when(experiment == "first" & condition == "Baseline" ~ "Gap", # exp1 has two conditions: Gap and RP
+                               experiment == "first" & condition == "Treatment" ~ "RP",
+                               experiment == "second" & condition == "Baseline" ~ "Old form", # exp 2 has two conditions: Old and New
+                               experiment == "second" & condition == "Treatment" ~ "New form",
+                               TRUE ~ as.character(condition) # exp3 conditions stay the same
+                               )
+         ) %>%
+######
+  head() # show the first 6 lines of the data.frame
+```
+
+The other common way to use mutate() is when you have a numerical operation (such as calculating residualised value by, say, word length). In this case, we can quickly add some fake columns to demonstrate how this would work (while adding back in our **filter()** operation from before):
+
+```{r}
+set.seed(12345)
+
+data %>%
+  filter(experiment == "second") %>% # only include the rows in which "experiment" contains the string "second"
+######
+  mutate(fakeValue = rnorm(n=selectCode, mean = 10, sd = 3), # create fake continuous data
+         fakeLength = round(rnorm(n=selectCode, mean = 6, sd = .5), 0), # create fake discrete data
+         fakeResid = fakeValue / fakeLength) %>% # calculate fake value residualised by fake length
+######
+  mutate(condition = case_when(experiment == "first" & condition == "Baseline" ~ "Gap", # exp1 has two conditions: Gap and RP
+                               experiment == "first" & condition == "Treatment" ~ "Resumptive Pronoun",
+                               experiment == "second" & condition == "Baseline" ~ "Old form", # exp 2 has two conditions: Old and New
+                               experiment == "second" & condition == "Treatment" ~ "New form",
+                               TRUE ~ as.character(condition) # exp3 conditions stay the same
+                               )
+         ) %>%
+  head() # show the first 6 lines of the data.frame
+```
+
 ## Transmute
+
+Not every column in this dataset is useful to us right now. Let's say we only care about "subject", "condition" and "fakeResid" now that we've applied our filter. In this case, we can use **transmute()** to reorganise and manipulate only the columns we want to keep. (We could also reorder the columns if we wanted by changing the order in which we call them as arguments.)
+
+```{r}
+set.seed(12345)
+
+data %>%
+  filter(experiment == "second") %>% # only include the rows in which "experiment" contains the string "second"
+  mutate(fakeValue = rnorm(n=selectCode, mean = 10, sd = 3), # create fake continuous data
+         fakeLength = round(rnorm(n=selectCode, mean = 6, sd = .5), 0), # create fake discrete data
+         fakeResid = fakeValue / fakeLength) %>% # calculate fake value residualised by fake length
+  mutate(condition = case_when(experiment == "first" & condition == "Baseline" ~ "Gap", # exp1 has two conditions: Gap and RP
+                               experiment == "first" & condition == "Treatment" ~ "Resumptive Pronoun",
+                               experiment == "second" & condition == "Baseline" ~ "Old form", # exp 2 has two conditions: Old and New
+                               experiment == "second" & condition == "Treatment" ~ "New form",
+                               TRUE ~ as.character(condition) # exp3 conditions stay the same
+                               )
+         ) %>%
+######
+  transmute(subject = subject, # subject stays the same
+            condition = as.factor(condition), # convert condition to a factor
+            residualValue = fakeResid) %>% # rename 'fakeResid'
+######
+  head() # show the first 6 lines of the data.frame
+```
+
+Excellent! Now we've pre-processed our data and can pipe it to our analysis or visualisation. (But we won't, not quite yet.) One thing to note here is that **head()** is used only as a convention for display on this page. When we use head() during our actual pre-processing stage, we are cutting out every row beyond the 6th. When you do this on your own, you should leave out the head() function.
 
 ## Gather
 
-Often, what will happen is that you receive data that has something like the following structure (one subject per row, many columns).
+A different kind of pre-processing operation changes the shape of the data.frame. Often, what can happen is that you receive un-processed data that has something like the following structure (one subject per row, many columns).
 
 ```{r, warning=FALSE}
 wide <- read.csv("ExampleProject/data/wide-data.csv")
-wide
+
+wide %>%
+  head()
 ```
 
 This can sometimes be useful, but for data analysis and visuatisation in R, it's best to have one observation per row with very few columns. In this case, we can use `gather()`. The first argument is typically the data.frame we are working with, but since we can start with the name of our data frame (in this case, `wide`), we can pipe it directly into the `gather()` verb and leave the argument defining the data.frame implicit. The next two arguments are the names of the columns we're creating. By default, these are "key" and "value", but we can call them anything we'd like. The last argument picks out which columns to gather. In this case, I want names to stay separate, and I want to gather all other columns into one long column.
 
 ```{r, warning=FALSE}
 wide %>%
-  gather("demographic","answer",age:favColour)
+######
+  gather("demographic","answer",age:favColour) %>%
+######
+  head()
 ```
 
 
@@ -238,14 +340,19 @@ This can also go the other direction. If we have long data but we want it to be 
 
 ```{r}
 long <- read.csv("ExampleProject/data/long-data.csv",as.is = TRUE)
-long
+
+long %>%
+  head()
 ```
 
 Now, I want the column called "measure" to be **spread** across several columns. 
 
 ```{r}
 long %>%
-  spread(key=measure,value=value)
+######
+  spread(key=measure,value=value) %>%
+######
+  head()
 ```
 
 Although it's less common, this verb is useful for displaying small tables and sometimes it can help generate graphs. In any case, it's good to be aware of.
@@ -257,74 +364,400 @@ The last bit of `tidyr` we'll discuss for now is **separate**, which takes a col
 ```{r}
 long %>%
   spread(key=measure,value=value) %>%
-  separate(Savings,into=c("amount","currency"),sep=" ")
+######
+  separate(Savings,into=c("amount","currency"),sep=" ") %>%
+######
+  head()
 ```
 
-Note quickly that "Age" and "amount" contain numbers but are still of class `character`. We can easily change this:
+Note quickly that "Age" and "amount" contain numbers but are still of class `character`. We can easily change this with **mutate()**, as we did before:
 
 ```{r}
 long %>%
   spread(key=measure,value=value) %>%
   separate(Savings,into=c("amount","currency"),sep=" ") %>%
+######
   mutate(Age = as.integer(Age),
-         amount = as.numeric(amount))
+         amount = as.numeric(amount)) %>%
+######
+  head()
 ```
 
 ## Combining datasets
 
-[Resource](https://dplyr.tidyverse.org/reference/bind.html)
+If you have multiple datasets that you wish to combine, dplyr and tidyverse provide a number of elegant ways of doing so. As this is a more advanced procedure, I'll leave you with this link: [https://dplyr.tidyverse.org/reference/bind.html](https://dplyr.tidyverse.org/reference/bind.html)
 
 # Summarising a data table
 
+Sometimes, we don't actually care about our raw data but rather we want to visualise or analyse a summary of the raw data. This is particularly useful in visualisation, as bar charts and error bars can be difficult for the visualisation tools to calculate on the fly.
+
 ## Group by
+
+The function **group_by()** doesn't appear to do anything on its own. What it does is flag columns for summary when passed to the next verb (i.e., **summarise()**, described below). This means we can use the group_by() verb to select which categories are relevant to our analysis. Let's take our fake data from earlier:
+
+```{r}
+set.seed(12345)
+
+data %>%
+  mutate(fakeValue = rnorm(n=selectCode, mean = 10, sd = 3), # create fake continuous data
+         fakeLength = round(rnorm(n=selectCode, mean = 6, sd = .5), 0), # create fake discrete data
+         fakeResid = fakeValue / fakeLength) %>% # calculate fake value residualised by fake length
+  head() # show the first 6 lines of the data.frame
+```
+
+Now, let's group by *experiment* and *condition*.
+
+```{r}
+set.seed(12345)
+
+data %>%
+  mutate(fakeValue = rnorm(n=selectCode, mean = 10, sd = 3), # create fake continuous data
+         fakeLength = round(rnorm(n=selectCode, mean = 6, sd = .5), 0), # create fake discrete data
+         fakeResid = fakeValue / fakeLength) %>% # calculate fake value residualised by fake length
+  group_by(experiment,condition) %>% # flag 'experiment' and 'condition' as categories of interest
+  head() # show the first 6 lines of the data.frame
+```
+
+Nothing has changed (yet). However...
 
 ## Summarise
 
+When we summarise our data, we can see how group_by() has flagged the categories we're interested in.
+
+```{r}
+set.seed(12345)
+
+data %>%
+  mutate(fakeValue = rnorm(n=selectCode, mean = 10, sd = 3), # create fake continuous data
+         fakeLength = round(rnorm(n=selectCode, mean = 6, sd = .5), 0), # create fake discrete data
+         fakeResid = fakeValue / fakeLength) %>% # calculate fake value residualised by fake length
+  group_by(experiment,condition) %>% # flag 'experiment' and 'condition' as categories of interest
+  summarise(mean = mean(fakeResid), # summarise by calculating the mean, standard deviation, and standard error for the categories of interest
+            sd = sd(fakeResid),
+            se = sd / sqrt(length(unique(item)))) %>%
+  head() # show the first 6 lines of the data.frame
+```
+
+We can visualise this summary table very easily, now!
+
+```{r, echo=FALSE}
+set.seed(12345)
+
+data %>%
+  mutate(fakeValue = rnorm(n=selectCode, mean = 10, sd = 3), # create fake continuous data
+         fakeLength = round(rnorm(n=selectCode, mean = 6, sd = .5), 0), # create fake discrete data
+         fakeResid = fakeValue / fakeLength) %>% # calculate fake value residualised by fake length
+  group_by(experiment,condition) %>% # flag 'experiment' and 'condition' as categories of interest
+  summarise(mean = mean(fakeResid), # summarise by calculating the mean and standard deviation for the categories of interest
+            sd = sd(fakeResid),
+            se = sd / sqrt(length(unique(item)))) %>%
+  ggplot(aes(x=condition, y=mean, fill=experiment)) +
+    geom_bar(stat="identity", position="dodge") +
+    geom_errorbar(aes(ymin=mean-se,ymax=mean+se), stat="identity", position=position_dodge(width=.9), width=.1)
+```
+
 # Ingredients of a ggplot
+
+Since ggplot2 combines different layers into a complex plot, we need to go through what each layer and its respective components do. Many are optional and you will have to experiment to see what components are most important to you.
+
+Crucially, ggplot allows **inherited** features. This means we can specify something important in the base plot, and each following layer will be aware of it. This is a common refrain in the tidyverse (see: *piping*). Not only does this cut down on typing, but it also cuts down on places for potential errors and conflicts in your code.
+
+## Base plot
+
+> Required
+
+The base plot is a required layer of any ggplot. Not every base plot will contain the same information, but there are a few elements that must be specified. Some of these can be overwritten in later layers, but since that is a relatively advanced operation, we can ignore it for now.
+
+The base plot does not generate a graph. All it does is instantiate the plotting function, specify what data.frame is being used, and list the required *aesthetics* `aes()`.
+
+```{r}
+ggplot(data, aes(x=condition))
+```
+
+#### Tidyverse and ggplot
+
+Since we are learning the whole tidyverse at once, the following examples will all use the pipe operator instead of calling the data.frame as an argument of ggplot. That means instead of the code in the previous chunk (which is sort of a default syntax), we can use this:
+
+```{r}
+data %>%
+  ggplot(aes(x=condition))
+```
+
+It is functionally identical, but it keeps the same tidyverse format as the stuff we were doing previously. This will make it easier to combine data manipulation and visualisation into one sleek operation later on.
+
+### Aesthetics
+
+> Optional in base plot, required somewhere
+
+Aesthetics are things like your x-axis, y-axis that are directly inferred from your data.frame. That is, if we are plotting a scatterplot from the built-in data `iris`, we should specify what the axes are so ggplot can figure out what the appropriate range and scale of the plot should be.
+
+```{r}
+ggplot(iris, aes(x=Sepal.Length, y=Sepal.Width))
+```
+
+
+#### X-axis
+
+> Optional in base plot, required somewhere
+
+The x-axis is required somewhere in the aesthetics of the plot. It does not necessarily need to be in the base plot, but if it's not in the base plot, it might not be inherited to other components (thus would need to be re-specified each time). 
+
+
+#### Y-axis
+
+> Optional, depending on plot type
+
+The y-axis is option because some types of plots like histograms and barcharts do not necessarily need it to be specified. However, for most plots, a y-axis will need to be specified either in the base plot or later in a different component's aesthetics.
+
+#### Colour
+
+> Optional
+
+Colour refers to the line or point colour in a plot. For plots that do not need coloured lines to properly visualise the data, the colour aesthetic can remain unspecified. It can also be specified outside of the aesthetics to change the overall appearance of the plot without attributing colour to a factor in the dataset.
+
+#### Fill
+
+> Optional
+
+Fill refers to the colour of a region in a plot, such as the interior of a point, a bar or boxplot. For plots that do not need coloured areas to properly visualise the data, the fill aesthetic can remain unspecified. It can also be specified outside of the aesthetics to change the overall appearance of the plot without attributing fill to a factor in the dataset.
+
+#### Size
+
+> Optional
+
+Size is the point or line size. It can be discrete or continuous, but is larger than 0 and frequently an integer. It can also be specified outside of the aesthetics to change the overall appearance of the plot without attributing size to a factor in the dataset.
+
+#### Alpha
+
+> Optional
+
+Alpha is the transparency of a colour or fill, specified as a real number between 0 and 1. It is particularly useful when visualising a large number of points that overlap. Although it can be specified in aesthetics as a factor in the dataset, it is most often used as a 'hard coded' value outside of the aesthetics.
+
+## Geom
+
+The geometric object ('geom') of a plot is effectively what *kind* of plot you want to make. There is a comprehensive list of geoms on [the official website](https://ggplot2.tidyverse.org/reference/#section-layer-geoms). We'll explore a few of the most common here.
+
+In order to create a geometric object and layer it on your base plot, you will have to **add** the new layer to what you already have.
+
+### Point
+
+Scatter plots can be generated with `geom_point()` layers.
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width)) +
+    geom_point()
+```
+
+We can now combine this type of plot with colours for each of the species (a factor in the dataframe).
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width)) +
+    geom_point(aes(colour = Species))
+```
+
+However, we can't tell if there are multiple points overlapping or not, so we can change the **alpha** so that when multiple points are overlapping, they appear darker (their opacity is compounded). Since this isn't an explicit property of the data.frame (but rather a quirk of the visualisation), we can keep alpha outside of the aesthetics.
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width)) +
+    geom_point(aes(colour = Species), alpha=.5)
+```
+
+
+**NB**: The colours are automatically chosen from the ggplot palette. You can also change what colours are used, which is discussed in [Danielle Turton's lesson](https://verbingnouns.github.io/AdventuresInR/docs/Session_2-plots_dplyr.html) from [Adventures in R](https://verbingnouns.github.io/AdventuresInR/).
+
+### Boxplot
+
+Boxplots, unlike scatterplots, have a factor on the x-axis and continuous numerical data on the y-axis.
+
+```{r}
+iris %>%
+  ggplot(aes(x = Species, y = Sepal.Length)) +
+    geom_boxplot()
+```
+
+This is a simple plot, but it doesn't have to be. We can add in visual cues to highlight that these three groups differ.
+
+```{r}
+iris %>%
+  ggplot(aes(x = Species, y = Sepal.Length, fill=Species)) +
+    geom_boxplot()
+```
+
+Much nicer! But now we have redundant information in the legend and the x-axis. We can easily get rid of the legend by adding a `theme` layer that says the position of the legend is `null`:
+
+```{r}
+iris %>%
+  ggplot(aes(x = Species, y = Sepal.Length, fill=Species)) +
+    geom_boxplot() +
+    theme(legend.position = "null")
+```
+
+### Histogram
+
+For our histogram, a simple version is not very visually pleasing.
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length)) +
+    geom_histogram()
+```
+
+We also get a warning that we shoud choose a better "binwidth":
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length)) +
+    geom_histogram(binwidth = .5)
+```
+
+But what about demonstrating how the different species are distributed in this data?
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length)) +
+    geom_histogram(aes(fill=Species), binwidth = .5)
+```
+
+This isn't very helpful because the numbers are stacked. We can see that they seem to have different distributions because the data are quite simple, but we really can't draw any inferences based on this visualisation by itself. Let's first only look at 'setosa' and 'virginica' to simplify the data, then graph them so they are overlapping histograms.
+
+```{r}
+iris %>%
+  filter(Species != "versicolor") %>% # only plot 'setosa' and 'virginica', could also be written as the following line:
+# filter(Species == "setosa" | Species == "virginica") %>%
+  ggplot(aes(x = Sepal.Length)) +
+    geom_histogram(aes(fill=Species), binwidth = .5, 
+                   alpha = .75, position = "identity")
+```
+
+Now it's clear that these two only overlap a little bit.
+
+**Exercise**: On your own, add back in the third group and see if you can choose a `binwidth` and `alpha` that make the visualisation clear without being too confusing (this is very hard!). *One potential answer is in the .Rmd.*
+
+```{r, echo=FALSE, eval=FALSE}
+iris %>%
+  ggplot(aes(x = Sepal.Length)) +
+    geom_histogram(aes(fill=Species), binwidth = .25, 
+                   alpha = .5, position = "identity")
+```
+
+#### Density
+
+Maybe in this case, a density plot would be best because it simplifies and outlines the data (but this is your call in the end):
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length)) +
+    geom_density(aes(fill=Species), alpha = .5, position = "identity")
+```
+
+
+### Smooth
+
+If we want to plot a regression or trend line, we can use **geom_smooth()**. Here, I'll overlay the smooth later on a point layer, but this is optional.
+
+```{r}
+iris %>%
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width, colour=Species)) +
+    geom_point() +
+    geom_smooth(method = "lm") # using a linear model for the regression line
+```
+
+Other options for `method` are described [here](https://ggplot2.tidyverse.org/reference/geom_smooth.html#arguments).
+
+### Bar
+
+Bar charts are slightly unusual in the ggplot world since they don't necessarily need a y-axis specified, but often you will want to specify one anyway.
+
+Let's go back to the data.frame we've called `data`.
+
+```{r}
+data %>%
+  ggplot(aes(x=condition, fill=selection)) +
+    geom_bar()
+```
+
+This just counts observations per factor, so we can see a very general overview of the data. However, we aren't looking at the three experiments separately, so we're losing some important information. One way to add another dimension to a plot like this is with `facet_wrap`.
+
+```{r}
+data %>%
+  ggplot(aes(x=condition, fill=selection)) +
+    geom_bar() +
+    facet_wrap(~experiment)
+```
+
+The problem here is that the y-axis is raw counts and we can't tell what *proportion* of the data is in which category. We can now combine our summarising skills with our plotting skills to get a clearer picture!
 
 ```{r}
 data %>%
   group_by(experiment,condition,selection) %>%
-  summarise(n=n(),
-            y=n()/240) %>%
-  ggplot(aes(x=condition,y=y,fill=selection)) +
-    geom_bar(stat = "identity", position = "stack", colour="grey40") +
-    scale_y_continuous(labels = scales::percent) +
-    theme_bw() +
-    ylab("percent of responses") +
-    ggtitle("Example graph:\nTest one") +
-    facet_wrap(~experiment) -> p
-options <- list(
-  Background=list(roughness=8),
-  GeomCol=list(fill_style="zigzag", angle_noise=0.5, fill_weight=2))
-#get_rough_chart(p, options)
+  summarise(count = n(),
+            length = 240) %>%
+  mutate(proportion = count/length)
 ```
 
+```{r}
+data %>%
+  group_by(experiment,condition,selection) %>%
+  summarise(count = n(),
+            length = 240) %>%
+  mutate(proportion = count/length) %>%
+  ggplot(aes(x=condition, fill=selection)) +
+    geom_bar(aes(y=proportion), stat="identity") + # now it won't count observations but will create a bar of the height of 'n'
+    facet_wrap(~experiment)
+```
 
-## Base plot
+But we can make our y-axis even nicer! Let's change the *theme* so it is a little prettier and add a nice title.
 
-### Aesthetics
+```{r}
+data %>%
+  group_by(experiment,condition,selection) %>%
+  summarise(count = n(),
+            length = 240) %>%
+  mutate(proportion = count/length) %>%
+  ggplot(aes(x=condition, fill=selection)) +
+    geom_bar(aes(y=proportion), stat="identity", colour="grey40") + 
+    theme_bw() +
+    ggtitle("Example graph") +
+    facet_wrap(~experiment)
+```
 
-#### X-axis
+# Challenge
 
-#### Y-axis
+Can you recreate this pre-processed data.frame and graph from what you know now? Take your time, list what information you need to calculate, list what aesthetics you see. This is a **huge challenge** and I would not expect anyone to be able to do it on their own. Error bars for this kind of (binomial) data are notoriously difficult! Ask for help from colleagues and the internet. See if you can develop your problem-solving skills in advance of next week's tutorial!
 
-#### Colour
+```{r, warning=FALSE, echo=FALSE}
+data %>%
+  group_by(experiment,condition,selection) %>%
+  summarise(n=n(),
+            y=n()/240) -> example.df
+example.df$ciLower <- NA
+example.df$ciUpper <- NA
 
-#### Fill
-
-#### Size
-
-#### Alpha
-
-## Geom
-
-### Point
-
-### Bar
-
-### Boxplot
-
-### Hist
-
-### Smooth
+for (i in 1:length(example.df$n)){
+  if (example.df$selection[i]=="Option 2") {
+    example.df$ciLower[i] <- as.numeric(unlist(prop.test(example.df$n[i],240,.5)[6])[1])
+    example.df$ciUpper[i] <- as.numeric(unlist(prop.test(example.df$n[i],240,.5)[6])[2])
+  }
+  else {
+    example.df$ciLower[i] <- NA
+    example.df$ciUpper[i] <- NA
+  }
+}
+example.df
+```
+```{r, echo=FALSE, warning=FALSE}
+example.df %>%
+  ggplot(aes(x=condition,y=y,fill=selection)) +
+    geom_bar(stat = "identity", position = "stack", colour="grey30") +
+    geom_hline(yintercept = .5, linetype="dotted", color = "grey30") +
+    geom_errorbar(stat = "identity", aes(ymin=ciLower, ymax=ciUpper), width=.1, color = "grey20") +
+    scale_y_continuous(labels = scales::percent) +
+    scale_fill_grey(start=.75, end=.45) +
+    theme_bw() +
+    ylab("proportion of responses") +
+    ggtitle("Example graph:\nTest one") +
+    facet_wrap(~experiment)
+```
