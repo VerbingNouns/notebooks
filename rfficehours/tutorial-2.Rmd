@@ -726,7 +726,7 @@ data %>%
 
 # Challenge
 
-Can you recreate this pre-processed data.frame and graph from what you know now? Take your time, list what information you need to calculate, list what aesthetics you see. This is a **huge challenge** and I would not expect anyone to be able to do it on their own. Error bars for this kind of (binomial) data are notoriously difficult! Ask for help from colleagues and the internet. See if you can develop your problem-solving skills in advance of next week's tutorial!
+Can you recreate this pre-processed data.frame and graph from what you know now? Take your time, list what information you need to calculate, list what aesthetics you see. This is a **huge challenge** and I would not expect anyone to be able to do it on their own. Error bars for this kind of (binomial) data are notoriously difficult! Ask for help from colleagues and the internet. See if you can develop your problem-solving skills in advance of next week's tutorial. Start easy -- change the colours and the y-axis label. Next, try to figure out how to make the y-axis display percentages rather than proportions. If you're feeling bored, only then try to tackle the error bars.
 
 ```{r, warning=FALSE, echo=FALSE}
 data %>%
