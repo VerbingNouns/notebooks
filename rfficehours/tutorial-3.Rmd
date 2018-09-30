@@ -290,23 +290,141 @@ mtcars %>% as_tibble() %>% mutate(
 Notice how we don't have a new column, but rather the old column was changed. Now we can apply these functions to our own data. We could also continue to play around with the examples if we haven't yet found the application we're looking for.
 
 # Online resources
-Intro to GitHub and StackOverflow
 
-## StackOverflow
+When you aren't sure how to proceed, your search engine of choice will become your best friend. Two of the most useful sites are Stack Overflow and GitHub.
+
+## Stack Overflow
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/stackoverflow.png"), 
+               alt = 'readr', 
+               width = 150,
+               style = 'position:right; top:0; right:0; padding:0px;')
+```
+
+Stack Overflow is a question and answer site, part of the Stack Exchange network, which you will become fairly familiar with as you continue to learn R as its focus is programming and software questions. It can be intimidating at first, and it tends toward the '*brogrammer*' type, but it is incredibly useful and responsive if you learn how to use it.
+
+[Take the official site tour.](https://stackoverflow.com/tour)
 
 ### Searching for answers
 
+Often, simply typing your question in Google will bring up Stack Overflow answers.
+
+If your code returns an error, sometimes the best way to fix it is to search for the error, verbatim.
+
+```{r, error=TRUE, warning=FALSE, fig.show='hide'}
+iris %>%
+  transmute(Sepal.Area = Sepal.Length * Sepal.Width) %>%
+  ggplot(aes(Petal.Length, Sepal.Area)) +
+    geom_point()
+```
+
+Hmm, not sure why I got an error, so I copy it directly into my search engine:
+
+![](images/error-1.png)
+
+Looks like a lot of people have asked about this over the years, so I'm in luck!
+
+As I go through the answers, I may realise that a lot of them are not relevant to me, but along the way I may also see a trend: solutions mostly suggest that there's either a typographical error or the shape of the data being passed to the graph isn't supported by the code. Let's see what I'm passing to `ggplot`, then.
+
+```{r, error=TRUE, warning=FALSE}
+iris %>%
+  transmute(Sepal.Area = Sepal.Length * Sepal.Width) %>%
+  head()
+```
+
+OH!!! Now we can see that we've used **transmute**, so the other columns we wanted were discarded. Let's use **mutate** instead.
+
+```{r, error=TRUE, warning=FALSE}
+iris %>%
+  mutate(Sepal.Area = Sepal.Length * Sepal.Width) %>%
+  ggplot(aes(Petal.Length, Sepal.Area)) +
+    geom_point()
+```
+
+Problem solved!
+
 ### Asking questions
+
+Sometimes you won't be able to find an answer right away. If you want to post something of your own to Stack Overflow, there are a few important things to note. 
+
+First, you must post a question. This may seem obvious, but if you ask for help without specifying what you need help with, your "question" will be deleted.
+
+Second, you need to include code that other people can run and reproduce the error. This means you may need to reproduce the error on your own with some of the sample datasets (or make your own dataset that you can share). This is another reason R includes the toy datasets such as `mtcars` and `iris` by default.
+
+Here is some official guidance:  
+[How to create a minimum, complete, verifiable example.](https://stackoverflow.com/help/mcve)
+
+And some unofficial guidance:  
+[How to ask a good question.](https://stackoverflow.com/questions/5963269/how-to-make-a-great-r-reproducible-example/5963610#5963610)
 
 ### Pitfalls
 
+Some of the issues with Stack Overflow are easy to avoid, such as making sure you provide a reproducible example. A more troublesome problem is if you can't find an answer that seems to parallel your question (and you don't want to or can't post your own question). In this case, we can try a few other things.
+
+If we get a large number of warnings or errors, we may be able to view the traceback (i.e., the list of messages that led up to the code crashing).
+
+```{r, error=TRUE, warning=TRUE, message=TRUE, fig.show='hide'}
+iris %>%
+  transmute(Sepal.Area = Sepal.Length * Sepal.Width) %>%
+  ggplot(aes(Petal.Length, Sepal.Area)) +
+    geom_point()
+```
+
+```
+Error in FUN(X[[i]], ...) : object 'Petal.Length' not found
+
+11. FUN(X[[i]], ...)
+10. lapply(aesthetics[new_aesthetics], rlang::eval_tidy, data = data)
+9. scales_add_defaults(plot$scales, data, aesthetics, plot$plot_env)
+8. f(..., self = self)
+7. l$compute_aesthetics(d, plot)
+6. f(l = layers[[i]], d = data[[i]])
+5. by_layer(function(l, d) l$compute_aesthetics(d, plot))
+4. ggplot_build.ggplot(x)
+3. ggplot_build(x)
+2. print.ggplot(x)
+1. function (x, ...) UseMethod("print")(x)
+```
+
+If we can read through the traceback, we may be able to pinpoint the problem in another way. Then, our search might be more fruitful.
+
+In the end, you may have to try searching for several different things to find something truly useful. Just remember **this is what professionals do too**.
+
 ## GitHub
+
+Another useful website is GitHub, which is a combination of a data/code respository and a community forum. Many questions you have may be answered somewhere in GitHub, similarly to Stack Overflow, but here we'll talk about some of its other uses.
 
 ### What is GitHub?
 
-[Resource](https://learngitbranching.js.org)
+**Git** is a computer programming language for version control. This is similar to the "Track Changes" option in Microsoft Word, but for any kind of file. Learning git is optional for using GitHub, although it can be very useful too. [Resource for learning how to use git.](https://learngitbranching.js.org)
+
+If you don't want to learn git, you can use the web interface, the desktop app, or a number of other interfaces (including RStudio). [Help with connecting RStudio to GitHub.](http://happygitwithr.com/)
 
 ### Basics
-What do you actually need to know to make use of GitHub?
+
+What do you actually need to know to make use of GitHub? The terminology can be pretty impenetrable, so here is a very brief primer.
+
+#### Repo (Repository)
+
+A repository is a lot like an R project in several ways. First, it is a collection of files that are all related in some way and may contain files within folders and a range of file types. If you find a repository that you want to play around with on your own, you can **clone** or download the repository to your own account or to your own computer and the original files will remain untouched. If you are collaborating with someone on this repository, you can also create a **branch**, which is sort of like a parallel universe of the original files. You can edit them and change them, but the originals will remain untouched. Later, if you and your collaborators choose to, your branch can be **merged** back into the "master" branch, at which point the original files *will* be changed. However, git keeps a version history so you can always revert those changes. 
+
+This is useful for more than just code! Storing manuscripts in GitHub repos is also great for making sure you never lose your work.
+
+#### Commit
+
+A noun or a verb, a commit is a bit like "saving" your work, at least locally. You might not see the change on the website's version of the files after you make a commit, but you've effectively saved your work. 
+
+#### Push
+
+In order to update the website's version of the files, you'll need to **push** your commit to the repository. This basically means you are sending your new saved version of whichever file or files you've changed to overwrite the current version. Luckily, the changes are also documented, so even though the file will be overwritten, you can always revert to a previous version.
+
+#### Pull
+
+A pull, on the other hand, takes the current version of the file from the website and overwrites the version you have stored locally (e.g., on your computer). Since the version of the file on your computer might not have been saved, it is important to note that you can't always revert to a previous version after a pull if it changes the file on your computer. That said, there are built-in mechanisms to prevent overwriting data. GitHub should (*should*) recognise that the repository version is different from the local version and warn you that there are updates. In some cases, it may give you the option to create a branch so that you don't lose the changes you've made to the local file which would be overwritten by the version in the repository. This may happen if you are collaborating simultaneously with other authors. Luckily, you can **merge** your branches later and not lose anyone's contribution. 
 
 ### Getting help
+
+GitHub offers a lot of community services, ranging from R packages that are still in development (i.e., not available through CRAN yet) to question and answer fora. In particular, if you are using someone else's code from GitHub and run into a problem, you can raise an **issue** and they will be notified that you need help troubleshooting their code. [Here are some tips on how to do so.](https://gist.github.com/ccannon94/4980dc78456cb7a7ab38028e933cb01e)
+
+
