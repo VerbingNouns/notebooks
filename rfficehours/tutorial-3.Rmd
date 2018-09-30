@@ -33,7 +33,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # Planning code
-Thinking like a programmer
+
+In order to write effective code in any language, you must start to think like a programmer. This is a lot easier than it might sound. Programmers approach problems in a step-wise manner, which allows them to figure out and plan each step of the solution. When they come up against a step that they can't implement right away, it might indicate that the step is actually too complex as written out and needs to be broken into smaller chunks. It's also possible that it's the right sized chunk, but they just don't know the function to accomplish the step. In that case, there is probably a specific search term they can use to figure out how other people may have dealt with the same issue. In either case, this type of workflow will help you feel more comfortable with using R or any computer programming language you might be interested in.
 
 ## Strategise
 
