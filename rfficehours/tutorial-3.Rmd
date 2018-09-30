@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = TRUE)
 | 1|<span style="background-color: #FFFF00">You will know how to plan out code in a step-wise manner</span>|
 | 2|<span style="background-color: #FFFF00">You will be able to navigate the CRAN documentation pages</span>|
 | 3|<span style="background-color: #FFFF00">You will know how to search online for solutions</span>|
-| 4|<span style="background-color: #FFFF00">You will realise that being good at R is just being good at Google</span>|
+| 4|<span style="background-color: #FFFF00">You will realise that being good at R is being good at search engines</span>|
 |||
 
 
@@ -38,18 +38,256 @@ In order to write effective code in any language, you must start to think like a
 
 ## Strategise
 
+**What is your goal?** As you are designing your code, decide what you want your code to do. Be as specific as you can, but if you aren't certain at this point, it'll become clear later on what needs to be elaborated.
+
+> I want to analyze my binomial data.
+
+1. I will need to know the data structure.
+    - I should load my data in and explore it, either visually or textually
+2. I will need to find an appropriate statistical measure
+3. I will need to use the proper R syntax
+    - I may need to look up the proper syntax
+    - I may need to learn a new function or a new argument for a function
+    - I may need to learn more about the statistical method
+4. I will need to execute the code
+    - I may need to debug the code
+5. I will need to interpret the output
+    - I may need help if I am unfamiliar with the output's formatting
+
+
 ## Test
+
+**What code do you need to achieve your goal?** What does each line do, and how does it contribute to your progress? You may end up copying code from other sources or even from code you have written previously. Does each line add to your project, or are some optional? You can determine this by running each line individually, or even running a portion of a line to see what will happen.
+
+```{r, eval=FALSE}
+data <- read.csv("data/binomial-data.csv", header=TRUE)
+```
+```{r, echo=FALSE, message=FALSE}
+data <- read.csv("ExampleProject/data/binomial-data.csv", header=TRUE)
+```
+
+What happens if you run the wrong code and get an error? What should you do if you run the code but don't understand the output?
+
+```{r, error=TRUE}
+glm(selection ~ condition * experiment)
+```
+
+```{r, error=TRUE, warning=FALSE}
+glm(selection ~ condition * experiment, data=data)
+```
+
+```{r}
+glm(selection ~ condition * experiment, data=data, family="binomial")
+```
 
 ## Run
 
+Once you've assembled your code and tested each part, it's time to run the whole thing. Before you do this, I recommend clearing out your global environment and starting fresh. Doing this will ensure you aren't accidentally calling a variable you created earlier but is no longer part of your code. To do this, you can click the small broom icon in the global environment pane. 
+
+You can also use the remove function `rm()` with any variable names as arguments to remove them individually.
+
+```{r}
+rm(data, model1)
+```
+
+Then, once you've cleared everything out, you can run your code from the top and generate it fresh. If this works, it also means your code can be shared in its current form (with collaborators, students, reviewers, etc). This is a success!
+
+## Example
+
+Let's say you have data like `binomial-data.csv` and you want to determine whether the Baseline and Treatment conditions behave the same way in each of the three experiments. What do you need to do to implement this analysis? Let's work backwards:
+
+> **Goal**: compare difference between conditions across three experiments
+
+Let's break this down. In order to do this, setting aside statistical issues for the moment, we must first import the data. (Yes, we must break it down to this level of concreteness!)
+
+```{r, eval=FALSE}
+data <- read.csv("data/binomial-data.csv", header=TRUE)
+head(data)
+```
+```{r, echo=FALSE, message=FALSE}
+data <- read.csv("ExampleProject/data/binomial-data.csv", header=TRUE)
+head(data)
+```
+
+Now what? Compare the three experiments! Or, wait… what does it mean to compare the three experiments? Let's get an idea of what the data structure is first, so we know what we're dealing with.
+
+```{r}
+str(data)
+```
+
+Okay, so we've got binary responses (`1`s and `0`s, or Option 1 and Option 2), two conditions ("Baseline" and "Treatment"), three experiments, and information about subjects and items. Now what?
+
+Well, we could try building a linear model of our binomial data. How do we do that? Let's search the documentation.
+
+What do we search the documentation for, though? Let's check a search engine first:
+
+![](images/google-lm.png)
+
+Excellent, let's see what the documentation for glm() looks like:
+
+```{r}
+?glm
+```
+
+Here's the function and its arguments from the documentation:
+
+```
+glm(formula, family = gaussian, data, weights, subset,
+    na.action, start = NULL, etastart, mustart, offset,
+    control = list(...), model = TRUE, method = "glm.fit",
+    x = FALSE, y = TRUE, singular.ok = TRUE, contrasts = NULL, ...)
+```
+
+In short, it looks like we can create a linear model for our data like so (given that we're familiar with [the syntax for a linear model](https://verbingnouns.github.io/AdventuresInR/docs/Session_4-AnalysingData.nb.html)):
+
+```{r}
+glm(formula = selectCode ~ condition*experiment,
+    family="binomial",
+    data=data)
+```
+
+This output isn't useful for us! At the bottom of the documentation page, however, there's some sample code we might modify:
+
+```
+## an example with offsets from Venables & Ripley (2002, p.189)
+utils::data(anorexia, package = "MASS")
+
+anorex.1 <- glm(Postwt ~ Prewt + Treat + offset(Prewt),
+                family = gaussian, data = anorexia)
+summary(anorex.1)
+```
+
+Looks like we should save our model under a variable name then use the function `summary()` to view the output properly. Let's try it.
+
+```{r}
+model1 <- glm(formula = selectCode ~ condition*experiment,
+              family="binomial",
+              data=data)
+summary(model1)
+```
+
+Well, that's something. But how do we interpret it? More importantly, is it really informative regarding our question? Since we've added interactions into the analysis, this complicates the interpretation so we may want to try something else to get at an answer about the behaviour across the experiments.
+
+We could try visual comparison:
+
+```{r}
+library(tidyverse)
+data %>%
+  group_by(experiment,condition,selection) %>%
+  summarise(count = n(),
+            length = 240) %>%
+  mutate(proportion = count/length) %>%
+  ggplot(aes(x=condition, fill=selection)) +
+    geom_bar(aes(y=proportion), stat="identity", colour="grey40") + 
+    theme_bw() +
+    ggtitle("Comparison of Conditions across the three Experiments") +
+    facet_wrap(~experiment)
+```
+
+It looks plausible that the *first* and *second* experiment have similar behaviour, but that is visually very different from what's happening in the *third* experiment.
+
+> What statistical analysis would you want to do to determine whether the behaviour observed in the *first*, *second*, and *third* experiments differs or not?
+
 # CRAN documentation
-Reading CRAN documentation
+
+CRAN stands for **The Comprehensive R Archive Network** and is available both online and through any R packages you have installed on your computer. Not every R package is available through CRAN, but most are and the ones that are are most likely to be well-tested and bug-free. To search CRAN documentation, you can type the `?` symbol before the function name you want to learn about (e.g., `?ggplot`), you can search in the *Help* tab of the lower right pane, or you can search online.
+
+Let's say you want to learn (or remember!) how to use `mutate()`, part of the dplyr package.
+
+![](images/mutate.png)
+
+It looks like there are a few things that might match, but since we know we want the dplyr version, we can click on that to get to the proper documentation page.
+
+> **Description**  
+> `mutate()` adds new variables and preserves existing; `transmute()` drops existing variables.
+
+Great, that's clear enough if you vaguely understand what it does to begin with, but we need more information.
 
 ## Formulas
 
+> **Usage**  
+> `mutate(.data, ...)`  
+`transmute(.data, ...)`
+
+What does this mean? This is part of the documentation that describes the syntax and arguments of the function (or in this case, functions), but it only lists one, `.data`, which is weird for a few reasons. What does the `.` mean? What are the other arguments? The following section will start to clarify this.
+
 ## Arguments
 
+> **Arguments**  
+> `.data` \ \ \ \ A tbl. All main verbs are S3 generics and provide methods for `tbl_df()`, `dtplyr::tbl_dt()` and `dbplyr::tbl_dbi()`.  
+> `...` \ \ \ \ Name-value pairs of expressions. Use `NULL` to drop a variable.
+These arguments are automatically quoted and evaluated in the context of the data frame. They support unquoting and splicing. See `vignette("programming")` for an introduction to these concepts.
+
+So when we see `.data` in the formula, we know we need to feed `mutate()` a variable of type "tbl" (which could be a table or a tibble, etc.). Since dplyr is part of the tidyverse, we can also assume that the `.` in front of `data` is indicating that this argument is the one that would need to be piped in from preceding code, if that's the set-up you're using.
+
+Also, when we see `...`, we know that we also need to specify at least one pair of expressions consisting of a name and a value. We could examine the vignette, or we could just jump down to the bottom of the documentation page to look at the examples.
+
 ## Examples
+
+> **Examples**  
+```
+# Newly created variables are available immediately  
+mtcars %>% as_tibble() %>% mutate(  
+  cyl2 = cyl * 2,  
+  cyl4 = cyl2 * 2  
+)  
+```
+
+In the first example, we can see the dataset `mtcars` is being used. Let's see what that's all about (i.e., let's **test** this bit of code)
+
+```{r}
+mtcars %>% as_tibble()
+```
+
+Now we can add in parts of the sample `mutate()` code one pair of expressions at a time:
+
+```{r}
+# Newly created variables are available immediately  
+mtcars %>% as_tibble() %>% mutate(  
+  cyl2 = cyl * 2
+)
+```
+
+And the second pair of expressions:
+
+```{r}
+# Newly created variables are available immediately  
+mtcars %>% as_tibble() %>% mutate(  
+  cyl2 = cyl * 2,  
+  cyl4 = cyl2 * 2  
+)
+```
+
+(This last bit makes the table too wide to display in this web format, but on your own computer you can see the final column you just created.)
+
+There's another example following the first that might be of interest. Let's check this one out too.
+
+```
+# You can also use mutate() to remove variables and  
+# modify existing variables  
+mtcars %>% as_tibble() %>% mutate(  
+  mpg = NULL,  
+  disp = disp * 0.0163871 # convert to litres  
+)
+```
+The first pair of expressions is `mpg = NULL`, which sounds like it will either fill the `mpg` column with the value `NULL` or remove the whole column. Let's find out...
+
+```{r}
+mtcars %>% as_tibble() %>% mutate(  
+  mpg = NULL
+)
+```
+
+It appears to be gone! Now we can add in the second pair of expressions and see what that does (ostensibly converts `disp` from gallons to litres):
+
+```{r}
+mtcars %>% as_tibble() %>% mutate(  
+  mpg = NULL,  
+  disp = disp * 0.0163871 # convert to litres  
+)
+```
+
+Notice how we don't have a new column, but rather the old column was changed. Now we can apply these functions to our own data. We could also continue to play around with the examples if we haven't yet found the application we're looking for.
 
 # Online resources
 Intro to GitHub and StackOverflow
@@ -65,6 +303,8 @@ Intro to GitHub and StackOverflow
 ## GitHub
 
 ### What is GitHub?
+
+[Resource](https://learngitbranching.js.org)
 
 ### Basics
 What do you actually need to know to make use of GitHub?
