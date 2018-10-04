@@ -319,8 +319,10 @@ div.tocify {
 <h2><span class="header-section-number">1.3</span> Run</h2>
 <p>Once you’ve assembled your code and tested each part, it’s time to run the whole thing. Before you do this, I recommend clearing out your global environment and starting fresh. Doing this will ensure you aren’t accidentally calling a variable you created earlier but is no longer part of your code. To do this, you can click the small broom icon in the global environment pane.</p>
 <p>You can also use the remove function <code>rm()</code> with any variable names as arguments to remove them individually.</p>
-<pre class="r"><code>rm(data, model1)</code></pre>
-<pre><code>## Warning in rm(data, model1): object 'model1' not found</code></pre>
+<pre class="r"><code>var1 &lt;- 1
+var2 &lt;- c(&quot;second&quot;, &quot;variable&quot;)
+
+rm(var1, var2)</code></pre>
 <p>Then, once you’ve cleared everything out, you can run your code from the top and generate it fresh. If this works, it also means your code can be shared in its current form (with collaborators, students, reviewers, etc). This is a success!</p>
 </div>
 <div id="example" class="section level2">
@@ -430,12 +432,12 @@ summary(model1)</code></pre>
 <p>Well, that’s something. But how do we interpret it? More importantly, is it really informative regarding our question? Since we’ve added interactions into the analysis, this complicates the interpretation so we may want to try something else to get at an answer about the behaviour across the experiments.</p>
 <p>We could try visual comparison:</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## ── Attaching packages ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
 <pre><code>## ✔ ggplot2 3.0.0     ✔ purrr   0.2.5
 ## ✔ tibble  1.4.2     ✔ dplyr   0.7.5
 ## ✔ tidyr   0.8.1     ✔ stringr 1.3.1
 ## ✔ readr   1.1.1     ✔ forcats 0.3.0</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>data %&gt;%

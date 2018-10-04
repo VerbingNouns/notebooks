@@ -57,8 +57,8 @@ Week beginning **1 October** (yes I know this is term-time...):
     * Thinking like a programmer  
     * Reading CRAN documentation  
     * Intro to GitHub and StackOverflow  
-* Monday 1 Oct 11:00 in TBD  
-* Tuesday 2 Oct 13:00 in TBD
+* Monday 1 Oct 11:00 in Percy SRC  
+* Tuesday 2 Oct 13:00 in Percy SRC
 * Wednesday 3 Oct 13:00 in Percy 1.05
 
 ---
@@ -75,7 +75,7 @@ Week beginning **1 October** (yes I know this is term-time...):
 **24, 25, 26 September**: Percy 1.05  
 
 * Week 3:  
-**1, 2, October**: TBD (it will depend on when timetables are released   
+**1, 2, October**: Percy SRC
 **3 October**: Percy 1.05  
 
 ![](percy.png)
