@@ -1,7 +1,7 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "Last updated: 11 Aug 2018"
+date: "Last updated: 11 Mar 2019"
 output: 
   html_document:
     theme: cerulean
@@ -14,7 +14,13 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### <span style="background-color: #FFFF00">[RfficeHours](rfficehours/info.html)</span>
+### [Data Viz/Analysis Workshop](leeds/blank-workbook.html)
+* "*Visualisation and analysis of linguistic data, using R*"
+* University of Leeds, 28 February 2019
+* Blank workbook to be filled out during the workshop
+* [Event website](https://www.latl.leeds.ac.uk/events/visualisation-and-analysis-of-linguistic-data-using-r/)
+
+### [RfficeHours](rfficehours/info.html)
 * Information about my drop-in R seminars, being trialed in September 2018.
 
 ### [Adventures In R](https://verbingnouns.github.io/AdventuresInR/)
