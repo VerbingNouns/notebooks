@@ -14,10 +14,15 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+### [Dealing with ordinal data](ordinal_data.nb.html)
+
+* A description of why ordinal regressions are useful and how to use them.
+* Code for producing useful visualisations of ordinal data.
+
 ### [Data Viz/Analysis Workshop](leeds/blank-workbook.html)
 * "*Visualisation and analysis of linguistic data, using R*"
-* University of Leeds, 28 February 2019
-* Blank workbook to be filled out during the workshop
+* University of Leeds, 28 February 2019.
+* Blank workbook to be filled out during the workshop.
 * [Event website](https://www.latl.leeds.ac.uk/events/visualisation-and-analysis-of-linguistic-data-using-r/)
 
 ### [RfficeHours](rfficehours/info.html)
@@ -25,7 +30,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### [Adventures In R](https://verbingnouns.github.io/AdventuresInR/)
 
-* Official page for the *Adventures In R* workshop
+* Official page for the *Adventures In R* workshop.
 
 ### [Setting up RStudio](1_Setting_Up.nb.html)
 
@@ -35,10 +40,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 * A tutorial on how to find the numbers one typically needs to report when conducting certain statistical tests.
 * Includes examples of wording for writing about statistical tests in academic prose.
-
-### [Dealing with ordinal data](ordinal_data.nb.html)
-
-* A description of why ordinal regressions are useful and how to use them.
 
 ### [Using and graphing prop.test()](forced_choice.nb.html)
 

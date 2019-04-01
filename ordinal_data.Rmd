@@ -1,24 +1,40 @@
 ---
+title: "Ordinal Data"
+author: "Dr Lauren M Ackerman"
+date: "01 April 2019"
+output: 
+  html_document:
+    theme: sandstone
+    highlight: default
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(lme4)
+library(ordinal)
+library(formatR)
+library(tidyverse)
+
+#> ★ DRAFT ★  
+#> (A work in progress…)
+```
+
+---
 title: "Dealing with ordinal data"
 author: "Lauren M Ackerman"
-date: "Last updated: 03 May 2018"
+date: "Last updated: 01 April 2019"
 output:
-  html_notebook:
+  html_document:
+    theme: sandstone
     toc: yes
     toc_depth: 2
     toc_float: yes
 ---
 [🔙 Home](https://verbingnouns.github.io/notebooks/)
 
-```{r echo=FALSE,message=FALSE}
-library(ggplot2)
-library(lme4)
-library(ordinal)
-library(formatR)
-```
-
-> ★ DRAFT ★  
-> (A work in progress…)
 
 # What is "ordinal" data?
 
@@ -47,10 +63,19 @@ When we graph our rating data in a box plot, we see there is likely to be a main
 ggplot(dataOrd, aes(x=factor1,y=rating)) + geom_boxplot(aes(fill=factor2)) + scale_y_continuous(breaks=c(1:7)) + ggtitle("Latin square rating data")
 ```
 
+First, we can look at only the main effect of *Factor 1*. Visually speaking, it looks likely to be significant because the interquartile ranges do not overlap (although this is just a rule of thumb).
+
 ```{r}
 ggplot(dataOrd, aes(x=factor1,y=rating)) + geom_boxplot(aes(fill=factor1)) + scale_y_continuous(breaks=c(1:7)) + ggtitle("Main effect of Factor 1")
+```
+
+Turning to *Factor 2*, it's not clear whether these two levels differ or not. The interquartile ranges largely overlap and the median bars appear to overlap the other group's interquartile range. Simply put, this suggests the distributions don't differ very much at this level of granularity. (Still, this is a rule of thumb.)
+
+```{r}
 ggplot(dataOrd, aes(x=factor2,y=rating)) + geom_boxplot(aes(fill=factor2)) + scale_y_continuous(breaks=c(1:7)) + ggtitle("Main effect of Factor 2")
 ```
+
+However, we have seen in the interaction plot that the influence of *Factor 2* appears to be larger within the `Treatment` condition of *Factor 1*, so we might anticipate there being an interaction between the two main effects. We should conduct ordinal regression to see if this is the case.
 
 # Ordinal regressions
 
@@ -61,6 +86,8 @@ lmer.rate.max <- lmer(rating ~ factor1*factor2 + (1|subject)+(1|item),data=dataO
 summary(lmer.rate.max)
 ```
 
+As in typical LMERs that one might produce using `lme4`, we can see AIC=`r round(summary(lmer.rate.max)$AIC[[1]],2)`, BIC=`r round(summary(lmer.rate.max)$AIC[[1]],2)`, and Log Likelihood=`r round(summary(lmer.rate.max)$AIC[[3]],2)`. We're presented with various residuals and a summary of the random effects (which are important but I will skip for now).
+
 The following model is an cumulative link mixed model, which operates in a very similar way to a linear mixed effect model on the surface, but takes into account the possibility that each level of the rating scale could be a different size or distance from its neighbors.
 
 ```{r}
@@ -68,32 +95,45 @@ clmm.max <- clmm(as.factor(rating) ~ factor1*factor2 + (1|subject)+(1|item),data
 summary(clmm.max)
 ```
 
-Just like you might with a LMER, you can do a model comparison to determine the contribution of each main effect and their interaction.
+You can see this in the section labeled `Threshold coefficients`, which shows the boundary estimates for each of the ordinal levels. (Note: you could probably plot these, too, just as I plot the estimates later on, but I won't do that here.)
+
+Just like you might with a LMER, you can do a nested model comparison to determine the contribution of each main effect and their interaction.
 
 ```{r}
 clmm.int <- clmm(as.factor(rating) ~ factor1+factor2 + (1|subject)+(1|item),data=dataOrd)
 clmm.one <- clmm(as.factor(rating) ~ factor2 + (1|subject)+(1|item),data=dataOrd)
 clmm.two <- clmm(as.factor(rating) ~ factor1 + (1|subject)+(1|item),data=dataOrd)
 ```
+
+First, by removing the interaction effect and comparing the depleted model to the maximal model, we find that the interaction contributes significantly to the overall model fit. This is expected, since we could visually detect something that looks like an interaction.
+
 ```{r}
 anova(clmm.max,clmm.int)
 ```
+
+Next, we can look for the main effect of *Factor 1*. Note, however, that we compared this depleted model not to the maximal model but to the model with the interaction removed. This is because we should not check for a main effect by removing the main effect of one factor *while also comparing it to the model with both the main effect and interaction*. That would be counting the main effect twice, effectively. Technically, it is possible to do so, but the degrees of freedom with be 2. This is less informative because it includes two types of effects in the one model comparison.
 
 ```{r}
 anova(clmm.int,clmm.one)
 ```
 
+As expected, *Factor 1* contributes significantly to the model's fit. But, if you look below, you will see that *Factor 2* also contributes significantly (although the Likelihood Ratio statistic is smaller for *Factor 2* than *Factor 1*).
+
 ```{r}
 anova(clmm.int,clmm.two)
 ```
 
-These suggest both main effects and their interaction all contribute significantly to the fit of the model.
+That solves our problem of the graphs! But maybe you're not convinced. After all, the box and whisker plot for *Factor 2* aren't very different...
+
+The problem here is that box plots assume your data are continuous. This is why the y-axis is continuous and why the boxes are filled in even between the discrete numbers on the y-axis. But ordinal data isn't continuous. There is a better way to visualise it, but it takes a little explanation:
 
 # Visualising the ratings
 
-If we visualise the ratings as probabilities, we can see subtle differences that aren't visible in box plots or bar charts. In the graph below, the coloured lines indicate the estimated probability each of the conditions will be assigned a certain rating. 
+If we visualise the ratings as probabilities, we can see subtle differences that aren't visible in box plots or bar charts. The x-axis is the value of $\beta$, or the estimate of the coefficients (with the baseline set to 0). This means that if two conditions are very similar in terms of how participants used the ordinal scale to rate these stimuli, they will appear close together on the x-axis. The y-axis is the probability with which participants used each level of the scale, from 0 (extremely unlikely) to 1 (extremely likely). Crucially, this allows us to visualise how different levels vary within a condition, as well as between, using probability curves.
 
-```{r, eval=TRUE,collapse=TRUE,tidy=TRUE}
+```{r, eval=FALSE,collapse=TRUE,tidy=TRUE,include=FALSE}
+# In the graph below, the coloured lines indicate the estimated probability each of the conditions will be assigned a certain rating. 
+
 # script adapted from Jalal Al Tamimi
 par(oma=c(0, 0, 0, 1)) # ,mfrow=c(1,1))
 xlim = c(min(clmm.max$beta)-.5,max(clmm.max$beta)+.5)
@@ -116,5 +156,134 @@ legend(par('usr')[2], par('usr')[4], bty='n', xpd=NA,lty=1, col=c("red", "orange
        legend=c("1", "2", "3", "4", "5", "6", "7"),cex=0.75)
 ```
 
-In this graph, we can see the probability curves for each of the seven ratings. In particular, we can now see that the *Baseline+Present* condition and the *Baseline+Absent* condition are not rated in precisely the same manner: *Baseline+Present* is more likely to receive a rating of 7 and less like to receive a rating of 5 than *Baseline+Absent*. In some cases, when this difference ends up being significant, it will not be visible in a box plot but will be visible in this sort of probability curve plot.
+In this graph below, we can see the probability curves for each of the seven ratings. In particular, we can now see that the *Baseline+Present* condition and the *Baseline+Absent* condition are not rated in precisely the same manner: *Baseline+Present* is more likely to receive a rating of 7 and less like to receive a rating of 5 than *Baseline+Absent*.
 
+```{r}
+# Script written by Lauren M Ackerman
+# 26 February 2019
+# Contact: l.m.ackerman AT gmail DOT com
+# Adapted from Jalal Al-Tamimi
+
+clmm.graph <- clmm(as.factor(rating) ~ interaction(factor1,factor2) + 
+                   (1|subject) + 
+                   (1|item),
+                 data=dataOrd) # ordinal regression with INTERACTION BUILT INTO MAIN EFFECT
+
+vlines <- c(0, # intercept, 0 = Baseline.Absent
+            clmm.graph$beta[[1]], # interaction(factor1, factor2) = Treatment.Absent
+            clmm.graph$beta[[2]], # interaction(factor1, factor2) = Baseline.Present
+            clmm.graph$beta[[3]]) # interaction(factor1, factor2) = Treatment.Present
+xaxis <- seq(min(vlines-.5), max(vlines+.5), length.out = 100) # create 100 steps
+yaxis <- rep(c(0,1),50) # fill in 0s and 1s for y-axis
+colors <- c("one" = "orangered",
+            "two" = "orange2",
+            "three" = "yellow",
+            "four" = "green",
+            "five" = "turquoise",
+            "six" = "blue",
+            "seven" = "purple") # establish the colour-rating level correspondence
+linetypes <- c("one" = "solid",
+               "two" = "11",
+               "three" = "12",
+               "four" = "13",
+               "five" = "14",
+               "six" = "15",
+               "seven" = "16") # establish the lty-rating level correspondence
+
+tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
+  mutate(one=  plogis(clmm.graph$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
+         two=  plogis(clmm.graph$Theta[2] - xaxis) - plogis(clmm.graph$Theta[1] - xaxis),
+         three=plogis(clmm.graph$Theta[3] - xaxis) - plogis(clmm.graph$Theta[2] - xaxis),
+         four= plogis(clmm.graph$Theta[4] - xaxis) - plogis(clmm.graph$Theta[3] - xaxis),
+         five= plogis(clmm.graph$Theta[5] - xaxis) - plogis(clmm.graph$Theta[4] - xaxis),
+         six=  plogis(clmm.graph$Theta[6] - xaxis) - plogis(clmm.graph$Theta[5] - xaxis),
+         seven=1 - (plogis(clmm.graph$Theta[6] - xaxis))) %>%
+  gather(rating,probability,3:9) %>% # make long data (change right-hand number to suit the ordinal levels)
+  mutate(rating=factor(rating,levels=c("one","two","three","four","five","six","seven"))) %>% # make factor and relevel
+  ggplot(aes(x=xaxis,y=yaxis)) + # set up ggplot
+  geom_hline(yintercept=0,lty="dotted") + # add lower horizontal line
+  geom_hline(yintercept=1,lty="dotted") + # add upper horizontal line
+  geom_line(aes(y=probability,colour=rating),lwd=1,alpha=.8) + # add predicted curves
+  annotate("segment", # type of annotation = line segments
+           x=vlines, y=0, xend=vlines, yend=1, # add estimates
+           lty="solid", alpha=.75) + # visual properties of vertical lines
+  annotate("text", # type of annotation = text
+           x=vlines,y=.75, # location of labels
+           label=c("Baseline-Absent",
+                   "Treatment-Absent",
+                   "Baseline-Present",
+                   "Treatment-Present"), # label names aligned with vlines[1:4]
+           angle=90,vjust=-0.2) + # visual properties of text labels
+  scale_x_continuous(breaks=c(min(xaxis-.5),max(xaxis+.5))) + # expand x axis horizontally
+  scale_y_continuous(breaks=c(0,.25,.5,.75,1)) + # expand y axis with consistent breaks
+  ylab("Probability") + xlab("") + ggtitle("Predicted curves") + # label plot properties
+  scale_colour_manual(values = colors) + # apply colours manually
+  theme_bw() # improve visibility with white background
+
+```
+
+However, they are still very similar in terms of their mean rating (which is why they are grouped so closely). In some cases, when this difference ends up being significant, it will not be visible in a box plot but will be visible in this sort of probability curve plot.
+
+One could also use this method to visualise the main effect of Factor 2, in order to get an idea of whether its two levels really are similar, or whether they just have similar median values (which is what the box plot shows us).
+
+```{r}
+clmm.graph <- clmm(as.factor(rating) ~ factor2 + 
+                   (1|subject) + 
+                   (1|item),
+                 data=dataOrd) # ordinal regression with ONLY FACTOR 2
+
+vlines <- c(0, # intercept, 0 = Absent
+            clmm.graph$beta[[1]]) # interaction(factor1, factor2) = Present
+xaxis <- seq(min(vlines-.5), max(vlines+.5), length.out = 100) # create 100 steps
+yaxis <- rep(c(0,1),50) # fill in 0s and 1s for y-axis
+colors <- c("one" = "orangered",
+            "two" = "orange2",
+            "three" = "yellow",
+            "four" = "green",
+            "five" = "turquoise",
+            "six" = "blue",
+            "seven" = "purple") # establish the colour-rating level correspondence
+linetypes <- c("one" = "solid",
+               "two" = "11",
+               "three" = "12",
+               "four" = "13",
+               "five" = "14",
+               "six" = "15",
+               "seven" = "16") # establish the lty-rating level correspondence
+
+tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
+  mutate(one=  plogis(clmm.graph$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
+         two=  plogis(clmm.graph$Theta[2] - xaxis) - plogis(clmm.graph$Theta[1] - xaxis),
+         three=plogis(clmm.graph$Theta[3] - xaxis) - plogis(clmm.graph$Theta[2] - xaxis),
+         four= plogis(clmm.graph$Theta[4] - xaxis) - plogis(clmm.graph$Theta[3] - xaxis),
+         five= plogis(clmm.graph$Theta[5] - xaxis) - plogis(clmm.graph$Theta[4] - xaxis),
+         six=  plogis(clmm.graph$Theta[6] - xaxis) - plogis(clmm.graph$Theta[5] - xaxis),
+         seven=1 - (plogis(clmm.graph$Theta[6] - xaxis))) %>%
+  gather(rating,probability,3:9) %>% # make long data (change right-hand number to suit the ordinal levels)
+  mutate(rating=factor(rating,levels=c("one","two","three","four","five","six","seven"))) %>% # make factor and relevel
+  ggplot(aes(x=xaxis,y=yaxis)) + # set up ggplot
+  geom_hline(yintercept=0,lty="dotted") + # add lower horizontal line
+  geom_hline(yintercept=1,lty="dotted") + # add upper horizontal line
+  geom_line(aes(y=probability,colour=rating),lwd=1,alpha=.8) + # add predicted curves
+  annotate("segment", # type of annotation = line segments
+           x=vlines, y=0, xend=vlines, yend=1, # add estimates
+           lty="solid", alpha=.75) + # visual properties of vertical lines
+  annotate("text", # type of annotation = text
+           x=vlines,y=.75, # location of labels
+           label=c("Baseline-Absent",
+                   "Baseline-Present"), # label names aligned with vlines[1:4]
+           angle=90,vjust=-0.2) + # visual properties of text labels
+  scale_x_continuous(breaks=c(min(xaxis-.5),max(xaxis+.5))) + # expand x axis horizontally
+  scale_y_continuous(breaks=c(0,.25,.5,.75,1)) + # expand y axis with consistent breaks
+  ylab("Probability") + xlab("") + ggtitle("Predicted curves") + # label plot properties
+  scale_colour_manual(values = colors) + # apply colours manually
+  theme_bw() # improve visibility with white background
+```
+
+This is an extremely informative, if somewhat boring-looking graph. In the box plot, it was hard to tell whether these two groups different because their interquartile ranges were so similar. Here, we get a clearer view of why they do indeed differ. In the *Baseline+Present* condition, ratings of seven (and to a lesser extent six) are much less likely than in the *Baseline+Absent* condition. The inverse is true for ratings of one and two (and to a lesser extent, three and four). Ratings of five appear to be approximately equally likely for both.
+
+# Summary
+
+Ordinal regressions are more appropriate for ordinal data than linear regressions are for a number of reasons. You don't need to transform your data, you can account for the levels not being "sized" linearly and you can account for subjects treating the individual levels differently than each other.
+
+If you analyse an ordinal regression, however, it is also important to visualise your data in an appropriate way. Box plots (and similarly, violin plots) are not optimal because they assume continuous data. Ordinal data is discrete *and* its levels are independent, so it makes more sense to visualise the probability of each level being selected, rather than the mean or median values for each condition.
