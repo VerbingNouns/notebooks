@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### [Dealing with ordinal data](ordinal_data.nb.html)
+### [Dealing with ordinal data](ordinal_data.html)
 
 * A description of why ordinal regressions are useful and how to use them.
 * Code for producing useful visualisations of ordinal data.
