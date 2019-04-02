@@ -1,7 +1,7 @@
 ---
 title: "Ordinal Data"
 author: "Dr Lauren M Ackerman"
-date: "01 April 2019"
+date: "02 April 2019"
 output: 
   html_document:
     theme: sandstone
@@ -17,22 +17,8 @@ library(lme4)
 library(ordinal)
 library(formatR)
 library(tidyverse)
-
-#> ★ DRAFT ★  
-#> (A work in progress…)
 ```
 
----
-title: "Dealing with ordinal data"
-author: "Lauren M Ackerman"
-date: "Last updated: 01 April 2019"
-output:
-  html_document:
-    theme: sandstone
-    toc: yes
-    toc_depth: 2
-    toc_float: yes
----
 [🔙 Home](https://verbingnouns.github.io/notebooks/)
 
 
@@ -79,16 +65,16 @@ However, we have seen in the interaction plot that the influence of *Factor 2* a
 
 # Ordinal regressions
 
-When we summarise a linear mixed effect model of this rating data, this is what we get.
+When we summarise a **linear mixed effect model** of this rating data, this is what we get.
 
 ```{r}
 lmer.rate.max <- lmer(rating ~ factor1*factor2 + (1|subject)+(1|item),data=dataOrd, REML=FALSE)
 summary(lmer.rate.max)
 ```
 
-As in typical LMERs that one might produce using `lme4`, we can see AIC=`r round(summary(lmer.rate.max)$AIC[[1]],2)`, BIC=`r round(summary(lmer.rate.max)$AIC[[1]],2)`, and Log Likelihood=`r round(summary(lmer.rate.max)$AIC[[3]],2)`. We're presented with various residuals and a summary of the random effects (which are important but I will skip for now).
+As in typical LMERs that one might produce using `lme4`, we can see the types of output, but it's not looking good for *Factor 2*. We're presented with various residuals and a summary of the random effects (which are important but I will skip for now). If we conducted a proper comparison of nested models with this dataset, we would get singular fits for each of the depleted models, but we would see that *Factor 2* does appear to have a significant contribution. But, in any case, let's see what happens when we analyze it with a CLMM instead of LMER.
 
-The following model is an cumulative link mixed model, which operates in a very similar way to a linear mixed effect model on the surface, but takes into account the possibility that each level of the rating scale could be a different size or distance from its neighbors.
+The following model is a **cumulative link mixed model** (CLMM), which operates in a very similar way to a linear mixed effect model on the surface, but takes into account the possibility that each level of the rating scale could be a different size or distance from its neighbors.
 
 ```{r}
 clmm.max <- clmm(as.factor(rating) ~ factor1*factor2 + (1|subject)+(1|item),data=dataOrd)
@@ -156,7 +142,7 @@ legend(par('usr')[2], par('usr')[4], bty='n', xpd=NA,lty=1, col=c("red", "orange
        legend=c("1", "2", "3", "4", "5", "6", "7"),cex=0.75)
 ```
 
-In this graph below, we can see the probability curves for each of the seven ratings. In particular, we can now see that the *Baseline+Present* condition and the *Baseline+Absent* condition are not rated in precisely the same manner: *Baseline+Present* is more likely to receive a rating of 7 and less like to receive a rating of 5 than *Baseline+Absent*.
+In this graph below, we can see the probability curves for each of the seven ratings. In particular, we can now see that the *Baseline+Present* condition and the *Baseline+Absent* condition are not rated in precisely the same manner: *Baseline+Absent* is more likely to receive a rating of 7 and less like to receive a rating of 5 than *Baseline+Present*.
 
 ```{r}
 # Script written by Lauren M Ackerman
@@ -182,14 +168,6 @@ colors <- c("one" = "orangered",
             "five" = "turquoise",
             "six" = "blue",
             "seven" = "purple") # establish the colour-rating level correspondence
-linetypes <- c("one" = "solid",
-               "two" = "11",
-               "three" = "12",
-               "four" = "13",
-               "five" = "14",
-               "six" = "15",
-               "seven" = "16") # establish the lty-rating level correspondence
-
 tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
   mutate(one=  plogis(clmm.graph$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
          two=  plogis(clmm.graph$Theta[2] - xaxis) - plogis(clmm.graph$Theta[1] - xaxis),
@@ -219,7 +197,6 @@ tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
   ylab("Probability") + xlab("") + ggtitle("Predicted curves") + # label plot properties
   scale_colour_manual(values = colors) + # apply colours manually
   theme_bw() # improve visibility with white background
-
 ```
 
 However, they are still very similar in terms of their mean rating (which is why they are grouped so closely). In some cases, when this difference ends up being significant, it will not be visible in a box plot but will be visible in this sort of probability curve plot.
@@ -243,14 +220,6 @@ colors <- c("one" = "orangered",
             "five" = "turquoise",
             "six" = "blue",
             "seven" = "purple") # establish the colour-rating level correspondence
-linetypes <- c("one" = "solid",
-               "two" = "11",
-               "three" = "12",
-               "four" = "13",
-               "five" = "14",
-               "six" = "15",
-               "seven" = "16") # establish the lty-rating level correspondence
-
 tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
   mutate(one=  plogis(clmm.graph$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
          two=  plogis(clmm.graph$Theta[2] - xaxis) - plogis(clmm.graph$Theta[1] - xaxis),
@@ -281,6 +250,134 @@ tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
 ```
 
 This is an extremely informative, if somewhat boring-looking graph. In the box plot, it was hard to tell whether these two groups different because their interquartile ranges were so similar. Here, we get a clearer view of why they do indeed differ. In the *Baseline+Present* condition, ratings of seven (and to a lesser extent six) are much less likely than in the *Baseline+Absent* condition. The inverse is true for ratings of one and two (and to a lesser extent, three and four). Ratings of five appear to be approximately equally likely for both.
+
+## Some visualisations under construction
+
+I have wondered whether it is possible to visualise the variable "sizes" of each of the levels of the ordinal scale. This is an attempt to plot them to visualise how they vary, including standard error confidence intervals. If you have suggestions for improvements, amendments, or uses, please email me at `lauren` [dot] `ackerman` [at] `ncl` [dot] `ac` [dot] `uk`.
+
+```{r}
+clmm.graph <- clmm(as.factor(rating) ~ interaction(factor1,factor2) + 
+                   (1|subject) + 
+                   (1|item),
+                 data=dataOrd) # ordinal regression with INTERACTION BUILT INTO MAIN EFFECT
+
+levellines <- c(summary(clmm.max)$coefficient[,1][[1]],
+                summary(clmm.max)$coefficient[,1][[2]],
+                summary(clmm.max)$coefficient[,1][[3]],
+                summary(clmm.max)$coefficient[,1][[4]],
+                summary(clmm.max)$coefficient[,1][[5]],
+                summary(clmm.max)$coefficient[,1][[6]])
+levellinesSE <- c(summary(clmm.max)$coefficient[,2][[1]],
+                  summary(clmm.max)$coefficient[,2][[2]],
+                  summary(clmm.max)$coefficient[,2][[3]],
+                  summary(clmm.max)$coefficient[,2][[4]],
+                  summary(clmm.max)$coefficient[,2][[5]],
+                  summary(clmm.max)$coefficient[,2][[6]])
+
+tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
+  mutate(one=  plogis(clmm.graph$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
+         two=  plogis(clmm.graph$Theta[2] - xaxis) - plogis(clmm.graph$Theta[1] - xaxis),
+         three=plogis(clmm.graph$Theta[3] - xaxis) - plogis(clmm.graph$Theta[2] - xaxis),
+         four= plogis(clmm.graph$Theta[4] - xaxis) - plogis(clmm.graph$Theta[3] - xaxis),
+         five= plogis(clmm.graph$Theta[5] - xaxis) - plogis(clmm.graph$Theta[4] - xaxis),
+         six=  plogis(clmm.graph$Theta[6] - xaxis) - plogis(clmm.graph$Theta[5] - xaxis),
+         seven=1 - (plogis(clmm.graph$Theta[6] - xaxis))) %>%
+  gather(rating,probability,3:9) %>% # make long data (change right-hand number to suit the ordinal levels)
+  mutate(rating=factor(rating,levels=c("one","two","three","four","five","six","seven"))) %>% # make factor and relevel
+  ggplot(aes(x=xaxis,y=yaxis)) + # set up ggplot
+  geom_hline(yintercept=0,lty="dotted") + # add lower horizontal line
+  geom_hline(yintercept=1,lty="dotted") + # add upper horizontal line
+  #geom_line(aes(y=probability,colour=rating),lwd=1,alpha=.8) + # add predicted curves
+  annotate("segment", # type of annotation = line segments
+           x=levellines, y=0, xend=levellines, yend=1, # add estimates
+           lty="solid") +
+  annotate("rect", # type of annotation = rectangle
+           xmin=levellines-levellinesSE, ymin=0, xmax=levellines+levellinesSE, ymax=1, # add estimates
+           lty="dotted", alpha=.5,fill="grey") +
+  annotate("text", # type of annotation = text
+           x=levellines,y=.75, # location of labels
+           label=c("1|2","2|3","3|4","4|5","5|6","6|7")) + # label names aligned with vlines[1:4]
+  xlab("Thresholds Beta value and SE") +
+  ylab("") +
+  theme_bw()
+
+```
+
+One interesting insight this plot provides is that the lower levels of the ordinal scale are both smaller and more variable (or less certain).
+
+I would like to be able to plot confidence intervals around the predicted curves. This is my attempt to do so:
+
+```{r}
+clmm.graph <- clmm(as.factor(rating) ~ interaction(factor1,factor2) + 
+                   (1|subject) + 
+                   (1|item),
+                 data=dataOrd) # ordinal regression with INTERACTION BUILT INTO MAIN EFFECT
+
+vlines <- c(0, # intercept, 0 = Baseline.Absent
+            clmm.graph$beta[[1]], # interaction(factor1, factor2) = Treatment.Absent
+            clmm.graph$beta[[2]], # interaction(factor1, factor2) = Baseline.Present
+            clmm.graph$beta[[3]]) # interaction(factor1, factor2) = Treatment.Present
+
+# summary(clmm.max)$coefficient[,2][[1]] #<-- how do we get SE values into curves?
+
+xaxis <- seq(min(vlines-.5), max(vlines+.5), length.out = 100) # create 100 steps
+yaxis <- rep(c(0,1),50) # fill in 0s and 1s for y-axis
+colors <- c("one" = "orangered",
+            "two" = "orange2",
+            "three" = "yellow",
+            "four" = "green",
+            "five" = "turquoise",
+            "six" = "blue",
+            "seven" = "purple") # establish the colour-rating level correspondence
+tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
+  mutate(one.base=  plogis(clmm.graph$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
+         two.base=  plogis(clmm.graph$Theta[2] - xaxis) - plogis(clmm.graph$Theta[1] - xaxis),
+         three.base=plogis(clmm.graph$Theta[3] - xaxis) - plogis(clmm.graph$Theta[2] - xaxis),
+         four.base= plogis(clmm.graph$Theta[4] - xaxis) - plogis(clmm.graph$Theta[3] - xaxis),
+         five.base= plogis(clmm.graph$Theta[5] - xaxis) - plogis(clmm.graph$Theta[4] - xaxis),
+         six.base=  plogis(clmm.graph$Theta[6] - xaxis) - plogis(clmm.graph$Theta[5] - xaxis),
+         seven.base=1 - (plogis(clmm.graph$Theta[6] - xaxis))) %>%
+  mutate(one.add=  plogis(clmm.graph$Theta[1]+summary(clmm.max)$coefficient[,2][[1]] - xaxis), # add column for rating levels (must be adapted for larger scales)
+         two.add=  plogis(clmm.graph$Theta[2]+summary(clmm.max)$coefficient[,2][[2]] - xaxis) - plogis(clmm.graph$Theta[1]+summary(clmm.max)$coefficient[,2][[1]] - xaxis),
+         three.add=plogis(clmm.graph$Theta[3]+summary(clmm.max)$coefficient[,2][[3]] - xaxis) - plogis(clmm.graph$Theta[2]+summary(clmm.max)$coefficient[,2][[2]] - xaxis),
+         four.add= plogis(clmm.graph$Theta[4]+summary(clmm.max)$coefficient[,2][[4]] - xaxis) - plogis(clmm.graph$Theta[3]+summary(clmm.max)$coefficient[,2][[3]] - xaxis),
+         five.add= plogis(clmm.graph$Theta[5]+summary(clmm.max)$coefficient[,2][[5]] - xaxis) - plogis(clmm.graph$Theta[4]+summary(clmm.max)$coefficient[,2][[4]] - xaxis),
+         six.add=  plogis(clmm.graph$Theta[6]+summary(clmm.max)$coefficient[,2][[6]] - xaxis) - plogis(clmm.graph$Theta[5]+summary(clmm.max)$coefficient[,2][[5]] - xaxis),
+         seven.add=1 - (plogis(clmm.graph$Theta[6]+summary(clmm.max)$coefficient[,2][[6]] - xaxis))) %>%
+  mutate(one.sub=  plogis(clmm.graph$Theta[1]-summary(clmm.max)$coefficient[,2][[1]] - xaxis), # add column for rating levels (must be adapted for larger scales)
+         two.sub=  plogis(clmm.graph$Theta[2]-summary(clmm.max)$coefficient[,2][[2]] - xaxis) - plogis(clmm.graph$Theta[1]-summary(clmm.max)$coefficient[,2][[1]] - xaxis),
+         three.sub=plogis(clmm.graph$Theta[3]-summary(clmm.max)$coefficient[,2][[3]] - xaxis) - plogis(clmm.graph$Theta[2]-summary(clmm.max)$coefficient[,2][[2]] - xaxis),
+         four.sub= plogis(clmm.graph$Theta[4]-summary(clmm.max)$coefficient[,2][[4]] - xaxis) - plogis(clmm.graph$Theta[3]-summary(clmm.max)$coefficient[,2][[3]] - xaxis),
+         five.sub= plogis(clmm.graph$Theta[5]-summary(clmm.max)$coefficient[,2][[5]] - xaxis) - plogis(clmm.graph$Theta[4]-summary(clmm.max)$coefficient[,2][[4]] - xaxis),
+         six.sub=  plogis(clmm.graph$Theta[6]-summary(clmm.max)$coefficient[,2][[6]] - xaxis) - plogis(clmm.graph$Theta[5]-summary(clmm.max)$coefficient[,2][[5]] - xaxis),
+         seven.sub=1 - (plogis(clmm.graph$Theta[6]-summary(clmm.max)$coefficient[,2][[6]] - xaxis))) %>%
+  gather(level,probability,3:23) %>% # make long data (change right-hand number to suit the ordinal levels)
+  separate(level,c("rating","type")) %>%
+  spread(type,probability) %>%
+  mutate(rating=factor(rating,levels=c("one","two","three","four","five","six","seven"))) %>% # make factor and relevel
+  ggplot(aes(x=xaxis,y=yaxis)) + # set up ggplot
+  geom_hline(yintercept=0,lty="dotted") + # add lower horizontal line
+  geom_hline(yintercept=1,lty="dotted") + # add upper horizontal line
+  geom_ribbon(aes(ymin=sub,ymax=add,fill=rating),lwd=1,alpha=.2) + # add predicted curves confidence intervals *** NEEDS WORK **
+  geom_line(aes(y=base,colour=rating),lwd=1,alpha=.8) + # add predicted curves
+  annotate("segment", # type of annotation = line segments
+           x=vlines, y=0, xend=vlines, yend=1, # add estimates
+           lty="solid", alpha=.75) + # visual properties of vertical lines
+  annotate("text", # type of annotation = text
+           x=vlines,y=.75, # location of labels
+           label=c("Baseline-Absent",
+                   "Treatment-Absent",
+                   "Baseline-Present",
+                   "Treatment-Present"), # label names aligned with vlines[1:4]
+           angle=90,vjust=-0.2) + # visual properties of text labels
+  scale_x_continuous(breaks=c(min(xaxis-.5),max(xaxis+.5))) + # expand x axis horizontally
+  scale_y_continuous(breaks=c(0,.25,.5,.75,1)) + # expand y axis with consistent breaks
+  ylab("Probability") + xlab("") + ggtitle("Predicted curves") + # label plot properties
+  scale_colour_manual(values = colors) + # apply colours manually
+  theme_bw() # improve visibility with white background
+```
+
+I think this is neither necessarily the correct nor the easiest way to do this, and I cannot recommend using this code to produce professional visualisations of the predicted curves' standard error confidence intervals. I am providing this code so that others may build on it and feed back to me so that I can update it and complete the tutorial properly. ¡Buena suerte!
 
 # Summary
 
