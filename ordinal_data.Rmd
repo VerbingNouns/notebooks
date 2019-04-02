@@ -317,9 +317,6 @@ vlines <- c(0, # intercept, 0 = Baseline.Absent
             clmm.graph$beta[[1]], # interaction(factor1, factor2) = Treatment.Absent
             clmm.graph$beta[[2]], # interaction(factor1, factor2) = Baseline.Present
             clmm.graph$beta[[3]]) # interaction(factor1, factor2) = Treatment.Present
-
-# summary(clmm.max)$coefficient[,2][[1]] #<-- how do we get SE values into curves?
-
 xaxis <- seq(min(vlines-.5), max(vlines+.5), length.out = 100) # create 100 steps
 yaxis <- rep(c(0,1),50) # fill in 0s and 1s for y-axis
 colors <- c("one" = "orangered",
@@ -331,29 +328,44 @@ colors <- c("one" = "orangered",
             "seven" = "purple") # establish the colour-rating level correspondence
 tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
   mutate(one.base=  plogis(clmm.graph$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
-         two.base=  plogis(clmm.graph$Theta[2] - xaxis) - plogis(clmm.graph$Theta[1] - xaxis),
-         three.base=plogis(clmm.graph$Theta[3] - xaxis) - plogis(clmm.graph$Theta[2] - xaxis),
-         four.base= plogis(clmm.graph$Theta[4] - xaxis) - plogis(clmm.graph$Theta[3] - xaxis),
-         five.base= plogis(clmm.graph$Theta[5] - xaxis) - plogis(clmm.graph$Theta[4] - xaxis),
-         six.base=  plogis(clmm.graph$Theta[6] - xaxis) - plogis(clmm.graph$Theta[5] - xaxis),
+         two.base=  plogis(clmm.graph$Theta[2] - xaxis) - 
+                    plogis(clmm.graph$Theta[1] - xaxis),
+         three.base=plogis(clmm.graph$Theta[3] - xaxis) - 
+                    plogis(clmm.graph$Theta[2] - xaxis),
+         four.base= plogis(clmm.graph$Theta[4] - xaxis) - 
+                    plogis(clmm.graph$Theta[3] - xaxis),
+         five.base= plogis(clmm.graph$Theta[5] - xaxis) - 
+                    plogis(clmm.graph$Theta[4] - xaxis),
+         six.base=  plogis(clmm.graph$Theta[6] - xaxis) - 
+                    plogis(clmm.graph$Theta[5] - xaxis),
          seven.base=1 - (plogis(clmm.graph$Theta[6] - xaxis))) %>%
-  mutate(one.add=  plogis(clmm.graph$Theta[1]+summary(clmm.max)$coefficient[,2][[1]] - xaxis), # add column for rating levels (must be adapted for larger scales)
-         two.add=  plogis(clmm.graph$Theta[2]+summary(clmm.max)$coefficient[,2][[2]] - xaxis) - plogis(clmm.graph$Theta[1]+summary(clmm.max)$coefficient[,2][[1]] - xaxis),
-         three.add=plogis(clmm.graph$Theta[3]+summary(clmm.max)$coefficient[,2][[3]] - xaxis) - plogis(clmm.graph$Theta[2]+summary(clmm.max)$coefficient[,2][[2]] - xaxis),
-         four.add= plogis(clmm.graph$Theta[4]+summary(clmm.max)$coefficient[,2][[4]] - xaxis) - plogis(clmm.graph$Theta[3]+summary(clmm.max)$coefficient[,2][[3]] - xaxis),
-         five.add= plogis(clmm.graph$Theta[5]+summary(clmm.max)$coefficient[,2][[5]] - xaxis) - plogis(clmm.graph$Theta[4]+summary(clmm.max)$coefficient[,2][[4]] - xaxis),
-         six.add=  plogis(clmm.graph$Theta[6]+summary(clmm.max)$coefficient[,2][[6]] - xaxis) - plogis(clmm.graph$Theta[5]+summary(clmm.max)$coefficient[,2][[5]] - xaxis),
+  mutate(one.add=  plogis(clmm.graph$Theta[1]+summary(clmm.max)$coefficient[,2][[1]] - xaxis), # add column for upper SE CI (must be adapted for larger scales)
+         two.add=  plogis(clmm.graph$Theta[2]+summary(clmm.max)$coefficient[,2][[2]] - xaxis) - 
+                   plogis(clmm.graph$Theta[1]+summary(clmm.max)$coefficient[,2][[1]] - xaxis),
+         three.add=plogis(clmm.graph$Theta[3]+summary(clmm.max)$coefficient[,2][[3]] - xaxis) - 
+                   plogis(clmm.graph$Theta[2]+summary(clmm.max)$coefficient[,2][[2]] - xaxis),
+         four.add= plogis(clmm.graph$Theta[4]+summary(clmm.max)$coefficient[,2][[4]] - xaxis) - 
+                   plogis(clmm.graph$Theta[3]+summary(clmm.max)$coefficient[,2][[3]] - xaxis),
+         five.add= plogis(clmm.graph$Theta[5]+summary(clmm.max)$coefficient[,2][[5]] - xaxis) - 
+                   plogis(clmm.graph$Theta[4]+summary(clmm.max)$coefficient[,2][[4]] - xaxis),
+         six.add=  plogis(clmm.graph$Theta[6]+summary(clmm.max)$coefficient[,2][[6]] - xaxis) - 
+                   plogis(clmm.graph$Theta[5]+summary(clmm.max)$coefficient[,2][[5]] - xaxis),
          seven.add=1 - (plogis(clmm.graph$Theta[6]+summary(clmm.max)$coefficient[,2][[6]] - xaxis))) %>%
-  mutate(one.sub=  plogis(clmm.graph$Theta[1]-summary(clmm.max)$coefficient[,2][[1]] - xaxis), # add column for rating levels (must be adapted for larger scales)
-         two.sub=  plogis(clmm.graph$Theta[2]-summary(clmm.max)$coefficient[,2][[2]] - xaxis) - plogis(clmm.graph$Theta[1]-summary(clmm.max)$coefficient[,2][[1]] - xaxis),
-         three.sub=plogis(clmm.graph$Theta[3]-summary(clmm.max)$coefficient[,2][[3]] - xaxis) - plogis(clmm.graph$Theta[2]-summary(clmm.max)$coefficient[,2][[2]] - xaxis),
-         four.sub= plogis(clmm.graph$Theta[4]-summary(clmm.max)$coefficient[,2][[4]] - xaxis) - plogis(clmm.graph$Theta[3]-summary(clmm.max)$coefficient[,2][[3]] - xaxis),
-         five.sub= plogis(clmm.graph$Theta[5]-summary(clmm.max)$coefficient[,2][[5]] - xaxis) - plogis(clmm.graph$Theta[4]-summary(clmm.max)$coefficient[,2][[4]] - xaxis),
-         six.sub=  plogis(clmm.graph$Theta[6]-summary(clmm.max)$coefficient[,2][[6]] - xaxis) - plogis(clmm.graph$Theta[5]-summary(clmm.max)$coefficient[,2][[5]] - xaxis),
+  mutate(one.sub=  plogis(clmm.graph$Theta[1]-summary(clmm.max)$coefficient[,2][[1]] - xaxis), # add column for lower SE CI (must be adapted for larger scales)
+         two.sub=  plogis(clmm.graph$Theta[2]-summary(clmm.max)$coefficient[,2][[2]] - xaxis) - 
+                   plogis(clmm.graph$Theta[1]-summary(clmm.max)$coefficient[,2][[1]] - xaxis),
+         three.sub=plogis(clmm.graph$Theta[3]-summary(clmm.max)$coefficient[,2][[3]] - xaxis) - 
+                   plogis(clmm.graph$Theta[2]-summary(clmm.max)$coefficient[,2][[2]] - xaxis),
+         four.sub= plogis(clmm.graph$Theta[4]-summary(clmm.max)$coefficient[,2][[4]] - xaxis) - 
+                   plogis(clmm.graph$Theta[3]-summary(clmm.max)$coefficient[,2][[3]] - xaxis),
+         five.sub= plogis(clmm.graph$Theta[5]-summary(clmm.max)$coefficient[,2][[5]] - xaxis) - 
+                   plogis(clmm.graph$Theta[4]-summary(clmm.max)$coefficient[,2][[4]] - xaxis),
+         six.sub=  plogis(clmm.graph$Theta[6]-summary(clmm.max)$coefficient[,2][[6]] - xaxis) - 
+                   plogis(clmm.graph$Theta[5]-summary(clmm.max)$coefficient[,2][[5]] - xaxis),
          seven.sub=1 - (plogis(clmm.graph$Theta[6]-summary(clmm.max)$coefficient[,2][[6]] - xaxis))) %>%
   gather(level,probability,3:23) %>% # make long data (change right-hand number to suit the ordinal levels)
-  separate(level,c("rating","type")) %>%
-  spread(type,probability) %>%
+  separate(level,c("rating","type")) %>% # tidy values in "rating" column for next step
+  spread(type,probability) %>% # spread so it's slightly wider data, keeping baseline and SE CI (upper and lower) values seperate
   mutate(rating=factor(rating,levels=c("one","two","three","four","five","six","seven"))) %>% # make factor and relevel
   ggplot(aes(x=xaxis,y=yaxis)) + # set up ggplot
   geom_hline(yintercept=0,lty="dotted") + # add lower horizontal line
