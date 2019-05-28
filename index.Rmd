@@ -1,7 +1,7 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "Last updated: 11 Mar 2019"
+date: "Last updated: 28 May 2019"
 output: 
   html_document:
     theme: cerulean
@@ -18,6 +18,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 * A description of why ordinal regressions are useful and how to use them.
 * Code for producing useful visualisations of ordinal data.
+
+### [Statistics for Linguists with R](reading/info.html)
+* [Event website](https://www.reading.ac.uk/celm/training/introduction-to-r-workshop-4-day-workshop/)
 
 ### [Data Viz/Analysis Workshop](leeds/blank-workbook.html)
 * "*Visualisation and analysis of linguistic data, using R*"
