@@ -1,0 +1,147 @@
+---
+title: "**Workshop**"
+author: "Dr Lauren M Ackerman"
+date: "03 JUN 2019"
+output:
+  html_notebook:
+    toc: false
+    theme: yeti
+    highlight: default
+    number_sections: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# 1. R and RStudio interfaces, RMarkdown, and best practices
+#    - Basic functionality, shortcuts, writing scripts and notebooks, organising files, interfacing with GitHub
+# 2. Data frame manipulation using Tidyverse
+#    - Piping syntax and code replicability
+#    - Tidyr, Dplyr, related packages
+#    - Cleaning, combining, and rearranging data frames
+# 3. Data visualisation using ggplot and best practices
+#    - Structure and syntax of ggplot and geom
+#    - Customising and combining plots
+#    - Determining what plot is best for your data
+# 4. Basic linear models without and with mixed effects (including gaussian, binomial, and ordinal)
+#    - building/selecting an appropriate model, including random effect structures
+#    - maximal vs parsimonious models
+#    - practical use of lm(), lmer(), glm(), glmer(), clmm()
+#    - dummy coding vs contrast coding
+#    - interpreting the output
+```
+
+Download course materials from [here](https://github.com/VerbingNouns/...).
+
+bit.ly/-----------
+
+These packages should already be installed on the lab computers. Please make sure you have installed them on your laptop before **tomorrow**, if you are using one.
+
+```{r}
+install.packages(tidyverse,ordinal,lme4)
+```
+
+# Introduction {.tabset}
+
+This workshop is designed to introduce you to practical uses and issues in R and RStudio, aimed at linguists and psychologists (well, psycholinguists). In this first day, we will start with the fundamentals of interacting with the programs.
+
+## R and RStudio interfaces
+
+R is a programming language that we can use to tell the computer what to do. We can "speak" R to the computer a number of ways, e.g., through the command line (Terminal in Macs) or through the R app.
+
+![](../images/pipes.jpg)
+
+## Base R functionality 
+
+### R is a calculator
+
+Its least unique function is to compute arithmetic. You probably don't want to use R just to add sums, but you could do.
+```{r}
+3 + 4
+```
+
+White space doesn't matter for most things (so you can put spaces between numbers, operations, names).
+```{r}
+3+4
+```
+
+Order of operations follows standard rules (BIDMAS / BODMAS / PEMDAS):
+```{r}
+3*4^2
+```
+```{r}
+(3*4)^2
+```
+
+
+### R is for interacting with data files
+
+> Dataset `sleep`:
+
+```{r}
+head(sleep)
+```
+
+* column 1 = how many extra hours of sleep were recorded
+* column 2 = which drug was administered
+* column 3 = which participant
+
+## Indicies
+
+### Finding the index of the value you want
+
+What does this do?
+```{r}
+sleep[1,]
+```
+
+How does this differ from `[1,]`?
+```{r}
+sleep[2,] # so that means this is row 2
+```
+
+How does this differ from `[3,]`?
+```{r}
+sleep[,3] # what do you think this is?
+```
+
+…which makes it `dataset[row,column]`
+
+## More descriptive methods
+
+You can also navigate with column names:
+```{r}
+sleep$ID
+```
+
+How would you view the column `extra`?
+```{r}
+sleep$extra
+```
+
+Use `str()` to get a summary of the structure of the dataset
+```{r}
+str(sleep)
+```
+
+What are all the unique values in `ID`?
+```{r}
+unique(sleep$extra)
+```
+
+What's the value in the first row, third column?
+```{r}
+sleep[1,3]
+```
+
+What's the first element in the column `ID`?
+```{r}
+sleep[1,]$ID
+sleep$ID[1]
+```
+
+You can also view the dataset as a spreadsheet (although it can't be altered).
+```{r}
+View(sleep)
+```
+

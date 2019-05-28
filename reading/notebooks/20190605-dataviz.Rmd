@@ -1,0 +1,139 @@
+---
+title: "**Workshop**"
+author: "Dr Lauren M Ackerman"
+date: "05 JUN 2019"
+output:
+  html_notebook:
+    toc: false
+    theme: yeti
+    highlight: default
+    number_sections: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# 1. R and RStudio interfaces, RMarkdown, and best practices
+#    - Basic functionality, shortcuts, writing scripts and notebooks, organising files, interfacing with GitHub
+# 2. Data frame manipulation using Tidyverse
+#    - Piping syntax and code replicability
+#    - Tidyr, Dplyr, related packages
+#    - Cleaning, combining, and rearranging data frames
+# 3. Data visualisation using ggplot and best practices
+#    - Structure and syntax of ggplot and geom
+#    - Customising and combining plots
+#    - Determining what plot is best for your data
+# 4. Basic linear models without and with mixed effects (including gaussian, binomial, and ordinal)
+#    - building/selecting an appropriate model, including random effect structures
+#    - maximal vs parsimonious models
+#    - practical use of lm(), lmer(), glm(), glmer(), clmm()
+#    - dummy coding vs contrast coding
+#    - interpreting the output
+```
+
+Download course materials from [here](https://github.com/VerbingNouns/...).
+
+ bit.ly/-----------
+ 
+## Basic ggplot2 {.tabset .tabset-pills}
+
+```{r}
+# https://bookdown.org/ndphillips/YaRrr/pirateplot.html
+library(tidyverse)
+install.packages("ggbeeswarm")
+library(ggbeeswarm)
+```
+
+### Exploration
+
+Plot boxplots and violin plots for the ratings. Subset by participant.
+```{r}
+data %>%
+  filter(region == 1) %>%
+  ggplot(aes(x=gram, y=rating, fill=freq)) +
+  geom_boxplot(position = position_dodge(.9)) +
+  #geom_violin(alpha=.5) +
+  facet_wrap(~subj)
+```
+
+Group by region, word, frequency, and grammaticality. Summarise mean and standard error.
+```{r}
+data %>%
+  group_by(region, word, freq, gram) %>%
+  summarise(meanRT = mean(rt),
+            seRT = sd(rt)/sqrt(n())) %>%
+  ggplot(aes(x=region,y=meanRT,colour=gram)) +
+    geom_point() +
+    geom_path(aes(lty=freq)) +
+    geom_errorbar(aes(ymin=meanRT-seRT, ymax=meanRT+seRT),width=.1) +
+  scale_x_continuous(breaks=c(1:5),labels = c("the","old","VERB","the","boat")) +
+  ylab("reading time (miliseconds)")
+```
+
+#### Why? 
+
+Well, check out the [Datasaurus Dozen](https://www.autodeskresearch.com/publications/samestats), which all have the same x/y means and standard deviations:
+![](../images/datasaurus.gif)
+
+### Try it out
+
+> Dataset `iris`:
+
+The function `ggplot` layers different geometries and aesthetics to build up a plot:
+```{r}
+iris %>%
+  mutate(Sepal.Width = Sepal.Width+rnorm(length(Sepal.Width),0,.1))%>%
+  ggplot(aes(x=Species,y=Sepal.Width,fill=Species)) +
+  geom_violin(lty=0,alpha=.5)+
+  geom_boxplot(alpha=0.5,lwd=.5) +
+  geom_quasirandom(dodge.width=1, alpha=.5)
+```
+
+In what ways might we change this plot?
+```{r}
+iris %>%
+  mutate(
+    Sepal.Width = Sepal.Width + 
+      rnorm(
+        length(Sepal.Width) , 0 , .1
+        )
+    ) %>%
+  ggplot(aes(x=Species,y=Sepal.Width)) +
+  geom_boxplot() +
+  geom_quasirandom(aes(pch=Species), alpha=.5)
+  #ggplot(aes(x=Species,y=Sepal.Width,fill=Species)) +
+  #geom_violin(lty=0,alpha=.5)+
+  #geom_boxplot(alpha=0.5,lwd=.5) +
+  #geom_quasirandom(dodge.width=1, alpha=.5)
+```
+
+
+Going back to `quakes`, let's pipe our table into a ggplot (and fill in missing values):
+```{r}
+quakes %>%
+  group_by(mag) %>%
+  summarise(n=n(),
+            sta=mean(stations),
+            staSD=sd(stations),
+            staSE=staSD/sqrt(n),
+            dep=mean(depth),
+            depSD=sd(depth),
+            depSE=depSD/sqrt(n)) %>%
+  ggplot(aes(x=mag)) +
+  geom_point(aes(y=sta),colour="red")+
+  geom_path(aes(y=sta),colour="red")+
+  geom_ribbon(aes(ymin=sta-staSD,ymax=sta+staSD),fill="red",alpha=.2) +
+  geom_ribbon(aes(ymin=sta-staSE,ymax=sta+staSE),fill="red",alpha=.5) +
+  geom_point(aes(y=dep),colour="blue")+
+  geom_path(aes(y=dep),colour="blue")+
+  geom_ribbon(aes(ymin=dep-depSD,ymax=dep+depSD),fill="blue",alpha=.2) +
+  geom_ribbon(aes(ymin=dep-depSE,ymax=dep+depSE),fill="blue",alpha=.5) +
+  theme_bw() + ylab("depth OR number of stations reporting")
+```
+
+Inheritance:
+```{r}
+ggplot(data=quakes, aes(x=long)) +
+  geom_point(aes(y=lat,colour=stations)) #+
+  #geom_path()
+```
