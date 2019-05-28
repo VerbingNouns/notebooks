@@ -13,13 +13,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-University of Reading, Earley Gate, Agriculture GL20-PC
-
 # Purpose {.tabset}
 
 In this four-day workshop, you will explore [R](https://cran.r-project.org/) and [RStudio](https://www.rstudio.com/products/rstudio/download/#download), which are extremely powerful, flexible tools. However, they are only useful if you know how to get started. This summer school is aimed at postgraduates and staff who are interested in using R but either do not feel comfortable with it or wish to learn it in a classroom context. I will not assume any previous experience with R, but I will assume a basic understanding of statistics (e.g., linear regressions, correlations) and familiarity with concepts in quantitative linguistics and/or psychology.
 
-There will be computers available in the workshop location. If you wish to learn to use R on your own laptop, please make sure you have the latest version of R downloaded (3.6.0) and at least a moderately recent RStudio (1.1.463 or greater). The room we will be meeting in (Earley Gate, Agriculture GL20-PC) is not the most ergonomic arrangement, so please make sure to have each day's files downloaded to the computer you are using so that you can follow along without needing to crane your neck!
+There will be computers available in the workshop location. If you wish to learn to use R on your own laptop, please make sure you have the latest version of R downloaded (3.6.0) and at least a moderately recent RStudio (1.1.463 or greater). The room we will be meeting in (London Road Campus, L33 120) has a somewhat unusual arrangement, so please make sure to have each day's files downloaded to the computer you are using so that you can follow along without needing to crane your neck!
 
 
 
@@ -66,15 +64,13 @@ There will be computers available in the workshop location. If you wish to learn
 
 ## Location
 
-![](../images/map.jpg)
-
-### Registration
-
-London Road L29 G02
-
 ### Workshop location
 
+![](./images/lab.png)
+
 London Road L33 120
+
+![](./images/map.png)
 
 *An official map of campus can be found [here](http://www.reading.ac.uk/web/files/maps/london-road-campus-map.pdf).*
 
