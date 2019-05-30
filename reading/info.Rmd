@@ -7,7 +7,7 @@ output:
     toc: false
     toc_float: true
 ---
-[🔙 Home](https://verbingnouns.github.io/notebooks/) || [Day 1 ⇢](info.html)
+[🔙 Home](https://verbingnouns.github.io/notebooks/) || [Day 1 ⇢](notebooks/20190603-base_R.nb.html)
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
