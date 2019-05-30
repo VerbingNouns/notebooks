@@ -623,7 +623,7 @@ points(cars$speed[cars$speed<15.5&cars$dist>41],cars$dist[cars$speed<15.5&cars$d
 See how much clearer this is? There are still gaps in the explanation. I haven't told you what `pch=15` means or what it does. There is a lot of text and it's difficult to read. These are things you can annotate and explain to yourself when you find and adapt other people's code. Eventually, they'll become second nature, and you won't need to annotate everything, but at first, it can be helpful if you expect to forget what everything means by the next time you use your code.
 
 * `pch` is the point type. Search "pch" in the help tab or type `?pch` into the console to learn more.
-* `col` lets you change the colour of the line or point. There are [a large number of pre-named colours](http://research.stowers.org/mcm/efg/R/Color/Chart/).
+* `col` lets you change the colour of the line or point. There are [a large number of pre-named colours](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/colorPaletteCheatsheet.pdf).
 * `lty` means "line type". Typical values are "dashed", "dotted", or "solid".
 * `lwd` means "line width". It takes a numerical integer value.
 
