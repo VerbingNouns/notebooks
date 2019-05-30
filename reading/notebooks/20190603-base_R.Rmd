@@ -1,5 +1,5 @@
 ---
-title: "**Workshop**"
+title: "**Base R Functionality and RStudio**"
 author: "Dr Lauren M Ackerman"
 date: "03 JUN 2019"
 output:
@@ -34,7 +34,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #    - dummy coding vs contrast coding
 #    - interpreting the output
 ```
-[⇠ Workshop Home](info.html) || [Day 2 ⇢](notebooks/20190604-tidyverse.html)
+[⇠ Workshop Home](../info.html) || [Day 2 ⇢](20190604-tidyverse.html)
 
 Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-201906) *after 2nd June*.
 
@@ -42,8 +42,8 @@ Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-20
 
 These packages should already be installed on the lab computers. Please make sure you have installed them on your laptop before **tomorrow**, if you are using one.
 
-```{r}
-install.packages(tidyverse,ordinal,lme4)
+```{r eval=FALSE}
+install.packages("tidyverse","ordinal","lme4")
 ```
 
 # Introduction: R and RStudio 
@@ -174,7 +174,7 @@ Scripts are simply text files, they are not R and they don't do anything unless 
 On all platforms: the green + symbol in the top left corner will let you create a new script.
 
 On a Mac: `command`+`shift`+`N`  
-On a PC:  
+On a PC:  `Ctrl`+`Alt`+`I`
 
 The symbol `#` hides the text that follows on that line from R, that is, it "comments it out". This lets you write comments to yourself and to anyone else who might read your code. You'll want to do this so you can remember what you were doing (*trust* me, you will not remember) and so other people can replicate what you did (even if it's just to help you debug your code later).
 
@@ -214,6 +214,8 @@ Now that we've gone through the fundamentals of organisation and basic R operato
 Once you've created a project (.Rproj), you can open the project and it should open right to where you left off. This means your scripts will open as well, as long as you did not close them the last time you worked on the project. However, if you want to open a script that isn't currrently open but does exist, you can do so in the Files tab of the lower right pane. Click on the name of the script, and it will open in a new tab of your scripts pane (top left by default).
 
 ![](../gui/new-script.png)
+
+However, it is still extremely important to save all your work, frequently. If you use GitHub, there is a way to link it to RStudio so that you can commit changes and interact with your repositories from within the RStudio interface.
 
 ## R is a calculator
 
@@ -354,6 +356,8 @@ head(sleep)
 * column 2 = which drug was administered
 * column 3 = which participant
 
+We will talk in depth about how to interact with datasets *tomorrow* when we work with the `tidyverse` packages. However, base R has a number of useful functions and properties to understand that will make `tidyverse` make more sense, but also be more appealing.
+
 # Indicies 
 ## Finding the index of the value you want
 
@@ -420,6 +424,16 @@ length(unique(data$experiment))
 
 There are three different experiments in this dataset.
 
+Use `str()` to get a summary of the structure of the dataset, which will also give you this type of information.
+```{r}
+str(sleep)
+```
+
+You can also view the dataset as a spreadsheet (although it can't be altered).
+```{r}
+View(sleep)
+```
+
 ### Cells within a dataset
 
 Finally, if we want to find out how many unique items there are in experiment "first" only, we can specify a subset of the dataset using square brackets `[]`. Before we do that, though, let's go through what the arguments for the square brackets are.
@@ -454,23 +468,23 @@ For instance, if we want to view only the second experiment (which is called `se
 data[data$experiment=="second",]
 ```
 
+Let's break the syntax of this code down.
 
-## More descriptive methods
+First, we write `data` because we want to look within our dataset that we've named "data". Then we put in the square brackets `[]` after `data` because we want to look at a subset of the dataset. Inside of the square brackets, we want to specify what column has the information that we can use for identifying the target subset. Do to that, we write `data$experiment` to say that the "experiment"column in "data" has the important information, then `==` to check each value to see if it's the same as `"second"`. We finally put a comma `,` as the last character within the square brackets to specify we want to see all the *rows* that match these criteria (remember: `[row,column]`).
 
-You can also navigate with column names:
+I won't go into this more now, but `==` is a very different operator to `=`. While `=` assigns a value, `==` asks whether or not two things are equal. The opposite of `==` is `!=` (pronounced "bang-equals" or "not-equal-to").
+
+Going back to the `unique()` function, if we want to query how many unique items are in the second experiment only, we can use the following code:
+
 ```{r}
-sleep$ID
+length(unique(data$item[data$experiment=="second"]))
 ```
 
-How would you view the column `extra`?
-```{r}
-sleep$extra
-```
+This only differs from the previous example in a small number of ways. Instead of querying a two dimensional matrix (`data` has rows and columns), we want to query a one dimensional vector (`item`), which is a subset of `data`. This is why there is no comma at the end of the expression in the square brackets. That is, we want to query a subset of a subset, so we specify the column with our target information and the column and subset information for the column that will help us narrow down what we're looking at. Then, by using `unique()`, we won't count multiple tokens of an item, just the type count. Finally, by using `length()`, we can find out how many types there are.
 
-Use `str()` to get a summary of the structure of the dataset
-```{r}
-str(sleep)
-```
+It starts to look messy and hard to read pretty quickly though. [Tomorrow's tutorial](20190604-tidyverse.html) will introduce you to a different way of doing this that is easier to read.
+
+Try these on your own:
 
 What are all the unique values in `ID`?
 ```{r}
@@ -488,8 +502,170 @@ sleep[1,]$ID
 sleep$ID[1]
 ```
 
-You can also view the dataset as a spreadsheet (although it can't be altered).
-```{r}
-View(sleep)
+### Tab-delimited files (.txt)
+
+Tab delimited files use white space (specifically, the tab character, unicode: U+0009 sometimes coded as `\t`) to separate information in columns and line breaks (either "carriage return" or "new line" characters, sometimes coded as `\r` and `\n` respectively). This could result in a text file that looks something like this:
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("../gui/txt.png"), 
+               alt = 'logo', 
+               style = 'position:relative; top:0; right:0; padding:10px; width:60%')
 ```
 
+
+Note how the columns don't necessarily line up neatly. This is because the tab character is not a fixed width, but rather refers to a location along the horizontal axis of the page (at least in this file type). For a human, this is harder to read than a spreadsheet, but for a computer it's easier.
+
+Importantly, text files can be encoded as UTF-8 (or UTF-16), which will accommodate most characters, even from other languages and alphabets. They can also be encoded as ASCII (a very basic encoding that only allows alphanumeric Latin characters and some punctuation), or certain types of old encodings that are not compatible across platforms. In particular, Microsoft Word will **not** produce a useful encoding. 
+
+> DO NOT USE MICROSOFT WORD (OR SIMILAR) TO EDIT A DATASET  
+> **SERIOUSLY, DO NOT DO IT**
+
+On Windows, [Notepad++](https://notepad-plus-plus.org/) is one of the best plain text editors, and it's free. On Macintosh, [BBEdit](https://www.barebones.com/products/bbedit/) is my personal favorite plain text editor. For example, in BBEdit, you can change the encoding of a file (in case the wrong one was chosen initially, or in case you wish to ensure your file has a compatible encoding). I recommend **UTF-8**.
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("../gui/encodings.png"), 
+               alt = 'logo', 
+               style = 'position:relative; top:0; right:0; padding:10px; width:40%')
+```
+
+It is possible to create a .txt tab delimited file by copying and pasting a spreadsheet (e.g., from Excel or Google Sheets) into a plain text file. This is also useful if you are more comfortable with spreadsheets than R at the moment, although you will soon find R to be easier and faster than Excel for most data organisation!
+
+Once you have created and saved your dataset as a `.txt` file, you can load it into R and save it with a variable name using the following code:
+
+```{r, eval=FALSE}
+data <- read.delim("data/20180908-my_data_file.txt", header=TRUE, as.is=TRUE)
+```
+
+The function `read.delim()` takes several arguments, but only one is obligatory. The bare minimum you must give it is the name of your `.txt` file, within quotation marks to signify it is a string of characters and not a variable name. Since our folder for saving datasets is called "data", we preface our dataset's name with `data` and a `/` to indicate that the target file is inside the folder called `data`. This is guaranteed to work on a Macintosh computer, but you may need to replace the `/` character with a `\` character if you are working on a Windows computer.
+
+### Comma separated values (.csv)
+
+Another type of file is the `.csv` or "comma-separated values" file. This type of file is functionally equivalent to a tab-delimited file, but instead of each value in a row being separated with tabs, they are separated with commas. Furthermore, a .csv file can distinguish between values that are supposed to be text and values that are numeric. It typically does this by putting text in quotation marks.
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("../gui/csv.png"), 
+               alt = 'logo', 
+               style = 'position:relative; top:0; right:0; padding:10px; width:60%')
+```
+
+This kind of file might be generated automatically by your data gathering software, or you can save an Excel spreadsheet (or most other kinds of spreadsheets) as a .csv from within the native program interface. In many ways, the .csv is better than a tab delimited file. For instance, it is less likely to have problems with white space if, say, one of the columns contains sentences or longer strings of text. However, because the comma is the element that separates each value in a column, a .csv can sometimes have difficulty with punctuation in sentences. This is why enclosing strings of text in quotation marks is crucial. It indicates that any comma within quotation marks is meant to be treated as text and not the separating marker.
+
+A .csv can be loaded into R as a variable using the following code:
+
+```{r, eval=FALSE}
+data <- read.csv("data/20180908-my_data_file.csv", header=TRUE, as.is=TRUE)
+```
+
+As before, the only obligatory argument is the name and location of the file. However, I prefer to specify that the first row of the dataset is the header row, and I also prefer to specify `as.is=TRUE` so that text is not automatically treated like a multi-level factor (but instead, as text characters).
+
+### Why not Excel? (.xls/.xlsx)
+
+There are ways to load Excel spreadsheets directly into R, but there are lots of good reasons *not* to. First of all, any formatting that you save in your spreadsheet will need to be filtered out. This means that colour-coding, fonts, wrapping text, dates, times, or any other cell-specific formatting will have to be removed. This can unintentionally alter the data (for instance, dates may not be properly converted to interpretable text or numbers). Moreover, R cannot tell you if it has misinterpreted something from an Excel file, so you would have to go through the file and check it anyway to make sure your columns and values have been correctly imported. Finally, because Microsoft Excel (`.xlsx`) files are a proprietary brand that continuously updates and changes the program used to generate spreadsheets, there is no guarantee that your operating system will upload the file the same way someone else's will, which makes your data less replicable. To give you an idea what this means, here is the "plain text" version of an .xslx spreadsheet generated by Microsoft Excel.
+
+![](../gui/xml.png)
+
+Rather than worrying about any of this potential complications, it is easy to save your .xlsx file as a .csv or paste the content into a .txt tab-delimited file. It takes very little time, the file size will be smaller than a .xlsx file, and the data file will be readable by software well into the future, even after Excel updates its file formatting again.
+
+# Literate programming
+
+Literate programming is a useful way to annotate your code or navigate someone else's code. In short, it allows you to write prose, insert pictures, view output, and produce tables within your code. In particular, **R markdown** (`.Rmd`) files and **R notebooks** allow you to write R in a literate programming environment. In fact, this webpage was generated as an .Rmd file!
+
+This section will briefly discuss why literate programming, and specifically .Rmd files, are useful to know about and learn to use.
+
+## Annotation
+
+**Why do we annotate code?**  
+
+Fundamentally, code can be difficult to read. We are not computers, we forget what we were doing or trying to do, we lose our place. Annotating code is one way to help us remember what our though process was at the time of writing. It also allows other people to use, adapt, and debug our code. This increases replicability and allows more open, transparent science, too.
+
+As mentioned earlier, we can leave comments in our code by writing text after a `#` symbol.
+
+```{r}
+paste("Hello","world!") # the paste() function connects text values with one space.
+paste0("Hello"," ","world","!") # the paste0() function connects text values with no intervening character(s).
+```
+
+But commenting code may only get you so far. It can be difficult to read, there is no formatting in case you want to make some text bold or more salient, and you can still lose your place in a long script.
+
+This is where .Rmd files improve upon commenting.
+
+## Prose
+
+In a .Rmd file, we can still comment code line-by-line, but we can also include longer (more visually pleasing) explanations of what we are doing and what we intend to do. This means you can leave yourself reminders! You can also indicate what doesn't work (so that someone else may help), and leave notes to yourself or to your audience about your interpretations of the data. Most importantly, you can view output such as graphs in-line, which means they are saved adjacent to the code that produced them. This makes it *much* easier to return to an analysis or share it with someone who is not intimately familiar with your data.
+
+### Example
+
+In this graph, I'm using the automatically available dataset called `cars`. The `plot()` function is moderately flexible, so I can just tell it what columns in `cars` I want for the x-axis and the y-axis, and it'll generate a graph.
+
+```{r}
+plot(cars$speed,cars$dist)
+```
+
+However, this graph is ugly and boring. I want to change the colour and shape of the points because I know my audience is actually interested in certain propterties of the graph and I want to make it as easy as possible for them to navigate it quickly.
+
+Below, I've generated a graph that splits the data into four quadrants. I tried other numerical values for the horizontal and vertical divisions, but reducing the horizontal division meant the lower right (orange) quadrant became too sparse and shifting the vertical division to the left meant the upper left (blue) quadrant became too sparse. I have not tried increasing the vertical division, but I suspect it would also result in the lower right (orange) quandrant becoming too sparse.
+
+```{r}
+plot(cars$speed,cars$dist,col="white") # generate the plot background at an appropriate size and scale
+abline(h=41,lty="dotted",col="grey") # include the horizontal line
+abline(v=15.5,lty="dotted",col="grey") # include the vertical line
+lines(lowess(cars),type="l",lwd=2) # plot the black trend line
+points(cars$speed[cars$speed<15.5&cars$dist<41],cars$dist[cars$speed<15.5&cars$dist<41],col="red", pch=15) # lower left quadrant
+points(cars$speed[cars$speed>15.5&cars$dist<41],cars$dist[cars$speed>15.5&cars$dist<41],col="orange", pch=16) # lower right quadrant
+points(cars$speed[cars$speed>15.5&cars$dist>41],cars$dist[cars$speed>15.5&cars$dist>41],col="green", pch=17) # upper right quadrant
+points(cars$speed[cars$speed<15.5&cars$dist>41],cars$dist[cars$speed<15.5&cars$dist>41],col="blue", pch=18) # upper left quadrant
+```
+
+See how much clearer this is? There are still gaps in the explanation. I haven't told you what `pch=15` means or what it does. There is a lot of text and it's difficult to read. These are things you can annotate and explain to yourself when you find and adapt other people's code. Eventually, they'll become second nature, and you won't need to annotate everything, but at first, it can be helpful if you expect to forget what everything means by the next time you use your code.
+
+* `pch` is the point type. Search "pch" in the help tab or type `?pch` into the console to learn more.
+* `col` lets you change the colour of the line or point. There are [a large number of pre-named colours](http://research.stowers.org/mcm/efg/R/Color/Chart/).
+* `lty` means "line type". Typical values are "dashed", "dotted", or "solid".
+* `lwd` means "line width". It takes a numerical integer value.
+
+## R Notebooks
+
+An R Notebook will allow you to easily create a document (e.g., an HTML document) that can be compiled for easy sharing or reporting analysis. It differs slightly from a regular .Rmd file, but can be easier to learn to use and update.
+
+Create a new R Notebook by clicking the green `+` in the upper left corner and selecting "R Notebook". It will automatically give you a little information about how to write, run, and compile the document. Make sure to save it with a short, descriptive name!
+
+Here are links that contain good cheat sheets and tips for formatting an R Notebook:  
+
+* [Official RStudio documentation and guide](https://rmarkdown.rstudio.com/r_notebooks)  
+* [Official RStudio cheat sheet](https://rmarkdown.rstudio.com/lesson-15.html)  
+* [More detailed explanation of how to use R Notebooks and Rmd files](https://bookdown.org/yihui/rmarkdown/notebook.html)
+
+### Organising code
+
+When you write your code, it should be kept mostly chronological. This way, the steps you take are in the correct order.
+
+However, there are some circumstances where it makes more sense to go back and add code in the middle rather than at the end of a document. If you re-do a statistical analysis or want to compare two methods, those may be more coherent if placed adjacent in the document rather than in the order you performed them. This is especially the case if you learn a new technique and want to go back and re-do an older analysis. The same thing goes for graphs and other outputs.
+
+If you are working directly in an R script (which I do not recommend if you can use an .Rmd or notebook instead), you can create section headings. To do so, you can type `#### Section Title ####` with at least four hashes on either side of the text, and then you will be able to navigate directly to that heading using the small orange hash symbol in the lower left corner of the scripts pane.
+
+An R Notebook also allows you to create section headings and navigate between them in a similar way, but when you compile and save the document, the section headings are also visually salient.
+
+```
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+```
+
+Furthermore, there are options for creating a table of contents for your notebook, which makes it even easier. Here is an example of what you might put in the document header to create a nice, simple table of contents for your notebook.
+
+```
+---
+title: "Untitled R Notebook"
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+```
+
+### Sharing code
+
+To share your code, you can upload the .Rmd or .R script(s) that you used to do your processing and analysis to any open science site. These include [Open Science Framework](https://osf.io/) (OSF), [GitHub](https://github.com/), or your own personal website. Since each file can automatically generate an HTML file, you can either copy and paste the contents or upload the HTML file directly for others to read your report without necessarily knowing any R or needing to download any files.
+
+I will discuss GitHub more in a later tutorial. It is very difficult to break into but very simple to use effectively once you know the basics.
