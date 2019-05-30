@@ -233,6 +233,8 @@ Order of operations follows standard rules (BIDMAS / BODMAS / PEMDAS):
 ```{r}
 3*4^2
 ```
+
+…compared to…
 ```{r}
 (3*4)^2
 ```
@@ -293,31 +295,25 @@ To assign a value (etc) to a variable, there are three possible operators: `=`, 
 First we assign the value of 3 to the variable `x`. Notice that spaces between the numbers and the operator are optional. I like to use them to help see each component more clearly.
 
 ```{r}
-x = 3 # or x=3
-x
+
 ```
 
 We can also use one of the arrow operators. The two characters that comprise the arrow cannot have space between them. They act as a single unit. For the leftward-facing arrow, the value(s) on the right are assigned to the variable on the left.
 
 ```{r}
-y <- 4 # or y<-4
-y
+
 ```
 
 Now that we've assigned values to `x` and `y`, we can do things to them. Below, I demonstrate some basic arthimetic operators that allow R to act like a calculator.
 
 ```{r}
-x + y
-x * y
-x / y
-x ^ y
+
 ```
 
 Finally, the rightward-pointing arrow is used very rarely, but functions in a similar way to the other two assignment operators. The value(s) on the left are assigned to the variable on the right.
 
 ```{r}
-x + y -> z # or z <- x + y or z=x+y
-z
+
 ```
 
 To assign more than one value to a variable, there are several functions we can use, but the most common and easiest is `c()`. To read more about the function `c()`, you can type `c` into the search bar in the help tab in the lower right pane, *or* you can input the following into your console:
@@ -366,17 +362,25 @@ What does this do?
 sleep[1,]
 ```
 
-How does this differ from `[1,]`?
+How does `sleep[2,]` differ from `sleep[1,]`?
 ```{r}
-sleep[2,] # so that means this is row 2
+
 ```
 
-How does this differ from `[3,]`?
+How does `sleep[3,]` differ from `sleep[,3]`?
 ```{r}
-sleep[,3] # what do you think this is?
+
 ```
 
-…which makes it `dataset[row,column]`
+
+
+
+
+
+```{r include=FALSE}
+#…which makes it `dataset[row,column]`
+```
+
 
 ## Navigating bigger datasets
 
@@ -394,24 +398,24 @@ data <- read.csv("data/binomial-data.csv")
 
 Now, if you want to view the first six rows of the dataset to see what types of things are in it, you can use the function `head()`.
 
-```{r, asis=TRUE}
-head(data)
+```{r}
+
 ```
 
 You can also look at the bottom six rows with `tail()`
 
 ```{r}
-tail(data)
+
 ```
 
 ### Basic querying functions
 
-If we want to find out what each of the experiments are called, or how many conditions there are, we can use the function `unique()`. 
+If we want to find out what each of the experiments is called, or how many conditions there are, we can use the function `unique()`. 
 
 Note that we must specify what variable name we've given our dataset (`data`) and what column we want to query (`experiment`). The relationship between the dataset and the column in the dataset is specified with the `$` operator.
 
 ```{r}
-unique(data$experiment)
+
 ```
 
 There are three experiments, and their names are `"first"`, `"second"`, and `"third"`. 
@@ -419,19 +423,19 @@ There are three experiments, and their names are `"first"`, `"second"`, and `"th
 If we want to know *how many* unique values there are in a column, we can embed the `unique()` function in the `length()` function.
 
 ```{r}
-length(unique(data$experiment))
+
 ```
 
 There are three different experiments in this dataset.
 
 Use `str()` to get a summary of the structure of the dataset, which will also give you this type of information.
 ```{r}
-str(sleep)
+
 ```
 
 You can also view the dataset as a spreadsheet (although it can't be altered).
 ```{r}
-View(sleep)
+
 ```
 
 ### Cells within a dataset
@@ -465,7 +469,7 @@ Now, going back to our dataset, if we want to view the content of one column, su
 For instance, if we want to view only the second experiment (which is called `second` in the `experiment` column, helpfully enough), we can use the code below:
 
 ```{r}
-data[data$experiment=="second",]
+
 ```
 
 Let's break the syntax of this code down.
@@ -488,18 +492,18 @@ Try these on your own:
 
 What are all the unique values in `ID`?
 ```{r}
-unique(sleep$extra)
+
 ```
 
 What's the value in the first row, third column?
 ```{r}
-sleep[1,3]
+
 ```
 
 What's the first element in the column `ID`?
+
 ```{r}
-sleep[1,]$ID
-sleep$ID[1]
+
 ```
 
 ### Tab-delimited files (.txt)
@@ -667,5 +671,3 @@ output:
 ### Sharing code
 
 To share your code, you can upload the .Rmd or .R script(s) that you used to do your processing and analysis to any open science site. These include [Open Science Framework](https://osf.io/) (OSF), [GitHub](https://github.com/), or your own personal website. Since each file can automatically generate an HTML file, you can either copy and paste the contents or upload the HTML file directly for others to read your report without necessarily knowing any R or needing to download any files.
-
-I will discuss GitHub more in a later tutorial. It is very difficult to break into but very simple to use effectively once you know the basics.
