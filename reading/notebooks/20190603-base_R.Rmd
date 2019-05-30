@@ -35,9 +35,9 @@ knitr::opts_chunk$set(echo = TRUE)
 #    - interpreting the output
 ```
 
-Download course materials from [here](https://github.com/VerbingNouns/...).
+Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-201906) *after 2nd June*.
 
-bit.ly/-----------
+[**bit.ly/RforLinguists-201906**](http://bit.ly/RforLinguists-201906)
 
 These packages should already be installed on the lab computers. Please make sure you have installed them on your laptop before **tomorrow**, if you are using one.
 
