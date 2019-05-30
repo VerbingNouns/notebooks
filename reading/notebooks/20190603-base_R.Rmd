@@ -34,6 +34,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #    - dummy coding vs contrast coding
 #    - interpreting the output
 ```
+[⇠ Workshop Home](info.html) || [Day 2 ⇢](notebooks/20190604-tidyverse.html)
 
 Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-201906) *after 2nd June*.
 
@@ -373,7 +374,7 @@ sleep[,3] # what do you think this is?
 
 …which makes it `dataset[row,column]`
 
-## Navigating biggeratasets
+## Navigating bigger datasets
 
 In your script (or, if you don't take my advice, in your console), you can open and manipulate a dataset.
 
