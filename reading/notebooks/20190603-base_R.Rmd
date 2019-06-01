@@ -43,7 +43,7 @@ Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-20
 These packages should already be installed on the lab computers. Please make sure you have installed them on your laptop before **tomorrow**, if you are using one.
 
 ```{r eval=FALSE}
-install.packages("tidyverse","ordinal","lme4")
+install.packages("tidyverse","ordinal","lme4","broom")
 ```
 
 # Introduction: R and RStudio 

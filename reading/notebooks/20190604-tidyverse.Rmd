@@ -1,13 +1,17 @@
 ---
-title: "**Workshop**"
+title: "**Tidyverse**"
 author: "Dr Lauren M Ackerman"
 date: "04 JUN 2019"
 output:
   html_notebook:
-    toc: false
-    theme: yeti
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
     highlight: default
-    number_sections: false
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -30,12 +34,27 @@ knitr::opts_chunk$set(echo = TRUE)
 #    - dummy coding vs contrast coding
 #    - interpreting the output
 ```
+[⇠ Day 1](20190603-base_R.html) || [Day 3 ⇢](20190605-dataviz.html)
 
-Download course materials from [here](https://github.com/VerbingNouns/...).
+Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-201906) *after 2nd June*.
 
- bit.ly/-----------
+[**bit.ly/RforLinguists-201906**](http://bit.ly/RforLinguists-201906)
+
+You will need these datasets today:
+
+1. [binomial-data.csv](ExampleProject/data/binomial-data.csv)
+2. [long-data.csv](ExampleProject/data/long-data.csv)
+3. [wide-data.csv](ExampleProject/data/wide-data.csv)
+
+You may also need to install the package `broom`:
+```{r}
+install.packages("broom")
+```
+
  
- ## Tidyverse functionality {.tabset}
+# Tidyverse functionality
+
+Tidyverse is a package, or a set of add-on tools, that you can optionally use in R to easily and clearly process and visualise your data. In the tidyverse, there are a number of included packages. You do not need to use them all, nor do you need to load them all, but for simplicity's sake, it's easier to load the whole thing and then not worry about it.
 
 ```{r}
 library(tidyverse)
@@ -43,8 +62,12 @@ library(tidyverse)
 
 A `tibble` is different from a `table`.
 ```{r}
-as.tibble(sleep)
+as_tibble(sleep)
 ```
+
+The most important (and exciting!) difference between the way base R functions work and the way tidyverse functions work is the **pipe**: **`%>%`**
+
+In short, the pipe (`%>%`) takes whatever has already been done in the preceding line(s) and funnels it into the next line. This means complex operations can be performed, including changing or manipulating the data.frame, but it is temporary within the piped lines and will not permanently alter the data. Each line that you pipe to will have a function, and the functions defined inside the tidyverse package are typically referred to as `verbs`. I will not use this terminology strictly, but it is good to know.
 
 > Pipes are like toy funnels
 
@@ -52,36 +75,87 @@ as.tibble(sleep)
 
 ![](../images/pipes.jpg)
 
+How would you write the base R function `head(sleep)`?
 
 ```{r}
-sleep %>%
-  head()
 
-# or
-
-sleep %>%
-  head
 ```
+
+The verb `count()` counts how many attestations there are of each level in the specified column.
 
 How many attestations of each type of `group`?
 ```{r}
-sleep %>%
-  count(group)
+
 ```
 
-How can you make a new column? Duplicate `group` into `group2`:
+## `sleep` dataset
+
+What does `sleep` look like?
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+## `quakes` dataset
+
+What does `quakes` look like?
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+# Processing into tables
+
+Before we start learning anything about our data and results, we need to process and organise the data.
+
+## Add columns
+
+How can you make a new column?
 ```{r}
 sleep %>%
-  mutate(group2 = group)
+  mutate(new = 1:length(group))
 ```
 
-Let's rename the levels in `group` to be "one" and "two":
+Duplicate `group` into `group2` for `sleep`:
+```
+
+```
+
+Create a column in `quakes` that calculates the `depth` of the quake divided by the number of `stations` reporting:
+```
+
+```
+
+### Case when
+
+Tidyverse tries to reduce the need for "for loops". Instead of going line by line through a dataset to determine what contingent behaviour to perform. The for-loop behaviour is time and energy intensive on large datasets. That's why `case_when` is so powerful.
+
+Here's an example of how one might create a column that translates the factor `group` number in `sleep` to a word:
 ```{r}
-sleep %>%
-  mutate(group2 = case_when(group==1 ~ "one",
-                            TRUE ~ "two"))
+sleep %>% 
+  mutate(groupText = case_when(group=="1" ~ "one",
+                               group=="2" ~ "two"))
+
+# or
+
+sleep %>% 
+  mutate(groupText = case_when(group=="1" ~ "one",
+                               TRUE ~ "two"))
 ```
 
+
+Now, how would you create a column in `quakes` that groups magnitude into "low", "medium" and "high"?
+```{r}
+
+```
 
 What's wrong with this one?
 ```{r}
@@ -90,78 +164,324 @@ sleep %>%
                             group==2 ~ as.factor("two")))
 ```
 
-
+How could we fix it?
 ```{r}
-sleep %>%
-  mutate(group2 = case_when(group==1 ~"one",
-                            group==2 ~"two")) %>%
-  mutate(group2 = as.factor(group2))
+
+```
+
+We can also use this to perform other sorts of contingent calculations.
+
+Create a column that adds 10 to `long` when it is above 175 and subtracts 10 from `long when it is below 175:
+```{r}
+
+```
+
+## Filter
+
+If we only want to look at Group 2 from `sleep`, we can filter the dataset (which is like subsetting):
+```{r}
+
+```
+
+This also works for continuous data:
+```{r}
+
 ```
 
 
-Now, let's recreate the `count` function with `group_by` and `summarise`:
+## Group and summarise
+
+What if we want to get aggregate values from our dataset, rather than looking at it as a whole?
+
+**`group_by`** is a verb that flags certain columns for operations down the line. **`summarise`** checks which columns are flagged and performs operations based on the permuations of values in those columns.
+
+What happens when we use `group_by` by itself?
 ```{r}
-sleep %>%
-  group_by(group) %>%
-  summarise(n = n())
-```
 
-
-We cal use `group_by` and `summarise` to do a lot more than just count:
-```{r}
-# mean value of `extra` by `group2`
-sleep %>%
-  mutate(group2 = case_when(group==1 ~"one",
-                            group==2 ~"two")) %>%
-  mutate(group2 = as.factor(group2)) %>%
-  group_by(group) %>%
-  summarise(effectMean = mean(extra))
-```
-
-
-## Processing into tables
-
-> Dataset `quakes`:
-
-What does `quakes` look like?
-```{r}
-quakes %>%
-  str
-
-View(quakes)
 ```
 
 How many observations are there per "level" of magnitude?
 ```{r}
-quakes %>%
-  group_by(mag) %>%
-  summarise(numberOfObvs = n())
+
 ```
 
-Let's create a table of the means, standard deviations, and standard errors for both stations reporting and depths:
+Now, let's recreate the `count` function with `group_by` and `summarise` for the `sleep` dataset (which has categories):
+```{r}
+
+```
+
+We can use `group_by` and `summarise` to do a lot more than just count:
+```{r}
+# mean value of `extra` by `group2`
+
+```
+
+Let's create a table of the means, standard deviations, and standard errors for both stations reporting and depths grouped by magnitude:
 ```{r}
 quakes %>%
-  group_by(mag) %>%
-  summarise(n = n(),
-            stationMean = mean(stations),
-            stationSD = sd(stations),
-            stationSE = sd(stations)/sqrt(n),
-            depthMean = mean(depth),
-            depthSD = sd(depth),
-            depthSE = sd(depth)/sqrt(n))
+  group_by(•••) %>%
+  summarise(n = •••,
+            stationMean = •••,
+            stationSD = •••,
+            stationSE = •••,
+            depthMean = •••,
+            depthSD = •••,
+            depthSE = •••)
 ```
 
-This dataset is wide. Let's make it long using `gather` (compare to `spread`):
+## Unite and separate (text)
+
+First, let's create some columns with character values:
+```{r}
+
+```
+
+Combine (using `unite`) the columns `groupText` and `category`.
+```{r}
+
+```
+
+The reverse process is called `separate`:
+```{r}
+
+```
+
+You can do this with any character. What happens when you use `i`?
+```{r}
+
+```
+
+
+## Bind and Join
+
+What if you have two datasets (observational data and demographic data) and you want to combine them?
+
+First, we'll split `sleep` into two datasets:
+```{r}
+
+```
+
+Let's look at the two datasets:
+```{r}
+
+```
+
+If we want to put them back together as they were (one column for both groups), we can bind by row:
+```{r}
+
+```
+
+If we want to bind the two subsets of `sleep` into a "wide" dataset, we can use a similar function to paste the two datasets together:
+```{r}
+
+```
+
+And in a more tidy format:
+```{r}
+
+```
+
+
+But this is somewhat coarse. The function `full_join` allows for binding by columns and rows in a much smoother, sleeker way.
+
+Bind `sleep1` and `sleep2` by rows using `full_join`:
+```{r}
+
+```
+
+Bind `sleep1` and `sleep2` by the `ID` column (so that `extra` and `group` are kept separate):
+```{r}
+
+```
+
+What happens if you try this with joining by `group`? Why?
+```{r}
+
+```
+
+
+But, the different forms of `join` are named in a way that only really makes sense if you know SQL. For the rest of us, there's a [cheat sheet](https://stat545.com/bit001_dplyr-cheatsheet.html).
+
+## Gather and spread
+
+This section will (hopefully) be depricated soon for much more intuitive functions called `pivot_longer` and `pivot_wider`. But for now, we'll learn the ones that are currently available.
+
+What is a wide dataset?
+```{r}
+
+```
+
+
+Let's make it long using `gather`, focusing on columns 3 through 8. How does this differ?:
+```{r}
+
+```
+
+If this were our original dataset and we wanted to make it wide, we could use `spread`:
+```{r}
+
+```
+
+How could you use `spread` to sort of recreate our wide `sleep` dataset?
+```{r}
+
+```
+
+# Try it out
+
+Read in `long-data.csv`:
+```{r}
+long_data <- read.csv(•••)
+```
+
+Make it wide in the way you choose. Think about the structure of the data and what you might want to do with it.
+```{r}
+
+```
+
+Read in `wide-data.csv`
+```{r}
+
+```
+
+Make it long in the way you choose. Try different methods to see what they do. Keep records of everything you try by taking advantage of literate programming.
+```{r}
+
+```
+
+## NAs
+
+See how one of the cells is `NA`? That's fine, but what if we want to add a value in? NAs are a strange category and R will throw errors if it doesn't like the way you're looking for them. Use `is.na` to get a boolean (TRUE/FALSE) value to isolate cells with NAs.
+```{r}
+
+```
+
+Let's find a way to put the value 'none' in that cell using `mutate`, `case_when`, and `is.na`.
+```{r}
+
+```
+
+Now do that without getting rid of other information. Hint: factor vectors are harder to edit than character vectors!
+```{r}
+
+```
+
+
+## Group challenge!
+
+Can you combine the wide data and long data into a single data frame using the subjects' ages as the common column? (There will be NAs, ignore or remove `Nationality` for now.)
+```{r}
+long_data %>% 
+  spread(•••) %>% 
+  mutate(•••) %>% 
+  select(•••) %>% 
+  full_join(•••)
+```
+
+Take this dataset and split `Savings` into `value` and `currency`. Make sure numbers are number and letters are characters.
+```{r}
+
+```
+
+
+Find a way to fill in the NAs in this dataset with unique values. If possible, do this within the piping environment without saving the dataset as an object.
+```{r}
+
+```
+
+
+# Calculations on tables
+
+For this, we'll use `binomial-data.csv`.
+```{r}
+data <- read.csv("../data/binomial-data.csv")
+```
+
+Personally, I prefer to not save data into new variables if I can avoid it. However, this makes doing statistical analyses more comlicated. We'll talk more about this on Thursday, but for now here are some nice tricks that will be good to know going forward.
+
+## Pull and select
+
+Some functions in tidyverse are not good at isolating single columns from a dataset but are still sensitive to `group_by` flags. If you want to isolate a single column, `pull` does the trick.
+
+`pull` the column `extra` from `sleep`:
+```{r}
+
+```
+
+`select` does the same thing, but you can select more than one column, or specify a column to remove. 
+
+There are some other differences, even when selecting one column. Can you tell?
+```{r}
+# just `extra`
+```
+
+```{r}
+# everything except `extra`
+```
+
+```{r}
+# `ID` and `extra`
+```
+
+### Try it out
+
+Create a subset of `quakes` that includes only latitude and longitude of quakes with a maximum magnitude of 5 and no fewer than 30 stations reporting.
+```{r}
+quakes %>% 
+  filter(•••) %>% 
+  select(•••)
+```
+
+Using this subset, summarise the data to count the number of quakes that occur to the east and west of 180˚ longitude.
+```{r}
+quakes %>% 
+  filter(•••) %>% 
+  select(•••) %>% 
+  mutate(•••) %>% 
+  group_by(•••) %>% 
+  summarise(•••)
+```
+
+## Do (for now)
+
+The function `do` is apparently on its way out, to be replaced by `map` (in `purrr`), but for now we'll talk about `do` and you can use your newfound skills to teach yourself `map` when it becomes available!
+
+`do` literally just means "do the operation I'm telling you to do on some dataset", which is superficially not useful.
 ```{r}
 quakes %>%
-  group_by(mag) %>%
-  summarise(n = n(),
-            stationMean = mean(stations),
-            stationSD = sd(stations),
-            stationSE = sd(stations)/sqrt(n),
-            depthMean = mean(depth),
-            depthSD = sd(depth),
-            depthSE = sd(depth)/sqrt(n)) %>%
-  gather(measurement, values, 3:8) #-> quakesLong
+  do(head(.)) # . means 'the dataset we've been piping through this chunk'
 ```
 
+However, notice how we *need* to have something within the braces for `head` here, when we wouldn't have needed it without `do`.
+```{r}
+
+```
+
+This is the important part of `do`: it allows us to specify which dataset we want to *do* something to, even within a piping environment. That is, we can nest operations of more than one dataset within a chunk by using `do`. 
+
+## `broom`
+
+```{r}
+library(broom)
+```
+
+I'll introduce the package `broom` now, but we'll come back to it on Thursday. Right now, we will only use it for the function `tidy`, which turns the output of a function to a tidy tibble if possible.
+
+Using base R, `cor.test` provides the results of a test for correlation between paired samples, defaulting to Pearson's product moment. It takes two arguments (each is one of the paired samples).
+```{r}
+
+```
+
+Here's how we can use `do` and `tidy` to produce an output that is easier to format, thus easier to use in literate programming.
+```{r}
+
+```
+
+If we save the tidied output (just this once…), we can put it directly into the text of the .Rmd file.
+```{r}
+
+```
+
+See? 
+
+> The $\beta$ value of this correlation is `r round(tidy.cor$estimate,3)` using the `r tidy.cor$method` method of analysis.
