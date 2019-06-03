@@ -41,6 +41,9 @@ Download course materials from [here](https://github.com/VerbingNouns/...).
 data <- read_csv("../data/simulated-data.csv")
 ```
 
+```{r}
+head(data)
+```
 
 ### The Ten Commandments of Statistical Inference
 
@@ -145,7 +148,3 @@ Do model comparison to assess the contribution of each of the factors to the ove
 ```{r}
 
 ```
-
-
-
- bit.ly/-----------
