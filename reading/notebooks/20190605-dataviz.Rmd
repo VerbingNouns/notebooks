@@ -4,10 +4,14 @@ author: "Dr Lauren M Ackerman"
 date: "05 JUN 2019"
 output:
   html_notebook:
-    toc: false
-    theme: yeti
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
     highlight: default
-    number_sections: false
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -30,21 +34,285 @@ knitr::opts_chunk$set(echo = TRUE)
 #    - dummy coding vs contrast coding
 #    - interpreting the output
 ```
+[⇠ Day 2](20190604-tidyverse.html) || [Day 4 ⇢](20190606-stats.html)
 
-Download course materials from [here](https://github.com/VerbingNouns/...).
+Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-201906) *after 2nd June*.
 
- bit.ly/-----------
- 
-## Basic ggplot2 {.tabset .tabset-pills}
+[**bit.ly/RforLinguists-201906**](http://bit.ly/RforLinguists-201906)
 
+You will need these datasets today:
+
+1. [binomial-data.csv](ExampleProject/data/binomial-data.csv)
+
+You may also need to install the package `ggbeeswarm`:
+```{r}
+install.packages("ggbeeswarm")
+```
+
+Load in today's libraries.
 ```{r}
 # https://bookdown.org/ndphillips/YaRrr/pirateplot.html
 library(tidyverse)
-install.packages("ggbeeswarm")
 library(ggbeeswarm)
 ```
 
-### Exploration
+# Plotting in base R
+
+I think it's good to know how to do it, but for most purposes, `ggplot2` will be easier and more powerful.
+
+## Scatter plots
+
+Plot the geocoordinates of `quakes`:
+```{r}
+plot(quakes$lat ~ quakes$long)
+```
+
+Change the colour and point character (pch):
+```{r}
+plot(quakes$lat ~ quakes$long, 
+     col="red", 
+     pch=3)
+```
+
+Change colour by longitude:
+```{r}
+plot(quakes$lat[quakes$long>175] ~ quakes$long[quakes$long>175], 
+     col="red", 
+     pch=3, 
+     xlim=c(160,190), 
+     ylim=c(-40,-10))
+points(quakes$lat[quakes$long<=175] ~ quakes$long[quakes$long<=175], 
+       col="blue", 
+       pch=4)
+```
+
+Change axis labels and add a vertical line to show the split:
+```{r}
+plot(quakes$lat[quakes$long>175] ~ quakes$long[quakes$long>175], 
+     col="red", 
+     pch=3, 
+     xlim=c(160,190), 
+     ylim=c(-40,-10),
+     xlab="longitude",
+     ylab="latitude",
+     main="`quakes` dataset")
+points(quakes$lat[quakes$long<=175] ~ quakes$long[quakes$long<=175], 
+       col="blue", 
+       pch=4)
+abline(v=175,col="green4",lty="dashed")
+```
+
+## Box plots
+
+Here we can visualise the distribution of `sleep` results for groups 1 and 2. We can use the same extra parameters as before to clean it up, too.
+```{r}
+boxplot(sleep$extra ~ sleep$group, 
+        col=c("red","blue"),
+        xlab="group",
+        ylab="extra hours of sleep",
+        main="`sleep` dataset")
+```
+
+We can add the parameter `notch` to indicate where the bulk of the data are located, and are intended to give a visual estimate if the distributions overlap little enough to estimate that they are distinct populations.
+```{r}
+boxplot(sleep$extra ~ sleep$group, 
+        col=c("red","blue"),
+        xlab="group",
+        ylab="extra hours of sleep",
+        main="`sleep` dataset",
+        notch=TRUE)
+```
+
+But how many data points go into these graphs? Not enough to prevent "hinges" from being larger than the actual interquartile ranges. And where *are* the points?
+
+```{r}
+boxplot(sleep$extra ~ sleep$group, 
+        col=c("red","blue"),
+        xlab="group",
+        ylab="extra hours of sleep",
+        main="`sleep` dataset",
+        notch=TRUE)
+points(sleep$extra ~ sleep$group)
+```
+
+So we get a decent view of how these groups are distributed, but we can do better.
+
+## When to use base R graphics
+
+The only times I personally use base R to plot things now is when I only want to take a very quick peek at a scatter plot or if I want to use one of the built-in visualisations of regressions (e.g., `qqplot`, which you should now be able to explore on your own!)
+
+# Components of a ggplot
+
+We build up plots in `ggplot2` starting with a base and slowly adding different geometries and properties, using a similar logic to how we added the annotation line to a scatterplot in base R. However, `ggplot` gives us a much more powerful interface because it allows us to do calculations during plotting and remember certain parameters *between* different layers of the plot.
+
+## Base plot
+
+The base plot by itself doesn't look like much, but it already shows us that there's a lot going on.
+```{r}
+ggplot(data=quakes,aes(x=long,y=lat))
+```
+
+Plus it just looks sleeker. (And don't underestimate the power of pleasant-looking graphics!)
+
+One of the parameters of the base plot is `aes()`, which stands for "aesthetics". Aesthetics of the base plot are the attributes of the plot that should be inherited for all layers. This typically includes things like the x-axis, y-axis, any colour-coding by groups, etc. We'll come back to this in a few minutes.
+
+## Geometries
+
+In order to actually see our data, we have to tell R what kind of plot we want to make. Let's start with a scatterplot, i.e., points.
+```{r}
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_point()
+```
+
+Notice how we didn't have to specify anything within the parameters for `geom_point()`. This is because everything that it requires has been inherited from the base plot. We could also use different geometries.
+
+`geom_hex` can clearly demonstrate how ggplot does "calculations" during plotting:
+```{r}
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_hex()
+
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_bin2d()
+
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_count()
+
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_density2d()
+```
+
+We can try a few others out, but these plots aren't really designed to be informative for these kinds of data.
+```{r}
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_area()
+
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_col()
+
+ggplot(data=quakes,aes(x=long,y=lat)) +
+  geom_path()
+```
+
+Some plots don't need y aesthetics because they calculate y based on frequency in the input:
+```{r}
+ggplot(data=quakes,aes(x=long)) +
+  geom_density()
+
+ggplot(data=quakes,aes(x=long)) +
+  geom_freqpoly()
+
+ggplot(data=quakes,aes(x=long)) +
+  geom_histogram()
+```
+
+And some plots need (at least) one axis to not be continuous data, like `boxplot`.
+```{r}
+ggplot(data=quakes,aes(x=as.factor(mag),y=stations)) +
+  geom_boxplot()
+
+ggplot(sleep, aes(x=group,y=extra)) +
+  geom_boxplot()
+```
+
+### Refresher
+
+How would you use piping to plot only one island's worth of data?
+```{r}
+quakes %>% 
+  filter(long>175) %>% 
+  ggplot(aes(x=long,y=lat)) +
+  geom_hex()
+```
+
+## Aesthetics
+
+Now let's look at how we can use `aes()` to make our visualisations more informative and engaging.
+
+`sleep` has two groups, so let's plot a boxplot of `extra` with the two groups separated by colour.
+```{r}
+sleep %>% 
+  ggplot(aes(x=group,y=extra,fill=group)) +
+  geom_boxplot()
+```
+
+We could also use colour to differentiate between individuals in an interaction plot. Try it with and without colour.
+```{r}
+sleep %>% 
+  ggplot(aes(x=as.numeric(group),y=extra)) +
+  geom_path()
+
+sleep %>% 
+  ggplot(aes(x=as.numeric(group),y=extra,colour=ID)) +
+  geom_path()
+```
+
+We can see that actually having colour specified as a distinct aesthetic separates out each of the IDs into pairs of `extra` values rather than treating them as points that all must be connected to each other. Moreover, we don't *need* to specify what colours to use (although we could).
+
+## Axes
+
+We can add layers to change the axes of the plot, add and change the spacing of the ticks, and label things.
+```{r}
+quakes %>% 
+  ggplot(aes(x=as.factor(mag),y=stations)) +
+  geom_boxplot() +
+  scale_y_continuous(name = "number of stations reporting",
+                     breaks = seq(from=0, to=100, by=50),
+                     minor_breaks = seq(from=0, to=150, by=10),
+                     limits = c(0,150),
+                     position = "right") +
+  xlab("magnitude of the quake") +
+  ggtitle("Stations by magnitude")
+```
+
+What else would you like to do with this graph?
+```{r}
+# ?
+```
+
+## Themes
+
+What if you don't like having a grey background or you're going to use the plot on a slide with a black background and you want it to look slick?
+
+Try out different themes! (If we put `+ NULL` at the end, we can comment out any line of the graph without having to worry what comes next)
+```{r}
+quakes %>% 
+  ggplot(aes(x=as.factor(mag),y=stations)) +
+  geom_boxplot() +
+  scale_y_continuous(name = "number of stations reporting",
+                     breaks = seq(from=0, to=100, by=50),
+                     minor_breaks = seq(from=0, to=150, by=10),
+                     limits = c(0,150),
+                     position = "right") +
+  xlab("magnitude of the quake") +
+  ggtitle("Stations by magnitude") +
+  #theme_bw() +
+  #theme_classic() +
+  #theme_dark() +
+  #theme_light() +
+  #theme_minimal() +
+  #theme_test() +
+  #theme_void() +
+  theme() +
+  NULL
+```
+
+### Legends
+
+## Extras
+
+### Annotations
+
+### Error bars 
+
+## Beyond `tidyverse`
+
+### Beeswarm vs Violin
+
+### `plotly`
+
+### Pirate plots
+
+# Exploration
 
 Plot boxplots and violin plots for the ratings. Subset by participant.
 ```{r}
@@ -70,12 +338,12 @@ data %>%
   ylab("reading time (miliseconds)")
 ```
 
-#### Why? 
+## Why? 
 
 Well, check out the [Datasaurus Dozen](https://www.autodeskresearch.com/publications/samestats), which all have the same x/y means and standard deviations:
 ![](../images/datasaurus.gif)
 
-### Try it out
+## Try it out
 
 > Dataset `iris`:
 
