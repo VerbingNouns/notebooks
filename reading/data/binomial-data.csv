@@ -1,4 +1,4 @@
-﻿experiment,subject,item,condition,selection,selectCode
+experiment,subject,item,condition,selection,selectCode
 first,1,1,Baseline,Option 2,0
 first,1,2,Baseline,Option 1,1
 first,1,3,Baseline,Option 2,0
