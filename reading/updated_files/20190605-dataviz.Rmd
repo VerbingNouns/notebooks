@@ -1,0 +1,385 @@
+---
+title: "**Workshop**"
+author: "Dr Lauren M Ackerman"
+date: "05 JUN 2019"
+output:
+  html_notebook:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
+    highlight: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# 1. R and RStudio interfaces, RMarkdown, and best practices
+#    - Basic functionality, shortcuts, writing scripts and notebooks, organising files, interfacing with GitHub
+# 2. Data frame manipulation using Tidyverse
+#    - Piping syntax and code replicability
+#    - Tidyr, Dplyr, related packages
+#    - Cleaning, combining, and rearranging data frames
+# 3. Data visualisation using ggplot and best practices
+#    - Structure and syntax of ggplot and geom
+#    - Customising and combining plots
+#    - Determining what plot is best for your data
+# 4. Basic linear models without and with mixed effects (including gaussian, binomial, and ordinal)
+#    - building/selecting an appropriate model, including random effect structures
+#    - maximal vs parsimonious models
+#    - practical use of lm(), lmer(), glm(), glmer(), clmm()
+#    - dummy coding vs contrast coding
+#    - interpreting the output
+```
+[⇠ Day 2](20190604-tidyverse.html) || [Day 4 ⇢](20190606-stats.html)
+
+Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-201906) *after 2nd June*.
+
+[**bit.ly/RforLinguists-201906**](http://bit.ly/RforLinguists-201906)
+
+You will need these datasets today:
+
+1. [binomial-data.csv](../data/binomial-data.csv)
+2. [simulated-data.csv](../data/simulated-data.csv)
+
+You may also need to install the packages `ggbeeswarm` and `yarrr` (which comes with a [lovely tutorial](https://bookdown.org/ndphillips/YaRrr/)):
+```{r}
+install.packages("ggbeeswarm")
+install.packages("yarrr")
+```
+
+Load in today's libraries.
+```{r}
+# https://bookdown.org/ndphillips/YaRrr/pirateplot.html
+library(tidyverse)
+library(ggbeeswarm)
+library(yarrr)
+```
+
+# Why dataviz?
+
+If you don't know the shape of your data, you might not draw appropriate conclusions about the statistical tests you perform.
+
+Check out the [Datasaurus Dozen](https://www.autodeskresearch.com/publications/samestats), which all have the same x/y means and standard deviations:
+![](../images/datasaurus.gif)
+
+Dataviz is also engaging, communicative, creative, efficient, and fun.
+
+# Plotting in base R
+
+I think it's good to know how to do it, but for most purposes, `ggplot2` will be easier and more powerful.
+
+## Scatter plots
+
+Plot the geocoordinates of `quakes`:
+```{r}
+# plot( y ~ x )
+# plot( x, y )
+```
+
+Change the colour and point character (pch):
+```{r}
+
+```
+
+Change colour by longitude with a split at 175˚S:
+```{r}
+plot(••• ~ •••, 
+     col=•••, 
+     pch=•••, 
+     xlim=c(160,190), 
+     ylim=c(-40,-10))
+points(••• ~ •••, 
+       col=•••, 
+       pch=•••)
+```
+
+Change axis labels and add a vertical line to show the split:
+```{r}
+•••
+abline(v=•••,col=•••,lty="dashed")
+```
+
+## Box plots
+
+Here we can visualise the distribution of `sleep` results for groups 1 and 2. We can use the same extra parameters as before to clean it up, too.
+```{r}
+boxplot(••• ~ •••, 
+        col=c("red","blue"),
+        xlab="group",
+        ylab="extra hours of sleep",
+        main="`sleep` dataset")
+```
+
+We can add the parameter `notch` to indicate where the bulk of the data are located, and are intended to give a visual estimate if the distributions overlap little enough to estimate that they are distinct populations.
+```{r}
+
+```
+
+But how many data points go into these graphs? Not enough to prevent "hinges" from being larger than the actual interquartile ranges. And where *are* the points?
+
+```{r}
+
+```
+
+So we get a decent view of how these groups are distributed, but we can do better.
+
+## When to use base R graphics
+
+The only times I personally use base R to plot things now is when I only want to take a very quick peek at a scatter plot or if I want to use one of the built-in visualisations of regressions (e.g., `qqplot`, which you should now be able to explore on your own!)
+
+# Components of a ggplot
+
+We build up plots in `ggplot2` starting with a base and slowly adding different geometries and properties, using a similar logic to how we added the annotation line to a scatterplot in base R. However, `ggplot` gives us a much more powerful interface because it allows us to do calculations during plotting and remember certain parameters *between* different layers of the plot.
+
+## Base plot
+
+The base plot by itself doesn't look like much, but it already shows us that there's a lot going on.
+```{r}
+
+```
+
+Plus it just looks sleeker. (And don't underestimate the power of pleasant-looking graphics!)
+
+One of the parameters of the base plot is `aes()`, which stands for "aesthetics". Aesthetics of the base plot are the attributes of the plot that should be inherited for all layers. This typically includes things like the x-axis, y-axis, any colour-coding by groups, etc. We'll come back to this in a few minutes.
+
+## Geometries
+
+In order to actually see our data, we have to tell R what kind of plot we want to make. Let's start with a scatterplot, i.e., points.
+```{r}
+
+```
+
+Notice how we didn't have to specify anything within the parameters for `geom_point()`. This is because everything that it requires has been inherited from the base plot. We could also use different geometries.
+
+`geom_hex` can clearly demonstrate how ggplot does "calculations" during plotting:
+```{r}
+
+```
+
+We can try a few others out, but these plots aren't really designed to be informative for these kinds of data.
+```{r}
+
+```
+
+Some plots don't need y aesthetics because they calculate y based on frequency in the input:
+```{r}
+
+```
+
+And some plots need (at least) one axis to not be continuous data, like `boxplot`.
+```{r}
+
+```
+
+### Refresher
+
+How would you use piping to plot only one island's worth of data?
+```{r}
+
+```
+
+## Aesthetics
+
+Now let's look at how we can use `aes()` to make our visualisations more informative and engaging.
+
+`sleep` has two groups, so let's plot a boxplot of `extra` with the two groups separated by colour.
+```{r}
+
+```
+
+We could also use colour to differentiate between individuals in an interaction plot. Try it with and without colour.
+```{r}
+
+```
+
+We can see that actually having colour specified as a distinct aesthetic separates out each of the IDs into pairs of `extra` values rather than treating them as points that all must be connected to each other. Moreover, we don't *need* to specify what colours to use (although we could).
+
+## Axes
+
+We can add layers to change the axes of the plot, add and change the spacing of the ticks, and label things.
+```{r}
+
+```
+
+What else would you like to do with this graph?
+```{r}
+# ?
+```
+
+## Themes
+
+What if you don't like having a grey background or you're going to use the plot on a slide with a black background and you want it to look slick?
+
+Try out different themes! (If we put `+ NULL` at the end, we can comment out any line of the graph without having to worry what comes next)
+```{r}
+quakes %>% 
+  ••• +
+  #theme_bw() +
+  #theme_classic() +
+  #theme_dark() +
+  #theme_light() +
+  #theme_minimal() +
+  #theme_test() +
+  #theme_void() +
+  #theme() +
+  NULL
+```
+
+## Error bars 
+
+If we generate summaries of our data, we can calculate standard errors and plot error bars.
+
+Let's put error bars on `quakes` after calculating the means and standard errors. Then let's try to make the ribbon defined by the standard deviation.
+```{r}
+
+```
+
+## Bar plots
+
+For bar plots, I recommend using summarised data. R can calculate certain things on its own (and there are ways to do any calculation you need using `ggplot2`), but for now this is my recommendation.
+
+Plot means and standard errors of stations reporting for the range of magnitudes, and fill the bars with a continuous colour scale to indicate the number of observations per bar.
+```{r}
+
+```
+
+# Beyond the `tidyverse`
+
+There are lots of really fantastic packages for plotting that aren't part of tidyverse or are add-ons that are part of the default offerings of `ggplot2`.
+
+## Beeswarm vs Violin
+
+Beeswarm plots are good for categorical data when you want to see the actual values of the points in each category.
+
+```{r}
+
+```
+
+## Pirate plots
+
+Pirate plots do this sort of graph natively.
+```{r}
+install.packages("yarrr")
+library(yarrr)
+```
+
+We can use code copied from the tutorial.
+```{r}
+pirateplot(formula = stations ~ mag, # dv is stations, iv is magnitude
+           data = quakes,
+           main = "Pirateplot of stations reporting earthquakes",
+           xlab = "magnitude",
+           ylab = "stations",
+           theme = 1)
+```
+
+## Raincloud plots
+
+Originally from [here](https://micahallen.org/2018/03/15/introducing-raincloud-plots/).
+```{r}
+source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
+raincloud_theme <- theme(
+  text = element_text(size = 10),
+  axis.title.x = element_text(size = 16),
+  axis.title.y = element_text(size = 16),
+  axis.text = element_text(size = 14),
+  axis.text.x = element_text(angle = 45, vjust = 0.5),
+  legend.title = element_text(size = 16),
+  legend.text = element_text(size = 16),
+  legend.position = "right",
+  plot.title = element_text(lineheight = .8, face = "bold", size = 16),
+  panel.border = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.grid.major = element_blank(),
+  axis.line.x = element_line(colour = "black", size = 0.5, linetype = "solid"),
+  axis.line.y = element_line(colour = "black", size = 0.5, linetype = "solid"))
+```
+
+Adapted from [Tidy Raincloud Plot](https://orchid00.github.io/tidy_raincloudplot) tutorial:
+```{r}
+
+```
+
+
+# Exploration
+
+> Dataset `simulated-data.csv`
+
+## Structure of the dataset
+
+Using `str`, examine the dataset.
+```{r}
+
+```
+
+Check out the first few rows using `head`.
+```{r}
+
+```
+
+## Plot the data
+
+Plot boxplots and violin plots for the ratings. Subset by participant.
+```{r}
+
+```
+
+Group by region, word, frequency, and grammaticality. Summarise mean and standard error.
+```{r}
+
+```
+
+
+## Bonus: Sandbox
+
+> Dataset `iris`
+
+The function `ggplot` layers different geometries and aesthetics to build up a plot:
+```{r}
+iris %>%
+  mutate(Sepal.Width = Sepal.Width+rnorm(length(Sepal.Width),0,.1))%>%
+  ggplot(aes(x=Species,y=Sepal.Width,fill=Species)) +
+  geom_violin(lty=0,alpha=.5)+
+  geom_boxplot(alpha=0.5,lwd=.5) +
+  geom_quasirandom(dodge.width=1, alpha=.5)
+```
+
+In what ways might we change this plot?
+```{r}
+
+```
+
+### Inheritance
+
+We can layer two different plots in the same graph by keeping some of the aesthetics undefined in the base plot.
+
+Going back to `quakes`, let's pipe a summary table into ggplot that provides means, standard deviations, and standard errors for both depth and stations reporting, grouped by magnitude. In the graph, plot the means as a path (and points), the standard error as a more opaque ribbon and standard deviation as a more transparent ribbon:
+```{r}
+quakes %>%
+  group_by(•••) %>%
+  summarise(n=•••,
+            sta=•••,
+            staSD=•••,
+            staSE=•••,
+            dep=•••,
+            depSD=•••,
+            depSE=•••) %>%
+  ggplot(aes(x=•••)) +
+  geom_point(aes(y=•••),colour="red")+
+  geom_path(aes(y=•••),colour="red")+
+  geom_ribbon(aes(ymin=•••-•••,ymax=•••+•••),fill="red",alpha=•••) +
+  geom_ribbon(aes(ymin=•••-•••,ymax=•••+•••),fill="red",alpha=•••) +
+  geom_point(aes(y=•••),colour="blue")+
+  geom_path(aes(y=•••),colour="blue")+
+  geom_ribbon(aes(ymin=•••-•••,ymax=•••+•••),fill="blue",alpha=•••) +
+  geom_ribbon(aes(ymin=•••-•••,ymax=•••+•••),fill="blue",alpha=•••) +
+  theme_bw() + ylab("depth OR number of stations reporting")
+```
+
+### Your pick
+
+What kind of graphs do you use most in your research? Can we simulate data as a group and learn to plot it in a few different ways?
