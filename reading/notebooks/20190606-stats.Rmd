@@ -4,10 +4,14 @@ author: "Dr Lauren M Ackerman"
 date: "06 JUN 2019"
 output:
   html_notebook:
-    toc: false
-    theme: yeti
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
     highlight: default
-    number_sections: false
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -36,27 +40,60 @@ Download course materials (.zip file) from [here](http://bit.ly/20190606-updates
 
 [**bit.ly/20190606-updates**](http://bit.ly/20190606-updates)
 
-## Storytelling with data {.tabset}
-
-> See **Simulated Data** notebook
-
 ```{r}
-data <- read_csv("../data/simulated-data.csv")
+library(lme4)
+library(tidyverse)
 ```
 
+# Storytelling with data
+
+The point of conducting statistical analysis is to find support (or lack of support) for the story you are trying to tell. Statistics without a story (or alternate story) isn't useful.
+
+![](../images/lmer.jpg)
+<small>Bodo Winter telling it like it is. (Photo credit: Adam Schembri 27/02/2019)</small>
+
+The [**Simulated Data**](simulated-data.html) notebook creates realistic-looking fake data that could tell a story about reading times. Let's take a look at the data so we can understand what the possible stories (=hypotheses) are.
+
+Read in the simulated dataset as `data`…
 ```{r}
-head(data)
+data <- read.csv("../data/simulated-data.csv", as.is = TRUE)
 ```
 
-### The Ten Commandments of Statistical Inference
+…and take a look at its structure.
+```{r}
+
+```
+
+## The Ten Statistical Commandments
+
+**NB**: statistical analysis is not the be-all end-all of science! Statistics is a branch of mathematics and is *highly* susceptible to falsification, similarly to many other braches of science. We must treat it with respect, as we are (presumably) not statisticians. We're using their discipline as a tool to understand our own. That doesn't mean we can't do it justice (I hope we can!), but it means we should tread lightly and be kind to one another.
 
 ![](../images/10stats.jpg)
 
-### Continuous data
+## Linear models
 
-```{r}
-library(lme4)
-```
+Check out Lisa DeBruine and Dale Barr's resources [here](https://psyarxiv.com/xp5cy).
+
+Components of a linear regression:
+
+$$y=\beta_0 + \beta_1 x_i + \varepsilon$$
+
+* intercept
+* slope
+* error
+
+Practical components of a linear regression analysis:
+
+$$DV \sim IV1 + IV2 + IV1:IV2 + (1+R_{slope} | R_{intercept}) $$
+
+* dependent variable (DV)
+* independent variables (IVs)
+* random effects (slopes, intercepts)
+* main effects (+)
+* interaction effects (:)
+    - combination of main and interaction effects (*)
+
+# Continuous data
 
 Build a simple linear model to examine region 3 (the verb):
 ```{r}
@@ -74,8 +111,7 @@ Add in mixed effects for a linear mixed effects model:
 summary(lmer(rt ~ freq+gram+freq:gram+age + (1|subj) + (1|item),data %>% filter(region==3)))
 ```
 
-![](../images/lmer.jpg)
-<small>Bodo Winter telling it like it is. (Photo credit: Adam Schembri 27/02/2019)</small>
+
 
 We should do model comparison to assess the contribution of each of the factors to the overall fit. But, read the Bates et al and Barr et al papers for an overview of the debates around how to design and test models.
 
@@ -101,7 +137,7 @@ How do regions 4 and 5 compare?:
 
 ```
 
-### Ordinal data
+# Ordinal data 
 
 First, how could we go about using `lmer` for rating data?
 ```{r}
@@ -109,7 +145,7 @@ mdl.ord <- lmer(rating ~ freq*gram + (1|subj), data%>%filter(region==1))
 summary(mdl.ord)
 ```
 
-#### Better ordinal data
+## Better ordinal data
 
 ```{r}
 library(ordinal)
@@ -121,9 +157,59 @@ mdl.ord.clmm <- clmm(as.factor(rating) ~ freq*gram + age + (1|subj), data%>%filt
 summary(mdl.ord.clmm)
 ```
 
-> See **visualising_ordinal_data.R** for Predicted Curves script
+## Visualising ordinal data
 
-### Binomial data
+> See [**visualising_ordinal_data.R**](visualising_ordinal_data.R) for Predicted Curves script
+
+```{r}
+# Script written by Lauren M Ackerman
+# 26 February 2019
+# Contact: l.m.ackerman AT gmail DOT com
+# Adapted from Jalal Al-Tamimi
+
+clmm.max <- clmm(as.factor(rating) ~ interaction(freq,gram) + (1 | subj) + (1 | item),
+                 data = data[data$region == 1,]) # ordinal regression with INTERACTION BUILT INTO MAIN EFFECT
+
+vlines <- c(0, # intercept, interaction(freq, gram)high.no
+            clmm.max$beta[[1]], # interaction(freq, gram)low.no
+            clmm.max$beta[[2]], # interaction(freq, gram)high.yes
+            clmm.max$beta[[3]]) # interaction(freq, gram)low.yes
+xaxis <- seq(min(vlines-.5), max(vlines+.5), length.out = 100) # create 100 steps
+yaxis <- rep(c(0,1),50) # fill in 0s and 1s for y-axis
+colors <- c("one" = "red",
+            "two" = "orange",
+            "three" = "green",
+            "four" = "blue",
+            "five" = "purple") # establish the colour-rating level correspondence
+
+tibble(xaxis,yaxis) %>% # baseline tibble for plot dimensions
+  mutate(one=  plogis(clmm.max$Theta[1] - xaxis), # add column for rating levels (must be adapted for larger scales)
+         two=  plogis(clmm.max$Theta[2] - xaxis) - plogis(clmm.max$Theta[1] - xaxis),
+         three=plogis(clmm.max$Theta[3] - xaxis) - plogis(clmm.max$Theta[2] - xaxis),
+         four= plogis(clmm.max$Theta[4] - xaxis) - plogis(clmm.max$Theta[3] - xaxis),
+         five= 1 - (plogis(clmm.max$Theta[4] - xaxis))) %>%
+  gather(rating,probability,3:7) %>% # make long data
+  mutate(rating=factor(rating,levels=c("one","two","three","four","five"))) %>% # make factor and relevel
+  ggplot(aes(x=xaxis,y=yaxis)) + # set up ggplot
+  geom_hline(yintercept=0,lty="dotted") + # add lower horizontal line
+  geom_hline(yintercept=1,lty="dotted") + # add upper horizontal line
+  geom_line(aes(y=probability,colour=rating),lwd=1) + # add predicted curves
+  annotate("segment", # type of annotation = line segments
+           x=vlines, y=0, xend=vlines, yend=1, # add estimates
+           lty="solid", alpha=.75) + # visual properties of vertical lines
+  annotate("text", # type of annotation = text
+           x=vlines,y=.75, # location of labels
+           label=c("high-no","low-no","high-yes","low-yes"), # label names aligned with vlines[1:4]
+           angle=90,vjust=-0.2) + # visual properties of text labels
+  scale_x_continuous(breaks=c(min(xaxis-.5),max(xaxis+.5))) + # expand x axis horizontally
+  scale_y_continuous(breaks=c(0,.25,.5,.75,1)) + # expand y axis with consistent breaks
+  ylab("Probability") + xlab("") + ggtitle("Predicted curves") + # label plot properties
+  scale_colour_manual(values = colors) + # apply colours manually
+  theme_bw() # improve visibility with white background
+```
+
+
+# Binomial data
 
 ```{r}
 data %>%

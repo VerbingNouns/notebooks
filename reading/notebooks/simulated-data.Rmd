@@ -3,9 +3,14 @@ title: "**Simulated data**"
 author: "Dr Lauren M Ackerman"
 date: "28 FEB 2019"
 output:
-  html_notebook:
+  html_document:
     toc: false
-    theme: yeti
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
     highlight: default
 ---
 
@@ -14,7 +19,7 @@ library(lme4)
 library(tidyverse)
 ```
 
-# Fake Experiment {.tabset}
+# Fake Experiment
 
 Kinds of data:
 
