@@ -36,9 +36,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 [⇠ Day 2](20190604-tidyverse.html) || [Day 4 ⇢](20190606-stats.html)
 
-Download course materials (.zip file) from [here](http://bit.ly/RforLinguists-201906) *after 2nd June*.
+Download course materials (.zip file) from [here](http://bit.ly/20190605-updates) *after 4th June*.
 
-[**bit.ly/RforLinguists-201906**](http://bit.ly/RforLinguists-201906)
+[**bit.ly/20190605-updates**](http://bit.ly/20190605-updates)
 
 You will need these datasets today:
 
