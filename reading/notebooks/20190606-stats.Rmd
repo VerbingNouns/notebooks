@@ -1,5 +1,5 @@
 ---
-title: "**Workshop**"
+title: "**Statistics**"
 author: "Dr Lauren M Ackerman"
 date: "06 JUN 2019"
 output:
@@ -30,8 +30,11 @@ knitr::opts_chunk$set(echo = TRUE)
 #    - dummy coding vs contrast coding
 #    - interpreting the output
 ```
+[⇠ Day 3](20190605-dataviz.html)
 
-Download course materials from [here](https://github.com/VerbingNouns/...).
+Download course materials (.zip file) from [here](http://bit.ly/20190606-updates) *after 5th June*.
+
+[**bit.ly/20190606-updates**](http://bit.ly/20190606-updates)
 
 ## Storytelling with data {.tabset}
 

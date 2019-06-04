@@ -1,5 +1,5 @@
 ---
-title: "**Workshop**"
+title: "**Dataviz**"
 author: "Dr Lauren M Ackerman"
 date: "05 JUN 2019"
 output:
