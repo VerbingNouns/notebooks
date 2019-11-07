@@ -1,0 +1,201 @@
+---
+title: "UCU Ballots 2019"
+author: "Dr Lauren M Ackerman"
+date: "10/31/2019"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+---
+[🔙 Home](https://verbingnouns.github.io/notebooks/)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set up
+
+```{r}
+library(tidyverse)
+
+ucu <- read.csv("data/UCU-ballot2019.csv", as.is=TRUE)
+```
+
+```{r}
+ucu %>% str
+```
+
+
+# Plot
+
+```{r}
+ucu %>% 
+  filter(Ballot=="USS-strike") %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  ggplot(aes(x=reorder(Region,-pcYes),y=pcYes,fill=threshold)) +
+    geom_bar(stat="identity") +
+    #facet_wrap(~Ballot) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    geom_hline(yintercept = 50,lty="dashed",alpha=.5) +
+    ylab("% Yes") +
+    xlab("") +
+  ggtitle("Percent of YES votes cast in the USS ballot for strike action") +
+    NULL
+```
+
+```{r}
+ucu %>% 
+  filter(Ballot=="USS-asos") %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  ggplot(aes(x=reorder(Region,-pcYes),y=pcYes,fill=threshold)) +
+    geom_bar(stat="identity") +
+    #facet_wrap(~Ballot) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    geom_hline(yintercept = 50,lty="dashed",alpha=.5) +
+    ylab("% Yes") +
+    xlab("") +
+  ggtitle("Percent of YES votes cast in the USS ballot for action short of strike") +
+    NULL
+```
+
+```{r}
+ucu %>% 
+  filter(Ballot=="PayWork-strike") %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  ggplot(aes(x=reorder(Region,-pcYes),y=pcYes,fill=threshold)) +
+    geom_bar(stat="identity") +
+    #facet_wrap(~Ballot) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    geom_hline(yintercept = 50,lty="dashed",alpha=.5) +
+    ylab("% Yes") +
+    xlab("") +
+  ggtitle("Percent of YES votes cast in the Pay/Work ballot for strike action") +
+    NULL
+```
+
+```{r}
+ucu %>% 
+  filter(Ballot=="PayWork-asos") %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  ggplot(aes(x=reorder(Region,-pcYes),y=pcYes,fill=threshold)) +
+    geom_bar(stat="identity") +
+    #facet_wrap(~Ballot) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    geom_hline(yintercept = 50,lty="dashed",alpha=.5) +
+    ylab("% Yes") +
+    xlab("") +
+  ggtitle("Percent of YES votes cast in the Pay/Work ballot for action short of strike") +
+    NULL
+```
+
+
+# Community
+
+```{r}
+ucu %>% 
+  filter(Ballot=="PayWork-strike") %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  ggplot(aes(x=reorder(Region,-Mailedout),y=pcYes,fill=threshold)) +
+    geom_bar(stat="identity") +
+    #facet_wrap(~Ballot) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    geom_hline(yintercept = 50,lty="dashed",alpha=.5) +
+    ylab("% Yes (Pay/Work-strike)") +
+    xlab("Ordered by total # of ballots mailed out, from most to fewest") +
+  ggtitle("Community builds support: More membership = More likely to meet the threshold") +
+    NULL
+```
+
+# Overlap
+
+```{r}
+uss <- unique(ucu$Region[ucu$Ballot=="USS-strike"])
+pw <-  unique(ucu$Region[ucu$Ballot=="PayWork-strike"])
+
+ucu %>% 
+  filter(Ballot=="PayWork-strike" | Ballot=="USS-strike") %>% 
+  filter(Region %in% uss,
+         Region %in% pw) %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  ggplot(aes(x=Ballot,y=pcTurnout,color=threshold, group=Region)) +
+    stat_summary(fun.y = identity, geom = "point") +
+    stat_summary(fun.y = identity, geom = "line") +
+  facet_wrap(~threshold) +
+  ylab("% Turnout") +
+  ggtitle("Universities that met threshold voted more favorably for anti-precarity") +
+  theme_bw() +
+    NULL
+```
+
+```{r}
+uss <- unique(ucu$Region[ucu$Ballot=="USS-strike"])
+pw <-  unique(ucu$Region[ucu$Ballot=="PayWork-strike"])
+
+ucu %>% 
+  filter(Ballot=="PayWork-strike" | Ballot=="USS-strike") %>% 
+  filter(Region %in% uss,
+         Region %in% pw) %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  group_by(Ballot, threshold) %>% 
+  summarise(n = n(),
+            meanYes = mean(pcYes),
+            meanTurnout = mean(pcTurnout),
+            sdYes = sd(pcYes),
+            sdTurnout = sd(pcTurnout),
+            seTurnout = sdTurnout/sqrt(n)) %>% 
+  ggplot(aes(x=Ballot,y=meanTurnout,color=threshold,group=threshold)) +
+    stat_summary(fun.y = identity, geom = "point") +
+    stat_summary(fun.y = identity, geom = "line") +
+  geom_errorbar(aes(ymin=meanTurnout-seTurnout,ymax=meanTurnout+seTurnout),width=.1)+
+  ylab("% Turnout") +
+  ggtitle("Mean % Turnout for Unis that did and didn't meet the threshold (SE)") +
+  theme_bw() +
+    NULL
+```
+
+```{r}
+uss <- unique(ucu$Region[ucu$Ballot=="USS-strike"])
+pw <-  unique(ucu$Region[ucu$Ballot=="PayWork-strike"])
+
+ucu %>% 
+  filter(Ballot=="PayWork-strike" | Ballot=="USS-strike") %>% 
+  filter(Region %in% uss,
+         Region %in% pw) %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) %>% 
+  group_by(Ballot, threshold) %>% 
+  summarise(meanYes = mean(pcYes),
+            nYes = n(),
+            sdYes = sd(pcYes),
+            seYes = sdYes/sqrt(nYes)) %>% 
+  ggplot(aes(x=Ballot,y=meanYes,color=threshold,group=threshold)) +
+    stat_summary(fun.y = identity, geom = "point") +
+    stat_summary(fun.y = identity, geom = "line") +
+  geom_errorbar(aes(ymin=meanYes-seYes,ymax=meanYes+seYes),width=.1)+
+  ylab("% Yes") +
+  theme_bw() +
+    NULL
+```
+
+# stats
+
+```{r}
+uss <- unique(ucu$Region[ucu$Ballot=="USS-strike"])
+pw <-  unique(ucu$Region[ucu$Ballot=="PayWork-strike"])
+
+ucu %>% 
+  filter(Ballot=="PayWork-strike" | Ballot=="USS-strike") %>% 
+  filter(Region %in% uss,
+         Region %in% pw) %>% 
+  mutate(threshold = case_when(pcTurnout >= 50 ~ "over", TRUE ~ "under")) -> data
+
+lme4::lmer(pcYes ~ Ballot*threshold+(1|Region),data) %>% summary
+lme4::lmer(pcTurnout ~ Ballot*threshold+(1|Region),data) %>% summary
+```
+
