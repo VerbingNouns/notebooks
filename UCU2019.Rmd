@@ -199,3 +199,23 @@ lme4::lmer(pcYes ~ Ballot*threshold+(1|Region),data) %>% summary
 lme4::lmer(pcTurnout ~ Ballot*threshold+(1|Region),data) %>% summary
 ```
 
+# Newcastle
+
+```{r}
+ucu %>% 
+  filter(Region=="Newcastle University") %>% 
+  separate(Ballot, into = c("Ballot","Action")) %>% 
+  ggplot(aes(x=Ballot,y=pcYes,fill=Action)) +
+    geom_bar(stat="identity", position = "dodge") +
+    #facet_wrap(~Ballot) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 0, hjust = .5, vjust = 0)) +
+    geom_hline(yintercept = 50,lty="dashed",alpha=.5,colour="white") +
+    ylab("% Yes") +
+    xlab("Ballot initiative") +
+  ggtitle("Percent of YES votes cast",subtitle = "at Newcastle University") +
+  scale_fill_manual("legend", values = c("asos" = "magenta", "strike" = "navy")) +
+  ylim(0,100) +
+    NULL
+```
+
