@@ -1,0 +1,562 @@
+---
+title: "UCU Ballots 2020"
+author: "Dr Lauren M Ackerman"
+date: "03/03/2020"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+---
+[🔙 Home](https://verbingnouns.github.io/notebooks/)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set up
+
+```{r libraries}
+library(tidyverse)
+library(ggchicklet)
+library(gganimate)
+```
+
+# Known stats
+```{r assignments}
+fixed_term_NCL <- .41
+fixed_term_all <- .33
+job_ads_TSft_NCL <- 230
+job_ads_TR_NCL <- 85
+employees_NCL_TSft <- .73
+employees_NCL_TSoe <- .20
+
+data <- read_csv("data/UCU-hesa-table-7.csv",
+                 col_names = TRUE,
+                 comment = "#")
+tbl13 <- read_csv("data/UCU-hesa-table-13.csv",
+                 col_names = TRUE,
+                 comment = "#") %>% 
+  mutate(`Contract salary (adjusted)` = case_when(`Contract salary` == "Contract salary < £18,031" ~               "Grade D",
+                                                  `Contract salary` == "Contract salary ≥ £18,031 and < £24,057" ~ "Grade E",
+                                                  `Contract salary` == "Contract salary ≥ £24,057 and < £32,277" ~ "Grade F",
+                                                  `Contract salary` == "Contract salary ≥ £32,277 and < £43,325" ~ "Grade G",
+                                                  `Contract salary` == "Contract salary ≥ £43,325 and < £58,172" ~ "Grade H",
+                                                  `Contract salary` == "Contract salary ≥ £58,172" ~               "Grade I",
+                                                  `Contract salary` == "Contract salary < £18,211" ~               "Grade D",
+                                                  `Contract salary` == "Contract salary ≥ £18,211 and < £24,298" ~ "Grade E",
+                                                  `Contract salary` == "Contract salary ≥ £24,298 and < £32,600" ~ "Grade F",
+                                                  `Contract salary` == "Contract salary ≥ £32,600 and < £43,758" ~ "Grade G",
+                                                  `Contract salary` == "Contract salary ≥ £43,758 and < £58,754" ~ "Grade H",
+                                                  `Contract salary` == "Contract salary ≥ £58,754" ~               "Grade I",
+                                                  `Contract salary` == "Contract salary < £18,412" ~               "Grade D",
+                                                  `Contract salary` == "Contract salary ≥ £18,412 and < £24,565" ~ "Grade E",
+                                                  `Contract salary` == "Contract salary ≥ £24,565 and < £32,958" ~ "Grade F",
+                                                  `Contract salary` == "Contract salary ≥ £32,958 and < £44,240" ~ "Grade G",
+                                                  `Contract salary` == "Contract salary ≥ £44,240 and < £59,400" ~ "Grade H",
+                                                  `Contract salary` == "Contract salary ≥ £59,400" ~               "Grade I",
+                                                  `Contract salary` == "Contract salary < £18,777" ~               "Grade D",
+                                                  `Contract salary` == "Contract salary ≥ £18,777 and < £24,983" ~ "Grade E",
+                                                  `Contract salary` == "Contract salary ≥ £24,983 and < £33,518" ~ "Grade F",
+                                                  `Contract salary` == "Contract salary ≥ £33,518 and < £44,992" ~ "Grade G",
+                                                  `Contract salary` == "Contract salary ≥ £44,992 and < £60,410" ~ "Grade H",
+                                                  `Contract salary` == "Contract salary ≥ £60,410" ~               "Grade I",
+                                                  `Contract salary` == "Contract salary < £19,202" ~               "Grade D",
+                                                  `Contract salary` == "Contract salary ≥ £19,202 and < £25,482" ~ "Grade E",
+                                                  `Contract salary` == "Contract salary ≥ £25,482 and < £34,189" ~ "Grade F",
+                                                  `Contract salary` == "Contract salary ≥ £34,189 and < £45,892" ~ "Grade G",
+                                                  `Contract salary` == "Contract salary ≥ £45,892 and < £61,618" ~ "Grade H",
+                                                  `Contract salary` == "Contract salary ≥ £61,618" ~               "Grade I"))
+```
+
+# Table 13 Plots
+
+```{r}
+head(tbl13)
+unique(tbl13$`Category marker`)
+unique(tbl13$`Category`[tbl13$`Category marker`=="Cost centre group"])
+unique(tbl13$`Category`[tbl13$`Category marker`=="Cost centre"])
+unique(tbl13$`Academic employment function`)
+unique(tbl13$`Contract levels`)
+unique(tbl13$Sex)
+unique(tbl13$`Academic Year`)
+unique(tbl13$`Contract salary`)
+```
+
+```{r}
+tbl13 %>% 
+  filter(`Category marker`=="Cost centre",
+         Category == "Total all cost centres", # "Total academic cost centres"... and others
+         `Academic employment function` != "All",
+         `Contract levels` == "All",
+         Sex == "Male" | Sex == "Female",
+         `Contract salary` != "Total") %>% 
+  ggplot(aes(x=`Contract salary (adjusted)`, y=Number, fill=`Sex`)) +
+  geom_bar(stat = "identity", position="dodge") +
+  #facet_wrap(~`Academic Year`) +
+  scale_fill_discrete(guide=FALSE) +
+  scale_y_log10() +
+  coord_flip() +
+  ggtitle('Academic Year: {closest_state}') +
+  facet_wrap(~`Academic employment function`) +
+  transition_states(`Academic Year`,
+                    transition_length = 1,
+                    state_length = 3)
+```
+
+
+
+
+```{r}
+data %>% 
+  filter(`HE provider`=="Newcastle University"),
+         `Academic Year`=="2018/19",
+         `Category Marker`=="Terms of employment",
+         `Activity standard occupational classification`=="All",
+         `Country of HE provider`=="All",
+         `Region of HE provider`=="All"
+`
+unique(data$`Category Marker`)
+``
+
+
+
+
+
+
+
+
+# Table 7 Plots
+
+```{r ft-academics}
+tibble(fixed_term_all,fixed_term_NCL) %>% 
+  pivot_longer(names_to = "fixed_term",
+               values_to = "percent",
+               cols = c(1:2)) %>% 
+  mutate(fixed_term = case_when(fixed_term == "fixed_term_all" ~ "Sector-wide",
+                                fixed_term == "fixed_term_NCL" ~ "Newcastle U.")) %>% 
+  ggplot(aes(x=fixed_term,y=percent,fill=fixed_term, colour=NULL)) +
+  geom_chicklet(radius = grid::unit(1, 'mm')) +
+  geom_bar(stat="identity",
+           aes(x=fixed_term, y=percent-.1, fill=fixed_term),
+           width = .88) +
+  scale_y_continuous(labels = scales::percent_format(),
+                     limits = c(0,1)) +
+  annotate(geom = "text", x = 1.01:2.01, y = c(.1,.1), 
+           label=c("41%","33%"),
+           size=5,
+           colour="white") +
+  scale_fill_manual(values = c("violetred2","mediumpurple4"),
+                    guide = FALSE) + #darkorchid4; purple4
+  scale_colour_manual(values = c("violetred2","mediumpurple4"),
+                    guide = FALSE) +
+  xlab("") +
+  ylab("percent of academics employed fixed-term") +
+  theme_bw()
+```
+
+```{r ft-posts}
+tibble(job_ads_TSft_NCL,job_ads_TR_NCL) %>% 
+  pivot_longer(names_to = "job_ads",
+               values_to = "percent",
+               cols = c(1:2)) %>% 
+  mutate(job_ads = case_when(job_ads == "job_ads_TR_NCL" ~ "\nT&R posts",
+                             job_ads == "job_ads_TSft_NCL" ~ "T&S fixed-term posts")) %>% 
+  ggplot(aes(x=job_ads,y=percent,fill=job_ads, colour=NULL)) +
+  geom_chicklet(radius = grid::unit(1, 'mm')) +
+  geom_bar(stat="identity",
+           aes(x=job_ads, y=percent-10, fill=job_ads),
+           width = .881) +
+  scale_y_continuous(limits = c(0,250)) +
+  annotate(geom = "text", x = 1.01:2.01, y = c(10,10), 
+           label=c("85","230"),
+           size=5,
+           colour="white") +
+  scale_fill_manual(values = c("violetred2","mediumpurple4"),
+                    guide = FALSE) + #darkorchid4; purple4
+  scale_colour_manual(values = c("violetred2","mediumpurple4"),
+                    guide = FALSE) +
+  xlab("") +
+  ylab("total advertised posts (2017/18)") +
+  theme_bw()
+```
+
+```{r ft-employees}
+tibble(employees_NCL_TSft,employees_NCL_TSoe) %>% 
+  pivot_longer(names_to = "TnS",
+               values_to = "percent",
+               cols = c(1:2)) %>% 
+  mutate(TnS = case_when(TnS == "employees_NCL_TSft" ~ "Fixed-term",
+                         TnS == "employees_NCL_TSoe" ~ "Open-ended")) %>% 
+  ggplot(aes(x=TnS,y=percent,fill=TnS, colour=NULL)) +
+  geom_chicklet(radius = grid::unit(1, 'mm')) +
+  geom_bar(stat="identity",
+           aes(x=TnS, y=percent-.1, fill=TnS),
+           width = .881) +
+  scale_y_continuous(limits = c(0,1),
+                     labels = scales::percent_format()) +
+  annotate(geom = "text", x = 1.01:2.01, y = c(.1,.1), 
+           label=c("73%","20%"),
+           size=5,
+           colour="white") +
+  scale_fill_manual(values = c("violetred2","mediumpurple4"),
+                    guide = FALSE) + #darkorchid4; purple4
+  scale_colour_manual(values = c("violetred2","mediumpurple4"),
+                    guide = FALSE) +
+  xlab("") +
+  ylab("percent of contract types for T&S employees") +
+  theme_bw()
+```
+
+```{r cross unis}
+data %>% #pull(`HE provider`) %>% unique
+  filter(`HE provider` == "Newcastle University" |
+         `HE provider` == "The University of Edinburgh" |
+         `HE provider` == "The University of York" |
+         `HE provider` == "University of Durham") %>% 
+  filter(`Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "Full-time",
+         `Category Marker` == "Terms of employment",
+         `Activity standard occupational classification` == "All") %>%
+  group_by(`HE provider`,`Academic Year`) %>% 
+  summarise(Total=sum(Number)) -> totals
+
+data %>% #pull(`HE provider`) %>% unique
+  #filter(`Academic Year` == "2018/19") %>% 
+  filter(`HE provider` == "Newcastle University" |
+         `HE provider` == "The University of Edinburgh" |
+         `HE provider` == "The University of York" |
+         `HE provider` == "University of Durham") %>% 
+  filter(`Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "Full-time",
+         `Category Marker` == "Terms of employment",
+         `Activity standard occupational classification` == "All") %>%
+  select(-c(UKPRN,
+            `Country of HE provider`,
+            `Region of HE provider`,
+            `Mode of employment`,
+            `Activity standard occupational classification`,
+            `Category Marker`)) %>% 
+  full_join(totals, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/Total)*100) %>% 
+  ggplot(aes(x=`HE provider`,
+             y=`percent`,
+             fill=`Category`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  #  stat_summary(geom = "bar", fun.y = `sum`, position = "stack") +
+  scale_fill_manual(values = c("violetred2","mediumpurple4")) +
+#  scale_y_continuous(scales::percent_format()) +
+  transition_states(`Academic Year`,
+                    transition_length = 2,
+                    state_length = 1) +
+  ggtitle("Academic Year: {closest_state}") +
+  theme_bw()
+```
+
+```{r totals}
+data %>% 
+  filter(`HE provider` != "Total",
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Terms of employment") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  group_by(`HE provider`,`Academic Year`) %>% 
+  summarise(total = sum(Number)) -> total_termsOfEmployment
+
+data %>% 
+  filter(`HE provider` != "Total",
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Academic employment function") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  group_by(`HE provider`,`Academic Year`) %>% 
+  summarise(total = sum(Number)) -> total_academicEmploymentFunction
+
+data %>% 
+  filter(`HE provider` != "Total",
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Contract levels") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  group_by(`HE provider`,`Academic Year`) %>% 
+  summarise(total = sum(Number)) -> total_contractLevels
+```
+
+## Terms of Employment
+
+```{r}
+total_termsOfEmployment %>% 
+  filter(total >= 2500) %>% 
+  pull(`HE provider`) %>% unique()
+```
+
+```{r filter unis by size 1}
+total_termsOfEmployment %>% 
+  filter(total >= 2500) %>% 
+  pivot_wider(names_from = "Academic Year", values_from = "total") %>% 
+  na.omit() %>% 
+  pull(`HE provider`) -> unis
+```
+
+```{r get means for reordering 1}
+data %>% 
+  filter(`HE provider` %in% unis,
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Terms of employment") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_termsOfEmployment, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  filter(Category == "Fixed-term") %>% 
+  group_by(`HE provider`) %>% 
+  summarise(mean = mean(percent)) -> means
+```
+
+```{r plot contract type for large unis}
+data %>% 
+  filter(`HE provider` %in% unis,
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Terms of employment") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_termsOfEmployment, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  full_join(means, by = "HE provider") %>% 
+  mutate(`HE provider` = case_when(`HE provider`== "Imperial College of Science, Technology and Medicine" ~ 
+                                     "Imperial College London",
+                                   TRUE ~ `HE provider`),
+         `HE provider` = as.factor(`HE provider`),
+         `HE provider` = fct_reorder(`HE provider`, -mean),
+         `Category` = as.factor(`Category`),
+         `Category` = fct_relevel(`Category`, "Fixed-term", after = Inf)) %>% 
+  ggplot(aes(x=`HE provider`,
+             y=`percent`,
+             fill=`Category`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  #theme(axis.text.x = element_text(angle = 50, hjust = 1)) +
+  scale_fill_manual(values = c("violetred2","mediumpurple4")) +
+  transition_states(`Academic Year`,
+                    transition_length = 1,
+                    state_length = 3) +
+  ggtitle("Academic Year: {closest_state}") +
+  theme_bw() +
+  coord_flip() +
+  geom_hline(yintercept = 50)
+```
+
+## Newcastle specific
+
+```{r}
+data %>% 
+  filter(`HE provider` == "Newcastle University",
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Terms of employment") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_termsOfEmployment, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  mutate(`Category` = as.factor(`Category`),
+         `Category` = fct_relevel(`Category`, "Fixed-term", after = Inf)) %>% 
+  ggplot(aes(x=`Academic Year`,
+             y=`percent`,
+             fill=`Category`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  #theme(axis.text.x = element_text(angle = 50, hjust = 1)) +
+  scale_fill_manual(values = c("violetred2","mediumpurple4"))
+```
+
+## Edinburgh specific
+
+```{r}
+data %>% 
+  filter(`HE provider` == "The University of Edinburgh",
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Terms of employment") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_termsOfEmployment, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  mutate(`Category` = as.factor(`Category`),
+         `Category` = fct_relevel(`Category`, "Fixed-term", after = Inf)) %>% 
+  ggplot(aes(x=`Academic Year`,
+             y=`percent`,
+             fill=`Category`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  #theme(axis.text.x = element_text(angle = 50, hjust = 1)) +
+  scale_fill_manual(values = c("violetred2","mediumpurple4"))
+```
+
+## Edinburgh specific
+
+```{r}
+data %>% 
+  filter(`HE provider` == "The University of Glasgow",
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Terms of employment") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_termsOfEmployment, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  mutate(`Category` = as.factor(`Category`),
+         `Category` = fct_relevel(`Category`, "Fixed-term", after = Inf)) %>% 
+  ggplot(aes(x=`Academic Year`,
+             y=`percent`,
+             fill=`Category`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  #theme(axis.text.x = element_text(angle = 50, hjust = 1)) +
+  scale_fill_manual(values = c("violetred2","mediumpurple4"))
+```
+
+
+## Academic Employment Function
+
+```{r}
+total_academicEmploymentFunction %>% 
+  filter(total >= 2500) %>% 
+  pull(`HE provider`) %>% unique()
+```
+
+```{r filter unis by size 2}
+total_academicEmploymentFunction %>% 
+  filter(total >= 2500) %>% 
+  pivot_wider(names_from = "Academic Year", values_from = "total") %>% 
+  na.omit() %>% 
+  pull(`HE provider`) -> unis
+```
+
+```{r get means for reordering 2}
+data %>% 
+  filter(`HE provider` %in% unis,
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Academic employment function") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_academicEmploymentFunction, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  filter(Category == "Teaching only") %>% 
+  group_by(`HE provider`) %>% 
+  summarise(mean = mean(percent)) -> means_employ
+```
+
+```{r plot contract type for large unis 2}
+data %>% 
+  filter(`HE provider` %in% unis,
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Academic employment function") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_academicEmploymentFunction, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  full_join(means_employ, by = "HE provider") %>% 
+  mutate(`HE provider` = case_when(`HE provider`== "Imperial College of Science, Technology and Medicine" ~ 
+                                     "Imperial College London",
+                                   TRUE ~ `HE provider`),
+         `HE provider` = as.factor(`HE provider`),
+         `HE provider` = fct_reorder(`HE provider`, -mean),
+         `Category` = as.factor(`Category`)) %>% 
+  ggplot(aes(x=`HE provider`,
+             y=`percent`,
+             fill=`Category`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  #theme(axis.text.x = element_text(angle = 50, hjust = 1)) +
+  scale_fill_manual(values = c("darkturquoise","red","mediumpurple4","violetred2")) +
+  transition_states(`Academic Year`,
+                    transition_length = 1,
+                    state_length = 3) +
+  ggtitle("Academic Year: {closest_state}") +
+  theme_bw() +
+  coord_flip()
+```
+
+
+
+## Contract levels
+
+```{r}
+total_contractLevels %>% 
+  filter(total >= 2500) %>% 
+  pull(`HE provider`) %>% unique()
+```
+
+```{r filter unis by size 3}
+total_contractLevels %>% 
+  filter(total >= 2500) %>% 
+  pivot_wider(names_from = "Academic Year", values_from = "total") %>% 
+  na.omit() %>% 
+  pull(`HE provider`) -> unis
+```
+
+```{r get means for reordering 3}
+data %>% 
+  filter(`HE provider` %in% unis,
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Contract levels") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_contractLevels, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  filter(Category == "Professor") %>% 
+  group_by(`HE provider`) %>% 
+  summarise(mean = mean(percent)) -> means_contract
+```
+
+```{r plot contract type for large unis 3}
+data %>% 
+  filter(`HE provider` %in% unis,
+         `Country of HE provider` == "All",
+         `Region of HE provider` == "All",
+         `Mode of employment` == "All",
+         `Activity standard occupational classification` == "All",
+         `Category Marker` == "Contract levels") %>% 
+  select(`HE provider`,`Academic Year`,Category,Number) %>% 
+  left_join(total_contractLevels, by = c("HE provider", "Academic Year")) %>% 
+  mutate(percent = (Number/total)*100) %>% 
+  full_join(means_contract, by = "HE provider") %>% 
+  mutate(`HE provider` = case_when(`HE provider`== "Imperial College of Science, Technology and Medicine" ~ 
+                                     "Imperial College London",
+                                   TRUE ~ `HE provider`),
+         `HE provider` = as.factor(`HE provider`),
+         `HE provider` = fct_reorder(`HE provider`, -mean),
+         `Category` = as.factor(`Category`),
+         `Category` = fct_relevel(`Category`, rev)) %>% 
+  ggplot(aes(x=`HE provider`,
+             y=`percent`,
+             fill=`Category`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  #theme(axis.text.x = element_text(angle = 50, hjust = 1)) +
+  scale_fill_manual(values = c("mediumpurple4","darkturquoise","violetred2")) +
+  transition_states(`Academic Year`,
+                    transition_length = 1,
+                    state_length = 3) +
+  ggtitle("Academic Year: {closest_state}") +
+  theme_bw() +
+  coord_flip()
+```
+
+
+
