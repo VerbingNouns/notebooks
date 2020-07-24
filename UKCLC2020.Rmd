@@ -1,0 +1,578 @@
+---
+title: "Introduction to Dataviz in R"
+date: "25 July 2020, 09:00-12:00"
+author: "Dr Lauren Ackerman"
+subtitle: "UKCLC Pre-Conference Workshop"
+output: 
+  html_notebook:
+    theme: sandstone
+    highlight: default
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+
+You will need to load in (and possibly install) the following packages:
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(viridis)
+```
+
+You will also need the following datasets: 
+
+1. [simpson-paradox-data.csv](data/simpson-paradox-data.csv)
+2. [boxplot-problems-data.csv](data/boxplot-problems-data.csv)
+3. [simulated-data.csv](data/simulated-data.csv)
+
+And [here is the .Rmd file](UKCLC2020.Rmd) to follow along with me.
+
+# Welcome to Dataviz!
+
+Visualising data is more than just turning numbers into pictures. It's telling a story, creating a narrative, and providing analysis all at once. To visualise data well, there are a few aspects you must consider: 
+
+1. The shape of the data
+2. Principles of aesthetic composition
+3. Priorities of your audience
+
+## Shape of your data
+
+Read in a data file to form the following plots.
+```{r read-spdata, message=FALSE}
+spdata <- read.csv("data/simpson-paradox-data.csv")
+```
+
+First, plot the data as simply and in as raw a form as possible to see if there are any clear problems or internal structures.
+
+```{r sp-simple-plot}
+plot(spdata$y~spdata$x)
+```
+
+You may also want to look at the raw data to get a sense of how it's structured or whether there are any major problems.
+
+```{r head-sp}
+head(spdata)
+```
+A summary of the data can also be useful in getting a sense of its shape.
+
+```{r summary-sp}
+summary(spdata)
+```
+
+We could make our own summaries.
+
+```{r detailed-summary-sp}
+spdata %>% 
+  group_by() %>% 
+  summarise(number=n(),
+            x.mean=mean(x),
+            x.sd=sd(x),
+            x.se=x.sd/sqrt(number),
+            y.mean=mean(y),
+            y.sd=sd(y),
+            y.se=y.sd/sqrt(number))
+```
+
+We could look at statistical tests.
+
+```{r cor.test-sp}
+cor.test(spdata$x, spdata$y)
+```
+And that could be it.
+
+However, without doing more detailed and principled exploration, you might miss something in your data that would cause a [Simpson's Paradox](https://towardsdatascience.com/simpsons-paradox-how-to-prove-two-opposite-arguments-using-one-dataset-1c9c917f5ff9).
+
+```{r sp-overall-smooth, echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(spdata, aes(x=x, y=y)) +
+  geom_point() +
+  geom_smooth(method="lm") +
+  theme_bw()
+```
+Above we see what looks like a clear and significant positive correlation. But from looking at the data, we should know that there is another column of interest that could affect the shape. (Column `z`, which contains letters.)
+
+```{r sp-grouped-smooth, echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(spdata, aes(x=x, y=y)) +
+  geom_point(aes(colour=z)) +
+  geom_smooth(aes(colour=z), method="lm") +
+  theme_bw()
+```
+To make this even more clear, we can overlay the groups' regression lines with the overall regression line.
+
+```{r sp-all-smooths, echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(spdata, aes(x=x, y=y)) +
+  geom_point(aes(colour=z)) +
+  geom_smooth(method="lm") +
+  geom_smooth(aes(colour=z), method="lm") +
+  theme_bw()
+```
+
+Each of these tells us something true, but they aren't all equally useful for informing us about the shape of our data.
+
+For more examples: [Datasaurus Dozen](https://www.autodeskresearch.com/publications/samestats)
+
+### Shape of your visualisation
+
+By the same token, not ever graph gives you the same information. 
+
+Read in the next data file.
+```{r read-bpdata}
+bpdata <- read.csv("data/boxplot-problems-data.csv")
+```
+
+If we plot this data using a boxplot, we get a lot of information about the median and quartile distribution of the data.
+
+```{r bp-boxplot}
+bpdata %>% 
+  ggplot(aes(y=y,x=z,fill=z)) +
+  geom_boxplot()
+```
+But these four categories look to have approximately the same median. The `d` category has a narrow distribution, but `a` and `b` look pretty similar and `c` is only slightly more broadly distributed. It's possible that there are no statistical differences between these categories!
+
+```{r bonferroni-alpha}
+# Bonferroni-corrected alpha for three comparisons:
+0.05/3
+```
+
+So, any p-values below 0.0167 can be considered statistically significant.
+
+```{r bp-lms}
+bpdata %>% # AB, AC, AD
+  mutate(z=z %>% as.factor) %>% 
+  lm(y ~ z, data=.) %>%
+  summary() # A is different to D at alpha=0.05
+
+bpdata %>% # BC, BD
+  mutate(z=z %>% as.factor,
+         z=fct_relevel(z, "b")) %>% 
+  lm(y ~ z, data=.) %>%
+  summary() # B is different to D at alpha=0.05
+
+bpdata %>% # CD
+  mutate(z=z %>% as.factor,
+         z=fct_relevel(z, "c")) %>% 
+  lm(y ~ z, data=.) %>%
+  summary() # All ns
+```
+
+We've run some simple stats and taken a look at the data, but we can't *see* the differences, and it's not very convincing that they're really there, especially after correcting for multiple comparisons. So what's going on?
+
+```{r bp-violin}
+bpdata %>% 
+  ggplot(aes(y=y,fill=z,x=z)) +
+  geom_violin()
+```
+Oh these all have different shape density distributions! We couldn't see that in the boxplot because it only showed us information about the quartile distribution.
+
+But we still don't know enough. For instance, we can see there are fewer points around 200 in category `c` than in the other categories, but what does this translate to? Are there no points there or just very few?
+
+```{r bp-violin-jitter}
+bpdata %>% 
+  ggplot(aes(y=y,fill=z,x=z)) +
+  geom_violin() +
+  geom_point(position=position_jitter(.2), alpha=.5)
+```
+
+It turns out that `c` has **no** points in the middle and that it's a strongly bimodal distribution. What does using a violin plot imply to your audience, then?
+
+## Principles of aesthetic composition
+
+Create the data set.
+```{r create-toydata}
+tibble(c("a","a","b","b"),c("c","d","c","d"),c(121, 120, 122, 125)) %>% 
+  rename(factor="c(\"a\", \"a\", \"b\", \"b\")",
+         level="c(\"c\", \"d\", \"c\", \"d\")",
+         value="c(121, 120, 122, 125)") -> toydata
+```
+
+### Lines and axes
+
+There are many things being communicated, even in a simple plot for dataset such as this.
+
+```{r toy-point-path}
+toydata %>% 
+  ggplot(aes(x=factor,y=value,colour=level)) +
+  geom_point()+
+  geom_path(aes(group=level))
+```
+What is this plot telling us?  
+
+* There is an interaction between `c` and `d`, whereby the increase from `a` to `b` is larger for `d` than for `c`
+* This *must* be a within-subjects analysis, at least within each of `c` and `d`
+* This *must* be a an order, with `a` coming before `b` (left to right)
+* There isn't an order within `c` and `d`, since they appear overlaid
+* All values between 120 and 125 are possible values one might observe (continuous data)
+
+
+```{r toy-bar}
+toydata %>% 
+  ggplot(aes(x=factor,y=value,fill=level)) +
+  geom_bar(position="dodge",stat="identity")
+```
+
+What is *this* plot telling us?  
+
+* There is the possibility for a tiny interaction between `c` and `d`, whereby the increase from `a` to `b` is larger for `d` than for `c`
+* Conditions `a` and `b` are independent, as are conditions `c` and `d`
+* These data could be unordered and there is no need for it to be within items or within subjects.
+* All values between 0 and 125 are possible values one might observe (continuous data)
+
+### Visibility {.tabset}
+
+Busyness can confuse and mislead your audience, but over-simplicity can as well. In order to balance presenting enough data against presenting too much data, consider how many "dimensions" you are showing, and how much of the data *and* how many plot elements you display at once.
+
+Let's create a new dataset to play with.
+```{r create-vizdata}
+set.seed(3); spdata %>% 
+  mutate(rValX = rnorm(x),
+         rValY = rnorm(y) %>% abs() %>% log()) -> vizdata
+```
+
+
+#### Round 1
+
+What's wrong with this graph?
+
+```{r bad1}
+vizdata %>% 
+  ggplot(aes(x=rValX, 
+             y=rValY,
+             colour=z)) +
+  geom_point()
+```
+
+1. Unlikely to print well
+2. Unhelpful labels
+3. Missing important information
+
+#### Round 2
+
+1. Unlikely to print well &#8594;→ Reduce greys and increase contrast
+2. Unhelpful labels &#8594;→ Add axis labels and title
+3. Missing important information &#8594;→ Add more dimensions? (Or make companion graphs.)
+
+```{r worse}
+vizdata %>% 
+  ggplot(aes(x=rValX, 
+             y=rValY,
+             fill=x, # add dimension for column `x`
+             size=y, # add dimension for column `y`
+             colour=z)) +
+  geom_point(pch=21) + # change 'point character' to allow for colour + fill
+  scale_fill_gradientn(colours = rainbow(7)) + # add visually striking grandient scale
+  theme_bw() + # make background more plain
+  # add the labels:
+  xlab("Randomized normal distribution of `x`") +
+  ylab("Log of the absolute value of a\nrandomized normal distribution of `y`") +
+  ggtitle("My cool plot", subtitle = "UKCLC2020")
+```
+
+1. Overlapping points obscure data
+2. Too many dimensions being encoded in too-similar visual spaces
+3. Perceptually nonlinear gradient scale
+4. Colourblind-unfriendly
+
+#### Round 3
+
+1. Overlapping points obscure data &#8594;→ Add transparency ("alpha")
+2. Too many dimensions being encoded in too-similar visual spaces &#8594;→ Add "shape" as a dimension
+3. Perceptually nonlinear gradient scale &#8594;→ Choose a better palette (e.g., `viridis`)
+4. Colourblind-unfriendly &#8594;→ Choose a bespoke palette; check with 3rd party app (e.g., [Color Oracle](https://colororacle.org/))
+
+From [Intro to Viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html):
+
+> *These color scales are designed to be:*
+>
+>- *Colorful, spanning as wide a palette as possible so as to make differences easy to see,*
+- *Perceptually uniform, meaning that values close to each other have similar-appearing colors and values far away from each other have more different-appearing colors, consistently across the range of values,*
+- *Robust to colorblindness, so that the above properties hold true for people with common forms of colorblindness, as well as in grey scale printing, and* 
+- *Pretty, oh so pretty*
+
+```{r worst}
+vizdata %>% 
+  ggplot(aes(x=rValX, 
+             y=rValY,
+             fill=x, 
+             size=y, 
+             shape=z, # add shape
+             colour=z)) +
+  geom_point(alpha=.75) + # add transparency
+  scale_shape_manual(values=c(21, 22, 23, 24)) + # manually choose which shapes to plot
+  scale_fill_viridis(option="plasma") + # choose a better palette
+  theme_bw() +
+  xlab("Randomized normal distribution of `x`") +
+  ylab("Log of the absolute value of a\nrandomized normal distribution of `y`") +
+  ggtitle("My cool plot", subtitle = "UKCLC2020")
+```
+
+1. WAY too busy! Impossible to see any patterns!
+2. Shape and (outline) colour are redundant
+
+#### Round 4
+
+1. WAY too busy! Impossible to see any patterns! &#8594;→ Split plot into facets
+
+```{r good}
+vizdata %>% 
+  ggplot(aes(x=rValX, 
+             y=rValY,
+             fill=x, 
+             size=y, 
+             shape=z,
+             colour=z)) +
+  geom_point(alpha=.75) + 
+  scale_shape_manual(values=c(21, 22, 23, 24)) + 
+  scale_fill_viridis(option="plasma") + 
+  theme_bw() +
+  xlab("Randomized normal distribution of `x`") +
+  ylab("Log of the absolute value of a\nrandomized normal distribution of `y`") +
+  ggtitle("My cool plot", subtitle = "UKCLC2020") +
+  facet_grid(~z) # facet the data by column `z` category
+```
+
+## Priorities of your audience
+
+A picture is worth a thousand words. The purpose of a graph is to support the "story" you are telling about your data. It should be true, but not everything true about it is relevant. 
+
+In our `vizdata` dataset, `x` and `y` are meaningful, and as it turns out, `rValX` and `rValY` are... random. So those values might not be as relevant to our audience. We will want to visualise them for ourselves as we explore the shape of the data in preparation for analysis, but we don't necessarily need to include every possible dimension.
+
+Our eyes are more sensitive to spacial location than to colour gradients, so let's make the colours the less important properties of the data.
+
+Shape and (outline) colour are doubly redundant now that we're faceting the data by column `z` category, so we can get rid of those dimensions altogether.
+
+Since the correlation between x and y is known to be important, we can add a smooth to draw our audience's attention to this property.
+
+```{r better, message=FALSE}
+vizdata %>% 
+  ggplot(aes(x=x, 
+             y=y,
+             colour=rValX, 
+             size=rValY)) +
+  geom_point(alpha=.5) + 
+  scale_colour_viridis(option="plasma") + # change to 'colour' to fill default point shapes
+  geom_smooth(method = "lm", fill=NA, colour="black", lwd=0.5) + #add visually distinctive smooth
+  theme_bw() +
+  xlab("Column `x` value") +
+  ylab("Column `y` value") +
+  ggtitle("My cool plot", subtitle = "UKCLC2020") +
+  facet_grid(~z)  
+```
+
+This graph crams ALL of the information in our dataset into a single plot. But it's not necessary to do so. After all, our original plot showing the four categories and their smooths gives us the same *relevant* information.
+
+```{r best, message=FALSE}
+vizdata %>% 
+  ggplot(aes(x=x, 
+             y=y)) +
+  geom_point(alpha=.5) + 
+  geom_smooth(method = "lm", fill=NA, colour="black", lwd=0.5) + #add visually distinctive smooth
+  theme_bw() +
+  xlab("Randomized normal distribution of `x`") +
+  ylab("Log of the absolute value of a\nrandomized normal distribution of `y`") +
+  ggtitle("My cool plot", subtitle = "UKCLC2020") +
+  facet_grid(~z)  
+```
+
+Now, this plot has a lot less information that the previous, but it's very easy to print and definitely has no colourblindness accessibility issues. There are many ways to consider your audience's priorities.
+
+# Tidyverse tools 
+
+During this time, attendees will learn about how the structure of a dataset can be changed to best suit their analytical purposes. 
+I will then introduce `ggplot2` and other plotting methods in R, with a focus on what types of graphs communicate what information. 
+
+## Data manipulation
+
+First, let's load in the dataset you'll be using for the group challenge.
+
+```{r create-challenge, message=FALSE}
+challenge <- read_csv("data/simulated-data.csv")
+```
+
+You can read more about the dataset and its structure in [the next section](#Simulated_data).
+
+```{r view-challenge}
+head(challenge)
+```
+
+The basic tools for data manipulation are `mutate`, `filter`, `group_by`/`summarise`, and , `pivot_longer`/`pivot_wider`. There are many, many, others, but these four will get you far.
+
+### `mutate`
+
+To mutate is to create a new column. It's not the best name for the function, but it gets the job done.
+
+Let's say we want to turn our `subj` column into a factor:
+```{r mutate-ex1}
+challenge %>% 
+  mutate(subj = as.factor(subj))
+```
+This overwrites the column that's already named `subj`.
+
+To create a brand new column, name it something else:
+```{r mutate-ex2}
+challenge %>% 
+  mutate(region.fct = as.factor(region))
+```
+
+### `filter`
+
+This is more straightforward. Just as in acoustics, if you have a low-pass filter, only low frequencies will get through, the `filter` function lets the defined properties pass through.
+```{r filter}
+challenge %>% 
+  filter(word == "the",
+         age <= 40,
+         rating != 1 &
+           rating != 2)
+```
+
+### `group_by`/`summarise`
+
+This pair of functions lets you perform descriptive statistics on your whole dataframe all at once, based on the groups you define.
+
+```{r group-sum, message=FALSE}
+challenge %>% 
+  group_by(gram, freq) %>% 
+  summarise(mean = mean(rt),
+            sd = sd(rt),
+            se = sd/sqrt(n()))
+```
+
+### `pivot_longer`
+
+We'll only talk about `pivot_longer`, since long data is generally better for `ggplot` than wide data, but they operate on the same principles.
+
+```{r pivot, message=FALSE}
+challenge %>% 
+  # same code as above
+  group_by(gram, freq) %>% 
+  summarise(mean = mean(rt),
+            sd = sd(rt),
+            se = sd/sqrt(n())) %>% 
+  # new code
+  pivot_longer(cols = c("mean","sd","se"),
+               names_to = "statistic",
+               values_to = "value")
+```
+
+## `ggplot2`
+
+The `ggplot` package works by layering plots, as we have seen. Now I'll step through each basic layer so you can understand what the previous code was doing.
+
+### Base plot
+
+The first layer is the base plot. It simply wakes up `ggplot`, which is now listening for more information to add.
+
+```{r base-plot, message=FALSE}
+ggplot(data = spdata)
+```
+
+
+### Aesthetics
+
+The first information to add is what the axes of our plot will be. This sort of information is 'inherited' by all following plot layers, so we want to define it here. Because these defined elements influence the visual properties of the plot, they're called "aesthetics", abbreviated `aes`.
+
+```{r aes, message=FALSE}
+ggplot(data = spdata, 
+       aes(x=x, 
+           y=y,
+           colour=z))
+```
+These properties will, by default, be inherited by all following layers, when appropriate. You can override this with `inherit.aes = FALSE`, or you can assign aesthetics specifically to some layers and not others within the geometry layers.
+
+### Geometry
+
+We haven't plotted the data yet because R doesn't know what form the data should take (e.g., points, bars, box and whisker, histogram, etc). We tell R what geometry (abbreviated `geom`) to use with a function we add (`+`) after the base plot.
+
+Here we're adding two geometries: `geom_point` to make the scatterplot and `geom_smooth` to draw the regression lines.
+
+```{r geom1, message=FALSE}
+ggplot(data = spdata, 
+       aes(x=x, 
+           y=y,
+           colour=z)) +
+  geom_point() +
+  geom_smooth(method="lm")
+```
+
+As you can see, `geom_smooth` has an argument that isn't within an `aes()` function. This means it applies to the properties of the layer without regard to the source dataset (`spdata`). In this case, the method for drawing the regression is "lm", which is irrelevant to the original dataset, but we can use arguments outside of `aes()` to "hard-code" properties in the graph as well.
+
+```{r geom2, message=FALSE}
+ggplot(data = spdata, 
+       aes(x=x, 
+           y=y,
+           colour=z)) +
+  geom_point(shape=15) + # also called "pch" for "point character"
+  geom_smooth(method="lm",
+              lty="dashed", # lty = "Line TYpe"
+              lwd=.5) # lwd = Line WiDth"
+```
+
+### Extras
+
+There are a mind-blowing number of extras you can add to your plots, as we saw above. Some are specific to `ggplot2` and some are specific to other packages.
+
+* [R Graphics Cookbook](https://r-graphics.org/)
+* [ggplot2: Elegant Graphics for Data Analysis](https://ggplot2-book.org/)
+* [The R Graph Gallery](https://www.r-graph-gallery.com/)
+* [Plotly R Open Source Graphing Library](https://plotly.com/r/)
+* [YaRrr! The Pirate’s Guide to R](https://bookdown.org/ndphillips/YaRrr/)
+
+```{r extras, message=FALSE}
+ggplot(data = spdata, 
+       aes(x=x, 
+           y=y,
+           colour=z)) +
+  geom_point(shape=15) + # also called "pch" for "point character"
+  geom_smooth(method="lm",
+              lty="dashed", # lty = "Line TYpe"
+              lwd=.5, # lwd = Line WiDth"
+              fill="pink") + 
+  theme_classic() +
+  scale_colour_manual(name="Category Z:",
+    values = c("red","gold","turquoise","blueviolet")) +
+  theme(legend.position = "bottom")
+```
+
+
+# Group challenge
+
+For the next hour, you can work on your own or in a small group to create a graph from the [simulated-data.csv](data/simulated-data.csv) file.
+
+This challenge brings together the skills learned in the previous part of the workshop. 
+
+When you have finished your graph, save it (or screenshot it) and send me the image file at lauren[DOT]ackerman[AT]ncl[DOT]ac[DOT]uk. Make sure that the file name is something by which I can identify you (e.g., your name or a "team name").
+
+We will return for the final 20 minutes to look at each others' creations and compete for the title of DataViz Champion! (I know it's silly, but it's also a lot of fun.)
+
+## Simulated data
+
+The "Simulated Data" file is a comma separated value (CSV) file, which R can read in easily, either using the `read.csv()` function or by clicking "Import dataset".
+
+This dataset is simulated experimental data for a reading time, rating, and comprehension experiment, which means there are several types of responses. Each column is described below.
+
+* subj = unique number for each subject or participant
+* age = the age of the participant
+* item = the item number that elicited the given response
+* freq = the categorical frequency of the manipulated region (high or low)
+* gram = whether or not the item is grammatical (yes or no)
+* rating = the subject's response to rating the acceptability of the item (1-5)
+* accuracy = the subject's response to a comprehension question about the item (1=correct, 0=incorrect)
+* region = which word number the reading time was measured for
+* word = an example word that might have appeared in the region (simplified across items)
+* rt = how long the subject spent reading the word in the given region
+
+There are two crossed factors, each with two levels:
+* gram = yes / no
+* freq = high / low
+
+This means there are four conditions:
+1. High frequency grammatical
+2. Low frequency grammatical
+3. High frequency ungrammatical
+4. Low frequency ungrammatical
+
+This experiment doesn't really ask a question, because it's not a real experiment. Instead, it sets up a paradigm that will allow you to compare across conditions using three different types of data:
+
+* continuous data (rt)
+* binomial data (accuracy)
+* ordinal rating data (rating)
+
+Since each item contains five regions, but rating and accuracy data are per item rather than per region, you will have to take a subset of the total dataset in order to properly graph and analyse rating or accuracy data. If you don't you'll be graphing or analysing five copies of this data at once.
