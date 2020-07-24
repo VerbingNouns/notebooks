@@ -121,7 +121,7 @@ bpdata <- read.csv("data/boxplot-problems-data.csv")
 
 If we plot this data using a boxplot, we get a lot of information about the median and quartile distribution of the data.
 
-```{r bp-boxplot}
+```{r bp-boxplot, message=FALSE,warning=FALSE}
 bpdata %>% 
   ggplot(aes(y=y,x=z,fill=z)) +
   geom_boxplot()
