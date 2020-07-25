@@ -257,8 +257,8 @@ vizdata %>%
              fill=x, # add dimension for column `x`
              size=y, # add dimension for column `y`
              colour=z)) +
-  geom_point(pch=21) + # change 'point character' to allow for colour + fill
-  scale_fill_gradientn(colours = rainbow(7)) + # add visually striking grandient scale
+  geom_point(shape=21) + # change 'point character' to allow for colour + fill
+  scale_fill_gradientn(colours = rainbow(7)) + # add visually striking gradient scale
   theme_bw() + # make background more plain
   # add the labels:
   xlab("Randomized normal distribution of `x`") +
@@ -447,7 +447,7 @@ challenge %>%
             sd = sd(rt),
             se = sd/sqrt(n())) %>% 
   # new code
-  pivot_longer(cols = c("mean","sd","se"),
+  pivot_longer(cols = c("mean","sd","se"), # cols = 3:5
                names_to = "statistic",
                values_to = "value")
 ```
@@ -462,6 +462,9 @@ The first layer is the base plot. It simply wakes up `ggplot`, which is now list
 
 ```{r base-plot, message=FALSE}
 ggplot(data = spdata)
+
+#spdata %>%
+#  ggplot()
 ```
 
 
@@ -534,7 +537,7 @@ ggplot(data = spdata,
 
 # Group challenge
 
-For the next hour, you can work on your own or in a small group to create a graph from the [simulated-data.csv](data/simulated-data.csv) file.
+For the next 45 minutes, you can work on your own or in a small group to create a graph from the [simulated-data.csv](data/simulated-data.csv) file.
 
 This challenge brings together the skills learned in the previous part of the workshop. 
 
@@ -568,6 +571,15 @@ This means there are four conditions:
 2. Low frequency grammatical
 3. High frequency ungrammatical
 4. Low frequency ungrammatical
+
+Sentence: "The old VERB the boat."
+
+|   VERB   | Frequency | Grammaticality |
+|----------|-----------|----------------|
+| man      | low       | yes |
+| steer    | high      | yes |
+| put      | high      | no  |
+| stare    | low       | no  |
 
 This experiment doesn't really ask a question, because it's not a real experiment. Instead, it sets up a paradigm that will allow you to compare across conditions using three different types of data:
 
