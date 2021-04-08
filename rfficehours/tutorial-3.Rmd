@@ -10,6 +10,8 @@ output:
     toc_float: 
       smooth_scroll: true
       collapsed: false
+    includes: 
+      in_header: ../google_analytics.html
 ---
 [⇠ Turorial 2](tutorial-2.html)
 
@@ -22,6 +24,8 @@ htmltools::img(src = knitr::image_uri("header.png"),
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+<small>Note (2021-04-08): This notebook uses the `iris` dataset. Until I can update it to use a dataset that is not so closely associated with eugenics, please consider [this explanation](https://www.meganstodel.com/posts/no-to-iris/) as to why it is problematic.</small>
 
 |  | Learning Outcomes |
 |--|----------|
@@ -62,8 +66,9 @@ In order to write effective code in any language, you must start to think like a
 ```{r, eval=FALSE}
 data <- read.csv("data/binomial-data.csv", header=TRUE)
 ```
+
 ```{r, echo=FALSE, message=FALSE}
-data <- read.csv("ExampleProject/data/binomial-data.csv", header=TRUE)
+data <- read.csv("ExampleProject/data/binomial-data.csv", header=TRUE, stringsAsFactors = TRUE)
 ```
 
 What happens if you run the wrong code and get an error? What should you do if you run the code but don't understand the output?
@@ -108,7 +113,7 @@ data <- read.csv("data/binomial-data.csv", header=TRUE)
 head(data)
 ```
 ```{r, echo=FALSE, message=FALSE}
-data <- read.csv("ExampleProject/data/binomial-data.csv", header=TRUE)
+data <- read.csv("ExampleProject/data/binomial-data.csv", header=TRUE, stringsAsFactors = TRUE)
 head(data)
 ```
 

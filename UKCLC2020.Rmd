@@ -10,6 +10,8 @@ output:
     toc: true
     number_sections: true
     toc_float: true
+    includes: 
+      in_header: google_analytics.html
 ---
 
 You will need to load in (and possibly install) the following packages:

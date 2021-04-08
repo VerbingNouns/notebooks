@@ -8,6 +8,8 @@ output:
     highlight: default
     toc: true
     toc_float: true
+    includes: 
+      in_header: google_analytics.html
 ---
 
 ```{r setup, include=FALSE}

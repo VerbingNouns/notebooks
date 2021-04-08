@@ -10,6 +10,8 @@ output:
     toc_float: 
       smooth_scroll: true
       collapsed: false
+    includes: 
+      in_header: ../google_analytics.html
 ---
 [⇠ Turorial 1](tutorial-1.html) || [Tutorial 3 ⇢](tutorial-3.html)
 

@@ -8,6 +8,8 @@ output:
     toc_depth: 2
     toc_float: true
     number_sections: true
+    includes: 
+      in_header: google_analytics.html
 ---
 [🔙 Home](https://verbingnouns.github.io/notebooks/)
 
@@ -19,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r libraries}
 library(tidyverse)
-library(ggchicklet)
+#library(ggchicklet)
 library(gganimate)
 ```
 
@@ -110,15 +112,14 @@ tbl13 %>%
 
 ```{r}
 data %>% 
-  filter(`HE provider`=="Newcastle University"),
+  filter(`HE provider`=="Newcastle University",
          `Academic Year`=="2018/19",
          `Category Marker`=="Terms of employment",
          `Activity standard occupational classification`=="All",
          `Country of HE provider`=="All",
-         `Region of HE provider`=="All"
-`
+         `Region of HE provider`=="All")
 unique(data$`Category Marker`)
-``
+```
 
 
 

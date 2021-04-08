@@ -6,6 +6,8 @@ output:
     highlight: default
     toc: false
     toc_float: true
+    includes: 
+      in_header: ../google_analytics.html
 ---
 [🔙 Home](https://verbingnouns.github.io/notebooks/) || [Day 1 ⇢](notebooks/20190603-base_R.html)
 

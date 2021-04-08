@@ -12,6 +12,8 @@ output:
       collapsed: false
     theme: sandstone
     highlight: default
+    includes: 
+      in_header: ../../google_analytics.html
 ---
 
 ```{r}

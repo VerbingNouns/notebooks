@@ -1,25 +1,16 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "Last updated: 23 March 2020"
+date: "Last updated: 08 April 2020"
 output: 
   html_document:
     theme: cerulean
     highlight: default
     toc: true
     toc_float: true
+    includes: 
+      in_header: google_analytics.html
 ---
-<head>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TZFDVSMD7K"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-TZFDVSMD7K');
-</script>
-</head>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -31,7 +22,8 @@ knitr::opts_chunk$set(echo = TRUE)
 * Code for producing useful visualisations of ordinal data.
 
 ### [Statistics for Linguists with R](reading/info.html)
-* [Event website](https://www.reading.ac.uk/celm/training/introduction-to-r-workshop-4-day-workshop/)
+* [2019 Event website](https://www.reading.ac.uk/celm/training/introduction-to-r-workshop-4-day-workshop/)
+* 2021 Event website coming soon!
 
 ### [Data Viz/Analysis Workshop](leeds/blank-workbook.html)
 * "*Visualisation and analysis of linguistic data, using R*"

@@ -6,6 +6,8 @@ output:
   html_notebook:
     toc: true
     toc_float: true
+    includes: 
+      in_header: google_analytics.html
 ---
 [🔙 Home](https://verbingnouns.github.io/notebooks/)
 
