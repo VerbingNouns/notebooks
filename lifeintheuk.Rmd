@@ -107,7 +107,7 @@ gg_vistime(timeline %>%
 
 ## `vistime()` 
 
-This method is the default plotly visualisation.
+This method is the default plotly visualisation. Unfortunately, the plot does not always accurately reflect the duration of events. Hover over each event to see the timing in text. I also dont know why the Bronze Age and other events don't show up.
 
 > Instructions: hover over image to see plotly navigation options.
 
@@ -121,7 +121,6 @@ vistime(timeline %>%
         optimize_y = FALSE)
 ```
 
-- I dont know why the Bronze Age and other events don't show up
 
 ### common era only
 
@@ -137,7 +136,7 @@ vistime(timeline %>%
 
 ## `hc_vistime()` 
 
-This method produces an interactive visualisation with fewer view options than the default, but a cleaner looking plot.
+This method produces an interactive visualisation with fewer view options than the default, but a cleaner looking plot. Unfortunately, the plot does not always accurately reflect the duration of events. Hover over each event to see the timing in text.
 
 > Instructions: hover over image to see interactive elements. click and drag to zoom in to a selected area.
 
