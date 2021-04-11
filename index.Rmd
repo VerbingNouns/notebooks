@@ -1,7 +1,7 @@
 ---
 title: "R Notebooks and Code Tutorials"
 author: "Lauren M Ackerman"
-date: "Last updated: 08 April 2020"
+date: "Last updated: 11 April 2020"
 output: 
   html_document:
     theme: cerulean
