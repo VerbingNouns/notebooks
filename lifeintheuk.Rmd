@@ -67,7 +67,7 @@ data.table::data.table(timeline %>%
                          arrange(`Start date`))
 ```
 
-Not all of the dates are completely accurate. Some are taken from general dates listed in the official handbook, others are from wikipedia or other online sources. The purpose of these dates is primarily to rearrange the information presented in the official handbook in chronological order, to better visualise when different events occurred.
+Not all of the dates are NOT completely accurate. Some are taken from general dates listed in the official handbook, others are from wikipedia or other online sources. The purpose of these dates is primarily to rearrange the information presented in the official handbook in chronological order, to better visualise when different events occurred.
 
 </hr>
 
