@@ -9,7 +9,7 @@ First Roman Invasion (Julius Caesar),-20088,-19359,Roman Empire,55 BCE,55 BCE,Fi
 Second Roman Invasion (Claudius Caesar),15706,16070,Roman Empire,43 AD,43 AD,Second Roman Invasion (Claudius Caesar) [43 AD-43 AD],15706,15706,firebrick
 Roman Occupation,16071,149750,Roman Empire,44 AD,410 AD,Roman Occupation [44 AD-410 AD],16071,149750,firebrick
 Earliest introduction of Christianity,73049,146097,Roman Empire,200 AD,400 AD,Earliest introduction of Christianity [200 AD-400 AD],73049,146097,firebrick
-"Anglos, Saxons, and Jutes arrive",164360,219146,Anglo-Saxon Rule,450 AD,600 AD,"Anglos, Saxons, and Jutes arrive [450 AD-600 AD]",164360,219146,orange
+"Angles, Saxons, and Jutes arrive",164360,219146,Anglo-Saxon Rule,450 AD,600 AD,"Angles, Saxons, and Jutes arrive [450 AD-600 AD]",164360,219146,orange
 Anglo-Saxons rule England,149751,389634,Anglo-Saxon Rule,410 AD,1066 AD,Anglo-Saxons rule England [410 AD-1066 AD],149751,389634,orange
 Saint Patrick,157055,168012,Anglo-Saxon Rule,430 AD,460 AD,Saint Patrick [430 AD-460 AD],157055,168012,orange
 Saint Augustine,129612,157294,Anglo-Saxon Rule,13 November 0354,28 August 0430,Saint Augustine [354 AD - 430 AD],129612,157294,orange
@@ -25,3 +25,9 @@ The Middle Ages,173856,542386,Middle Ages,476 AD,1485 AD,The Middle Ages [476 AD
 King Edward I (England) annexes Wales,468972,468972,Middle Ages,1284 AD,1284 AD,King Edward I (England) annexes Wales [1284 AD-1284 AD],468972,468972,yellow2
 The Statute of Rhuddlan,468972,561012,Middle Ages,1284 AD,1536 AD,The Statute of Rhuddlan [1284 AD-1536 AD],468972,561012,yellow2
 The Battle of Bannockburn,480102,480103,Middle Ages,23 June 1314 AD,24 June 1314 AD,The Battle of Bannockburn [23 June 1314 AD-24 June 1314 AD],480102,480102,yellow2
+Establishment of The Pale,426969,438291,Middle Ages,1169 AD,1200 AD,Establishment of The Pale [1169 AD-1200 AD],426969,438291,yellow1
+The Crusades,399941,464224,Middle Ages,1095 AD,1271 AD,The Crusades [1095 AD-1271 AD],399941,464224,yellow2
+The Hundred Years War,488330,530698,Middle Ages,1337 AD,1453 AD,The Hundred Years War [1337 AD-1453 AD],488330,530698,yellow2
+Battle of Agincourt,517115,517115,Middle Ages,25 October 1415 AD,25 October 1415 AD,Battle of Agincourt [25 October 1415 AD-25 October 1415 AD],517115,517115,yellow2
+The Black Death,492347,494174,Middle Ages,1348 AD,1353 AD,The Black Death [1348 AD-1353 AD],492347,494174,yellow3
+The Magna Carta is ratified,443935,443935,Middle Ages,15 June 1215 AD,15 June 1215 AD,The Magna Carta is ratified [15 June 1215 AD-15 June 1215 AD],443935,443935,yellow2

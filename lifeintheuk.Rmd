@@ -47,7 +47,16 @@ timedat %>% as_tibble() %>%
   mutate(start = as.Date(as.numeric(start), origin="0000-01-01"),
          end = as.Date(as.numeric(end), origin="0000-01-01"),
          altStart = as.Date(as.numeric(altStart), origin="0000-01-01"),
-         altEnd = as.Date(as.numeric(altEnd), origin="0000-01-01")) -> timeline
+         altEnd = as.Date(as.numeric(altEnd), origin="0000-01-01"),
+         order = case_when(group=="Early People" ~ 1,
+                           group=="Early Britain" ~ 2,
+                           group=="Roman Empire" ~ 3,
+                           group=="Anglo-Saxon Rule" ~ 4,
+                           group=="Norman Rule" ~ 5,
+                           group=="Middle Ages" ~ 6)) -> timeline
+```
+
+```{r table, echo=FALSE}
 data.table::data.table(timeline %>% 
                          transmute(Era = group,
                                    Event = event,
@@ -78,7 +87,7 @@ This method produces a static visualisation using ggplot functions.
 gg_vistime(timeline %>% 
              mutate(start=altStart,end=altEnd) %>% 
              #select(-color) %>% 
-             arrange(start), 
+             arrange(order,start), 
            optimize_y = FALSE,
            linewidth = 5)
 #gg_vistime(timeline %>% select(-color), optimize_y = FALSE)
@@ -91,7 +100,7 @@ gg_vistime(timeline %>%
              mutate(start=altStart,end=altEnd) %>% 
              #select(-color) %>% 
              filter(start >= "0000-01-01") %>% 
-             arrange(start), 
+             arrange(order,start), 
            optimize_y = FALSE,
            background_lines = 25) 
 ```
@@ -108,7 +117,7 @@ This method is the default plotly visualisation.
 vistime(timeline %>% 
           mutate(start=altStart, end=altEnd) %>% 
           #select(-c(color,tooltip)) %>% 
-          arrange(start), 
+          arrange(order,start), 
         optimize_y = FALSE)
 ```
 
@@ -121,7 +130,7 @@ vistime(timeline %>%
           mutate(start=altStart, end=altEnd) %>% 
           #select(-c(color,tooltip)) %>% 
           filter(start >= "0000-01-01") %>% 
-          arrange(start), 
+          arrange(order,start), 
         optimize_y = FALSE)
 ```
 
@@ -138,7 +147,7 @@ This method produces an interactive visualisation with fewer view options than t
 hc_vistime(timeline %>% 
              mutate(start=altStart,end=altEnd) %>% 
              select(-color) %>% 
-             arrange(start), 
+             arrange(order,start), 
            optimize_y = FALSE)
 #hc_vistime(timeline %>% select(-color), optimize_y = FALSE)
 ```
@@ -149,7 +158,7 @@ hc_vistime(timeline %>%
 hc_vistime(timeline %>% 
              select(-color) %>% 
              filter(start >= "0000-01-01") %>% 
-             arrange(start), 
+             arrange(order,start), 
            optimize_y = FALSE)
 ```
 
