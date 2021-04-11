@@ -69,3 +69,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 * A quick and dirty analysis of how people respond to Twitter "snail races".
 * Can be used to compensate for order effects in 4-point multiple choice questions (MCQs).
+
+### [Life in the UK timeline](lifeintheuk.html)
+
+* A supplementary study guide to visualise the order in which events took place.
+* Based on the Official Life in the UK Test handbook.
