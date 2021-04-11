@@ -1,0 +1,9 @@
+event,start,end,group,startForHumans,endForHumans,tooltip,altStart,altEnd,color
+Permanent loss of land bridge,-3542852,-2921941,Early People,11700 BCE,10000 BCE,Permanent loss of land bridge [10000 BCE],-2921941,-2921941,blue
+Hunter-gatherers,-2921940,-1460971,Early People,10000 BCE,6000 BCE,Hunter-gatherers [10000 BCE-6000 BCE],-2921940,-1460971,blue
+Neolithic (Stone Age),-1643591,-730486,Early Britain,6500 BCE,4001 BCE,Neolithic (Stone Age) [6500 BCE-4001 BCE],-1643591,-730486,green3
+First farmers arrive,-1460970,-1460605,Early People,6000 BCE,6000 BCE,First farmers arrive [6000 BCE],-1460970,-1460970,blue
+Bronze Age,-730485,-292195,Early Britain,4000 BCE,800 BCE,Bronze Age [4000 BCE-800 BCE],-730485,-292195,green3
+Iron Age,-292194,-20089,Early Britain,800 BCE,56 BCE,Iron Age [800 BCE-56 BCE],-292194,-20089,green3
+First Roman Invasion (Julius Caesar),-20088,-19359,Roman Empire,55 BCE,55 BCE,First Roman Invasion (Julius Caesar) [55 BCE],-20088,-20088,firebrick
+Second Roman Invasion (Claudius Caesar),15706,16070,Roman Empire,43 AD,43 AD,Second Roman Invasion (Claudius Caesar) [43 AD],15706,15706,firebrick

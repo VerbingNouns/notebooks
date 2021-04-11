@@ -1,0 +1,58 @@
+---
+title: "Life in the UK"
+output: 
+  html_document:
+    theme: sandstone
+    highlight: default
+    toc: true
+    toc_float:
+      collapsed: false
+    includes: 
+      in_header: google_analytics.html
+---
+
+```{r setup, include=FALSE}
+# install.packages("vistime")
+library(vistime); library(tidyverse)
+```
+
+Read in the spreadsheet made from the Life in the UK handbook (and additional information)
+```{r data}
+# century = 36525 days
+timedat <- read.csv("data/timeline.csv")
+
+timedat %>% as_tibble() %>% 
+  mutate(start = as.Date(as.numeric(start), origin="0000-01-01"),
+         end = as.Date(as.numeric(end), origin="0000-01-01"),
+         altStart = as.Date(as.numeric(altStart), origin="0000-01-01"),
+         altEnd = as.Date(as.numeric(altEnd), origin="0000-01-01")) -> timeline;timeline
+```
+# `vistime` package
+
+## `vistime()` 
+
+default plotly visualisation
+
+```{r vistimeplotly, echo=FALSE, warning=FALSE, message=FALSE}
+vistime(timeline %>% mutate(start=altStart, end=altEnd) %>% select(-c(color,tooltip)), optimize_y = FALSE)
+vistime(timeline %>% select(-c(color,tooltip)), optimize_y = FALSE)
+```
+
+## `gg_vistime()` 
+
+static visualisation
+
+```{r ggvis, echo=FALSE}
+gg_vistime(timeline %>% mutate(start=altStart,end=altEnd) %>% select(-color), optimize_y = FALSE)
+gg_vistime(timeline %>% select(-color), optimize_y = FALSE)
+```
+
+## `hc_vistime()` 
+
+interactive visualisation
+
+```{r hcvis, echo=FALSE, warning=FALSE, message=FALSE}
+hc_vistime(timeline %>% mutate(start=altStart,end=altEnd) %>% select(-color), optimize_y = TRUE)
+hc_vistime(timeline %>% select(-color), optimize_y = TRUE)
+```
+
