@@ -1,9 +1,21 @@
 event,start,end,group,startForHumans,endForHumans,tooltip,altStart,altEnd,color
-Permanent loss of land bridge,-3542852,-2921941,Early People,11700 BCE,10000 BCE,Permanent loss of land bridge [10000 BCE],-2921941,-2921941,blue
-Hunter-gatherers,-2921940,-1460971,Early People,10000 BCE,6000 BCE,Hunter-gatherers [10000 BCE-6000 BCE],-2921940,-1460971,blue
+Permanent loss of land bridge,-3542852,-2921941,Early People,11700 BCE,10000 BCE,Permanent loss of land bridge [11700 BCE-10000 BCE],-2921941,-2921941,cadetblue
+Hunter-gatherers,-2921940,-1460971,Early People,10000 BCE,6000 BCE,Hunter-gatherers [10000 BCE-6000 BCE],-2921940,-1460971,cadetblue
 Neolithic (Stone Age),-1643591,-730486,Early Britain,6500 BCE,4001 BCE,Neolithic (Stone Age) [6500 BCE-4001 BCE],-1643591,-730486,green3
-First farmers arrive,-1460970,-1460605,Early People,6000 BCE,6000 BCE,First farmers arrive [6000 BCE],-1460970,-1460970,blue
+First farmers arrive,-1460970,-1460605,Early People,6000 BCE,6000 BCE,First farmers arrive [6000 BCE-6000 BCE],-1460970,-1460970,cadetblue
 Bronze Age,-730485,-292195,Early Britain,4000 BCE,800 BCE,Bronze Age [4000 BCE-800 BCE],-730485,-292195,green3
 Iron Age,-292194,-20089,Early Britain,800 BCE,56 BCE,Iron Age [800 BCE-56 BCE],-292194,-20089,green3
-First Roman Invasion (Julius Caesar),-20088,-19359,Roman Empire,55 BCE,55 BCE,First Roman Invasion (Julius Caesar) [55 BCE],-20088,-20088,firebrick
-Second Roman Invasion (Claudius Caesar),15706,16070,Roman Empire,43 AD,43 AD,Second Roman Invasion (Claudius Caesar) [43 AD],15706,15706,firebrick
+First Roman Invasion (Julius Caesar),-20088,-19359,Roman Empire,55 BCE,55 BCE,First Roman Invasion (Julius Caesar) [55 BCE-55 BCE],-20088,-20088,firebrick
+Second Roman Invasion (Claudius Caesar),15706,16070,Roman Empire,43 AD,43 AD,Second Roman Invasion (Claudius Caesar) [43 AD-43 AD],15706,15706,firebrick
+Roman Occupation,16071,149750,Roman Empire,44 AD,410 AD,Roman Occupation [44 AD-410 AD],16071,149750,firebrick
+Earliest introduction of Christianity,73049,146097,Roman Empire,200 AD,400 AD,Earliest introduction of Christianity [200 AD-400 AD],73049,146097,firebrick
+"Anglos, Saxons, and Jutes arrive",164360,219146,Anglo-Saxon Rule,450 AD,600 AD,"Anglos, Saxons, and Jutes arrive [450 AD-600 AD]",164360,219146,orange
+Anglo-Saxons rule England,149751,389634,Anglo-Saxon Rule,410 AD,1066 AD,Anglo-Saxons rule England [410 AD-1066 AD],149751,389634,orange
+Saint Patrick,157055,168012,Anglo-Saxon Rule,430 AD,460 AD,Saint Patrick [430 AD-460 AD],157055,168012,orange
+Saint Augustine,129612,157294,Anglo-Saxon Rule,13 November 0354,28 August 0430,Saint Augustine [354 AD - 430 AD],129612,157294,orange
+Vikings first arrive,288177,288541,Anglo-Saxon Rule,789 AD,789 AD,Vikings first arrive [789 AD-789 AD],288177,288177,orange
+King Alfred the Great unites the Anglo-Saxons,323606,328719,Anglo-Saxon Rule,886 AD,899 AD,King Alfred the Great unites the Anglo-Saxons [886 AD-899 AD],323606,325066,orange
+Kenneth McAlpin unites Scotland,307900,313743,Anglo-Saxon Rule,843 AD,858 AD,Kenneth McAlpin unites Scotland [843 AD-858 AD],307900,313743,orange
+Cnut the Great rules England (and Scotland),371086,378341,Anglo-Saxon Rule,1016 AD,1035 AD,Cnut the Great rules England (and Scotland) [1016 AD-1035 AD],371086,378341,orange3
+Battle of Hastings,389635,389636,Norman Rule,14 October 1066 AD,14 October 1066 AD,Battle of Hastings [14 October 1066 AD-14 October 1066 AD],389635,389635,red3
+Norman Occupation of Wales,389714,402132,Norman Rule,1067 AD,1101 AD,Norman Occupation of Wales [1067 AD-1101 AD],389714,402132,red3

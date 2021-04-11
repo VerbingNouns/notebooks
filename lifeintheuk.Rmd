@@ -35,8 +35,14 @@ default plotly visualisation
 
 ```{r vistimeplotly, echo=FALSE, warning=FALSE, message=FALSE}
 vistime(timeline %>% mutate(start=altStart, end=altEnd) %>% select(-c(color,tooltip)), optimize_y = FALSE)
-vistime(timeline %>% select(-c(color,tooltip)), optimize_y = FALSE)
 ```
+
+common era only
+
+```{r cebase, echo=FALSE,message=FALSE}
+vistime(timeline %>% mutate(start=altStart, end=altEnd) %>% select(-c(color,tooltip)) %>% filter(start >= "0000-01-01"), optimize_y = FALSE)
+```
+
 
 ## `gg_vistime()` 
 
@@ -44,15 +50,27 @@ static visualisation
 
 ```{r ggvis, echo=FALSE}
 gg_vistime(timeline %>% mutate(start=altStart,end=altEnd) %>% select(-color), optimize_y = FALSE)
-gg_vistime(timeline %>% select(-color), optimize_y = FALSE)
+#gg_vistime(timeline %>% select(-color), optimize_y = FALSE)
 ```
+common era only
+
+```{r cegg, echo=FALSE}
+gg_vistime(timeline %>% mutate(start=altStart,end=altEnd) %>% select(-color) %>% filter(start >= "0000-01-01"), optimize_y = FALSE)
+```
+
 
 ## `hc_vistime()` 
 
 interactive visualisation
 
 ```{r hcvis, echo=FALSE, warning=FALSE, message=FALSE}
-hc_vistime(timeline %>% mutate(start=altStart,end=altEnd) %>% select(-color), optimize_y = TRUE)
-hc_vistime(timeline %>% select(-color), optimize_y = TRUE)
+hc_vistime(timeline %>% mutate(start=altStart,end=altEnd) %>% select(-color), optimize_y = FALSE)
+#hc_vistime(timeline %>% select(-color), optimize_y = FALSE)
+```
+
+common era only
+
+```{r cehc, echo=FALSE, message=FALSE}
+hc_vistime(timeline %>% select(-color) %>% filter(start >= "0000-01-01"), optimize_y = FALSE)
 ```
 
