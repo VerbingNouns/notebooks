@@ -1,0 +1,49 @@
+---
+title: "Before the workshop..."
+author: "Dr Lauren Ackerman"
+output:
+  html_document:
+    toc: false
+    number_sections: false
+    theme: sandstone
+    highlight: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set up
+
+Please make sure you have downloaded and installed [R](https://cran.r-project.org/), [RStudio](https://www.rstudio.com/products/rstudio/download/), and these packages below on your computer **before the workshop**. You may contact me if you run into problems. 
+
+```{r eval=FALSE, eval=FALSE}
+install.packages("tidyverse","ordinal","lme4","broom")
+```
+
+If you are unfamiliar with R and RStudio, follow these instructions:
+
+1. Download and install R and RStudio on the computer you will be using for this workshop.
+2. Locate on your computer the file called `20210608-datawrangling.Rmd` that was sent to you in advance of the workshop.
+3. Open that file in RStudio. You will now be looking at a white and grey document.
+4. At the top right of the second grey area, there should be a green triangle pointing rightwards. Click it.
+5. Allow the interface to work its magic! (Red text isn't necessarily bad -- it can simply be information.)
+
+This workshop will assume some familiarity with both R and RStudio. If you are entirely new to R, RStudio, programming and/or statistics, please also install the following package by clicking the green triangle in the upper right corner of the grey area (when viewing this file in RStudio):
+
+```{r, eval=FALSE}
+install.packages("swirl")
+```
+
+The `swirl` package will give you some basic skills that you will need for the workshop, if you do not already have R experience.
+
+Run the following chunk as before (green triangle) to get started with `swirl`.
+```{r, eval=FALSE}
+swirl::swirl()
+```
+
+Once you have clicked the green triangle, you will see it becomes a red square. You may also see a 'waiting' symbol moving below the chunk. If this is all you see (that is, you do not see red text saying 'Welcome to swirl! ...'), find and click the `Console` tab in the RStudio window. You will interact with `swirl` through the console.
+
+To exit `swirl`, you can press the Escape key.
+
+# See you soon!
