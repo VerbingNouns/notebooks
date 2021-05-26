@@ -21,9 +21,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Information
 
-Welcome to [ Statistics [ for Linguists ] ] with R (2021)! In this four-day workshop, you will use R and RStudio to manage data, build beautiful plots, and conduct different types of linear models. This summer school is aimed at postgraduates and staff who are interested in using R to do statistical analysis and have some minimal experience with it, but do not necessarily have confidence in either R or statistics. I will assume a little previous experience with R, descriptive statistics, and familiarity with concepts in quantitative linguistics and/or psychology, but minimal understanding of inferential statistics.
+Welcome to [ Statistics [ for Linguists ] ] with R (2021)! In this four-day workshop, you will use R and RStudio to manage data, build beautiful plots, and conduct different types of linear models. This summer school is aimed at postgraduates and staff who are interested in using R to do statistical analysis and have some minimal experience with it, but do not necessarily have confidence in either their skills in R or statistics. I will assume a little previous experience with R, descriptive statistics, and familiarity with concepts in quantitative linguistics and/or psychology, but no foundation in inferential statistics.
 
-Due to the pandemic (surprise!), this workshop will be held entirely remotely. This presents a major problem, as the computer you are likely to be using to watch the workshop is the same one you will have R on. Unless you are lucky enough to have two monitors or two computers, this will make active participation quite difficult. Therefore, each day is split into (at least) two sections. The first section will primarily be a lecture, where you can focus on watching and taking notes if you prefer. The second section will be more interactive, where you will be focusing more on engaging with R. However, if you can switch back and forth between Zoom and R, it is recommended to engage with R during the lecture as well.
+Due to the on-going pandemic, this workshop will be held entirely remotely. This presents a major problem, as the computer you are likely to be using to watch the workshop is the same one you will have R on. Unless you are lucky enough to have two monitors or two computers, this will make active participation quite difficult. Therefore, each day is split into (at least) two sections. The first section will primarily be a lecture, where you can focus on watching and taking notes if you prefer. The second section will be more interactive, where you will be focusing more on engaging with R. However, if you can switch back and forth between Zoom and R, it is recommended to engage with R during the lecture as well.
 
 ## Schedule
 
@@ -45,7 +45,7 @@ Get to know a dataset that simulates a linguistic experiment. Learn how to shape
 
 **Data visualisation as analysis**
 
-Using the simulated dataset, select appropriate visualisations for answering sound “research” questions using ggplot2 (part of the Tidyverse). Learn the principles of what makes a good visualisation and how to communicate efficiently and clearly using a “visual grammar”.
+Using the simulated dataset, select appropriate visualisations for answering sound “research” questions using `ggplot2` (part of the Tidyverse). Learn the principles of what makes a good visualisation and how to communicate efficiently and clearly using a “visual grammar”.
 
 | Time | Event |
 | --- | --- |
@@ -91,7 +91,7 @@ If you are unfamiliar with R and RStudio, follow these instructions:
 
 1. Download and install R and RStudio on the computer you will be using for this workshop.
 2. Copy and paste the text from the following grey box into your `Console` in RStudio (there should be a `>` symbol at the bottom left.)
-3. Hit enter.
+3. Make sure you have an active internet connection and **hit Enter**.
 4. Allow the interface to work its magic! (Red text isn't necessarily bad -- it can simply be information.)
 
 ```{r eval=FALSE, eval=FALSE}
@@ -113,7 +113,7 @@ Run the following chunk as before (copy, paste, Enter) to get started with `swir
 swirl::swirl()
 ```
 
-Once you have hit Enter, `swirl` will start "talking" to you in red text. You will have to respond to it by typing and hitting Enter when you are done with your answers.
+Once you have hit Enter, `swirl` will start "talking" to you in red text. You will have to respond to it by typing and hitting Enter when you are done with your answers. (You do not need an internet connection to use `swirl`.)
 
 To exit `swirl`, you can press the Escape key.
 
