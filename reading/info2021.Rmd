@@ -1,0 +1,123 @@
+---
+title: "[ Statistics [ for Linguists ] ] with R (2021)"
+author: "Dr Lauren Ackerman"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: false
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
+    highlight: default
+    includes: 
+      in_header: ../google_analytics.html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Information
+
+Welcome to [ Statistics [ for Linguists ] ] with R (2021)! In this four-day workshop, you will use R and RStudio to manage data, build beautiful plots, and conduct different types of linear models. This summer school is aimed at postgraduates and staff who are interested in using R to do statistical analysis and have some minimal experience with it, but do not necessarily have confidence in either R or statistics. I will assume a little previous experience with R, descriptive statistics, and familiarity with concepts in quantitative linguistics and/or psychology, but minimal understanding of inferential statistics.
+
+Due to the pandemic (surprise!), this workshop will be held entirely remotely. This presents a major problem, as the computer you are likely to be using to watch the workshop is the same one you will have R on. Unless you are lucky enough to have two monitors or two computers, this will make active participation quite difficult. Therefore, each day is split into (at least) two sections. The first section will primarily be a lecture, where you can focus on watching and taking notes if you prefer. The second section will be more interactive, where you will be focusing more on engaging with R. However, if you can switch back and forth between Zoom and R, it is recommended to engage with R during the lecture as well.
+
+## Schedule
+
+### Day 1 (8 June)
+
+**Data wrangling in Tidyverse**
+
+Get to know a dataset that simulates a linguistic experiment. Learn how to shape it, summarise it, and visualise it using Tidyverse in R.
+
+| Time | Event |
+| --- | --- |
+| 09h00 - 10h30 | Lecture |
+| 10h30 - 15h30 | Breaks, work independently |
+| 15h30 - 17h00 | Workshop, group work |
+
+*Due to unforeseen circumstances, there will be no Surgery session on Day 1. If you encounter problems or need extra help, the TAs and I will be available during the Workshop session, and I am happy to respond to queries by email.
+
+### Day 2 (10 June)
+
+**Data visualisation as analysis**
+
+Using the simulated dataset, select appropriate visualisations for answering sound “research” questions using ggplot2 (part of the Tidyverse). Learn the principles of what makes a good visualisation and how to communicate efficiently and clearly using a “visual grammar”.
+
+| Time | Event |
+| --- | --- |
+| 09h00 - 10h30 | Lecture |
+| 10h30 - 11h00 | Break |
+| 11h00 - 12h30 | Workshop, group work |
+| 12h30 - 15h00 | Break, work independently |
+| 15h00 - 16h00 | Report back, troubleshoot |
+
+### Day 3 (15 June)
+
+**Types of linear models**
+
+Continuous, categorical, binomial, and ordinal data all have distinctive properties that require distinct analytical techniques. Start to learn about how to analyse each of these types of data, and practice on the simulated data set.
+
+| Time | Event |
+| --- | --- |
+| 09h00 - 10h30 | Lecture |
+| 10h30 - 11h00 | Break |
+| 11h00 - 12h30 | Workshop, group work |
+| 12h30 - 15h00 | Break, work independently |
+| 15h00 - 16h00 | Report back, troubleshoot |
+
+### Day 4 (17 June)
+
+**Mixed effects and beyond**
+
+Simple linear models don’t account for important sources of noise, especially in experiments that have between-subjects and/or between-items analyses. Learn how to build and interpret a mixed effect model that accounts for this noise, to give you more reliable and informative analyses.
+
+| Time | Event |
+| --- | --- |
+| 09h00 - 10h30 | Lecture |
+| 10h30 - 11h00 | Break |
+| 11h00 - 12h30 | Workshop, group work |
+| 12h30 - 15h00 | Break, work independently |
+| 15h00 - 16h00 | Report back, troubleshoot |
+
+# Before the workshop...
+
+Please make sure you have downloaded and installed [R](https://cran.r-project.org/), [RStudio](https://www.rstudio.com/products/rstudio/download/), and these packages below on your computer **before the workshop**. You may contact me if you run into problems. 
+
+If you are unfamiliar with R and RStudio, follow these instructions:
+
+1. Download and install R and RStudio on the computer you will be using for this workshop.
+2. Copy and paste the text from the following grey box into your `Console` in RStudio (there should be a `>` symbol at the bottom left.)
+3. Hit enter.
+4. Allow the interface to work its magic! (Red text isn't necessarily bad -- it can simply be information.)
+
+```{r eval=FALSE, eval=FALSE}
+install.packages("tidyverse","ordinal","lme4","broom")
+```
+
+## Familiarise yourself
+
+This workshop will assume some familiarity with both R and RStudio. If you are entirely new to R, RStudio, programming and/or statistics, please also install the following package by copying and pasting the following text into your console just as you did before (then hit Enter):
+
+```{r, eval=FALSE}
+install.packages("swirl")
+```
+
+The `swirl` package will give you some basic skills that you will need for the workshop, if you do not already have R experience.
+
+Run the following chunk as before (copy, paste, Enter) to get started with `swirl`.
+```{r, eval=FALSE}
+swirl::swirl()
+```
+
+Once you have hit Enter, `swirl` will start "talking" to you in red text. You will have to respond to it by typing and hitting Enter when you are done with your answers.
+
+To exit `swirl`, you can press the Escape key.
+
+You can resume at any time, so you do not need to do it all in one go. In fact, you will need very little experience with `swirl` to be prepared for the workshop. I recommend taking a peek at **Course 1: R Programming** if you are new to R. Many of these courses will be useful and only briefly mentioned, as they are fundamental to much of R programming.
+
+***
+<big><big><big><big>See you soon!</big></big></big></big>
