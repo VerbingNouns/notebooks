@@ -1,0 +1,401 @@
+---
+title: "**Data Wrangling and Tidyverse**"
+author: "Dr Lauren Ackerman"
+date: "08 JUN 2021"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
+    highlight: default
+    includes: 
+      in_header: ../../google_analytics.html
+---
+
+[Return Home](../info2021.html)
+
+```{r,  setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# 1. R and RStudio interfaces, RMarkdown, and Tidyverse
+#    - Basic functionality, shortcuts, writing scripts and notebooks
+#    - Piping syntax and code replicability
+#    - Tidyr, Dplyr, related packages
+#    - Cleaning, combining, and rearranging data frames
+# 2. Data visualisation using ggplot and best practices
+#    - Structure and syntax of ggplot and geom
+#    - Customising and combining plots
+#    - Determining what plot is best for your data
+# 3. Basic linear models (including gaussian, binomial, and ordinal)
+#    - building/selecting an appropriate model
+#    - practical use of lm(), glm()
+#    - dummy coding vs contrast coding
+#    - interpreting the output
+# 4. Mixed effects linear models
+#    - mixed effects and convergence
+#    - practical use of lmer(), glmer(), clmm()
+#    - maximal vs parsimonious models
+```
+
+**Welcome to Day 1!**
+
+Today, we'll be breezing through some of the basics of R. Hopefully, some of this starts off as review. If you find yourself struggling with it at any time, that's *okay*! It's all written down, so you can come back to it later, when it's had more time to sink in.
+
+Learning R and statistics is an *iterative process*. If you attended the exact same workshop four times in a row, you'd learn something new each time. Depending on your skill level and confidence coming into this workshop, you are likely to learn different things. 
+
+If you're more skilled, think of the familiar parts as a chance to refresh your knowledge or see it from a slightly different perspective (as R and statistics are a lot like natural language -- there are dialects and communities of practice that vary across the population)! 
+
+If this is your first formal foray into R and linear models, it may seem overwhelming at times. That's normal and good, actually. This is a chance to get a crash course in *some* aspects of R and statistics, hold on to a few bits of information, and build on them as you learn more from other sources. I think of it like trying to get a drink of water from a garden hosepipe turned all the way on. Most of the water will miss your mouth, splash everywhere, and go down your front. Some of the water will spray into your mouth but bounce out (or get spit out!), and a very tiny bit will actually go down your throat. Every time you return to the hosepipe of information, your thirst for knowledge will be sated a little more, but it will require being on the receiving end of much more information than you can possibly take in before your thirst is quenched.
+
+After this Summer School, you can always return to these materials. Once they're online, I won't be taking them down. I encourage you to take notes and try them out alongside me, though, as I will be saying much more than is written. I will also be uploading the "complete" files which are what we end each day with. These will not be linked directly from the main page, but you will be able to access them any time to see the final state of the materials we worked on as a group. Your own materials may differ, so it's good to have them handy as well.
+
+The last thing I want to assert before we dive in is that *no one writes their code from scratch*. Even though it might sometimes look like I'm starting with a (nearly) blank page, or that I've memorized all the functions and arguments we'll be using, this is an illusion. The best way to write code is by copying and pasting code from other people's (reliable) sources, and adapting it. This is what professional programmers do, and it's what you'll do too. 
+
+# Base R
+
+Hopefully, you're already familiar enough with R to know that it can act like a calculator. You might already know that you can store *values* in things called *variables*. These values can be single objects, vectors, lists, arrays, matrices, or other things. 
+
+```{r}
+# A vector of class `character` containing four "strings":
+myList <- c("English", "Spanish", "Mandarin", "Arabic")
+
+# A vector of class `integer` containing four numbers:
+myNums <- 1:4
+
+# How can we identify which items are where?
+myList[2:3]
+
+# What operations can we do to the vector object?
+# How does that affect the members of the vector?
+myNums * .5 -> myNumsHalf
+
+# What are "classes" and why do we care?
+as.factor(myList)
+
+class(myList)
+class(myNums)
+class(myNumsHalf)
+class(as.factor(myList))
+```
+
+Libraries are like recipe books. Once we've installed the library (like purchasing the recipe book), we need to take it off the shelf and open it to access the recipes inside.
+
+```{r}
+library(palmerpenguins)
+```
+
+One of the "recipes" in the `palmerpenguins` library is a dataset called `penguins`.
+
+```{r}
+head(penguins)
+```
+
+## Simple operations
+
+Some base R operations will be useful throughout this workshop. Here are some of the most important things to know.
+
+```{r}
+penguins$species
+
+x <- unique(penguins$species)
+
+class(x)
+```
+
+One note of caution: you don't want to irreparably alter your data (which is why we don't want to open it in Excel if we can help it). This also means you don't want to overwrite your original data file. Let's create a new dataset that we can overwrite and modify so that we don't change the original.
+
+```{r}
+penguins_edited <- penguins
+
+
+```
+
+Finally, let's look at an overview of the structure of the dataset.
+
+```{r}
+str(penguins)
+```
+
+
+## Summary statistics
+
+Before we get into inferential statistics, we should review summary statistics.
+
+```{r}
+#
+```
+
+Some of these functions can optionally take an additional argument that tells it what to do with missing data.
+
+```{r}
+#
+```
+
+We can also polish up the output so it's more reader friendly.
+
+```{r}
+print("Adelie stats")
+max(   *** , na.rm = TRUE)
+min(   *** , na.rm = TRUE)
+mean(  *** , na.rm = TRUE)
+median(*** , na.rm = TRUE)
+
+print("Chinstrap stats")
+paste("max body mass =",       max( *** , na.rm = TRUE))
+paste("min body mass =",       min( *** , na.rm = TRUE))
+paste("mean body mass =",     mean( *** , na.rm = TRUE))
+paste("median body mass =", median( *** , na.rm = TRUE))
+
+print("Gentoo stats")
+paste("max body mass =",                    max( *** , na.rm = TRUE))
+paste("min body mass =",                    min( *** , na.rm = TRUE))
+paste("mean body mass =",                  mean( *** , na.rm = TRUE))
+paste("median body mass =",              median( *** , na.rm = TRUE))
+paste("standard deviation of body mass =",   sd( *** , na.rm = TRUE))
+paste("standard error of body mass =", round(sd( *** , na.rm = TRUE)/sqrt(length(na.omit( *** ))), 2))
+```
+
+# Tidyverse
+
+The `tidyverse` is a series of libraries that function well together and are designed to wrangle, manipulate, and visualise data cleanly and easily.
+
+```{r}
+library(tidyverse)
+```
+
+They're held together with something called a 'pipe', which is more of a funnel than a pipe:
+
+```{r}
+penguins %>% head()
+```
+
+There are some quirks in `tidyverse` packages, but ultimately they make it easier for humans to read code.
+
+```{r}
+penguins %>% 
+  pull(species) %>% 
+  unique()
+```
+
+Here are two ways to do the same thing:
+
+```{r}
+#
+```
+
+We can also polish up the output so it's formatted nicely.
+
+```{r}
+# paste("mean body mass =", .)
+```
+
+
+## Summaries and tables
+
+Typically, datasets are giant and unwieldy. We usually don't want to look at the whole thing. It's more informative if we can summarise it. There are functions to summarise whole datasets automatically, but they don't know what you care about in the dataset. Let's summarise `penguins` in the ways we care about.
+
+```{r, message=FALSE}
+#
+```
+
+As a side note, you can output these sorts of tables formatted for publication so you don't have to copy and paste individual values to a document!
+
+```{r, message=FALSE}
+***
+  knitr::kable(caption = "Table 1: Summary of penguin body mass (g) by species",
+               align = "c",
+               digits = 2)
+```
+
+
+# Data wrangling
+
+Data wrangling is the process of taking raw data from whatever output and making it ready to be analysed. It's time consuming and finnicky, but can also be pretty fun once you get the hang of it!
+
+## Column manipulations
+
+You can create or overwrite columns using `mutate()`, vertically subset data using `select()`, and horizontally subset data using `filter()`.
+
+```{r, message=FALSE}
+# area of a triangle = height * base / 2
+# density = mass / volume; volume = length * width * height
+
+```
+
+
+## Long vs wide data
+
+Sometimes, your data is too long or too wide for the analysis you want to do. This is made easy to fix with `pivot_wider()` and `pivot_longer()`.
+
+```{r, message=FALSE}
+penguins %>% 
+  filter(!is.na(body_mass_g)) %>% 
+  group_by(species) %>% 
+  summarise(max =       max(body_mass_g) %>% round(2),
+            min =       min(body_mass_g) %>% round(2),
+            mean =     mean(body_mass_g) %>% round(2),
+            median = median(body_mass_g) %>% round(2),
+            stdev =      sd(body_mass_g) %>% round(2),
+            se =       (stdev/sqrt(n())) %>% round(2)) -> wide_penguins
+
+wide_penguins
+```
+
+
+```{r}
+# pivot_longer()
+```
+
+
+```{r}
+wide_penguins %>% pivot_longer(cols = c("max", "min", "mean", "median", "stdev", "se"), names_to = "measure", values_to = "values") -> long_penguins
+```
+
+
+```{r}
+# pivot_wider()
+```
+
+
+## Clean up messy values
+
+The package `palmerpenguins` also comes with a messier 'raw' version of the data.
+
+```{r}
+head(penguins_raw)
+```
+
+### Case when
+
+The function `case_when()` allows us to isolate certain rows for manipulation or cleaning and apply different rules to different situations. It's very handy but can take some practice to get used to.
+
+```{r, message=FALSE}
+# unique `Comments`
+# range of `Delta 13 C (o/oo)`
+
+```
+
+# Workshop activities
+
+Practice reshaping [long-data.csv](https://verbingnouns.github.io/notebooks/reading/data/long-data.csv) and [wide-data.csv](https://verbingnouns.github.io/notebooks/reading/data/wide-data.csv), which you can download by right-clicking  or copying/pasting the links.
+
+You may also want to try to look up new functions to use for some of these tasks.
+
+- Make `long-data.csv` wider so that each type of measurement is its own column.
+- Once you've created a `Savings` column, find a way to *separate* or *split* the numeric and string information.
+    - This might require you to do a search online or in the Help window.
+- Change the class of data in columns, e.g., strings containing only numbers should be numeric.
+- Convert all values in the `Savings` column into a single currency. This might include tasks such as:
+    - searching for the current conversion rate online
+    - using `case_when` to manipulate different certain rows in different ways
+- Make `wide-data.csv` longer so that each survey question (column) except for `name` is on a separate row.
+- Interpret and debug error messages.
+
+```{r}
+longdat <- read_csv("../data/long-data.csv")
+str(longdat)
+longdat %>% pivot_wider(names_from = "measure", values_from = "value")
+```
+
+
+```{r}
+widedat <- read_csv("../data/wide-data.csv")
+str(widedat)
+widedat %>% 
+  pivot_longer(cols = 3:7, names_to = "question", values_to = "values")
+```
+
+## If you have time
+
+Explore [the simulated dataset](https://verbingnouns.github.io/notebooks/data/simulated-data.csv). We'll be using it more in the future, so you can start to get a feel for it now.
+
+```{r}
+simdat <- read_csv("../data/simulated-data.csv")
+str(simdat)
+```
+
+Here is some basic background about the design of the simulated data. It's meant to immitate some experimental linguistics data.
+
+### Background
+
+We believe high frequency words are generally read and comprehended faster than low frequency words. We also believe that sentences which are temporarily ambiguous cause reading time slowdowns.
+
+- [Ferreira & Henderson, 1990: Use of Verb Information in Syntactic Parsing: Evidence from Eye Movements and Self-Paced Reading](https://ferreiralab.faculty.ucdavis.edu/wp-content/uploads/sites/222/2015/05/Ferreira-Henderson-1990_VerbInformationParsing_JEPLMC.pdf)
+
+Compare:
+
+1. The coach praised the player tossed the frisbee.
+2. The coach praised the player thrown the frisbee.
+
+Sentence (1) is more difficult to interpret because "tossed" is ambiguous between a verb and a past participle.  
+Sentence (2) is unambiguous.  
+Sentence (1) takes longer to read, especially after the original interpretation ("The coach praised the player.") has been disconfirmed ("tossed").  
+Sentence (2) also has a disconfirmation, but the solution is made clear so the reinterpretation is straightforward.  
+
+The ambiguity here relies primarily on a reduced relative clause. Changing it to an unreduced relative clause removes all ambiguity and comprehension difficulty. Compare:
+
+3. The coach praised the player who was tossed the frisbee.
+4. The coach praised the player who was thrown the frisbee.
+
+"The old VERB the boat." where **VERB** is where the manipulation of interest will be. All verbs are ambiguous with nouns. 
+
+|Condition Number | Sample sentence | Verb frequency | Grammaticality |
+|----------|-----------------|----------------|----------------|
+|1|the old man the boat|high|  grammatical|
+|2|the old put the boat|high|ungrammatical|
+|3|the old run the boat|low |  grammatical|
+|4|the old owe the boat|low |ungrammatical|
+
+### Data collection
+
+#### Procedure
+
+The data came from a *simulated* experiment. No real people were involved. This is **fake data**.
+
+BUT: if it were real data, this is the experiment it would have come from:
+
+1. Participant signs a consent form and is assigned an identifying number, the two of which can only be linked using information stored *securely* (i.e., not in a laptop, notebook, or email).
+2. Participant sits at a computer and reads instructions for the task:
+    a. Read a sentence word by word at a natural pace.
+    b. Only one word will be visible at any time.
+    c. To see the next word, press the space bar or other button.
+    d. After the last word, press the button to answer two follow-up questions.
+    e. First, answer a question about the sentence you just read.
+    f. Second, rate the preceding sentence on a scale of 1 (unnatural, unacceptable) to 5 (natural, acceptable).
+    g. Once all sentences and associated questions have been answered, the participant answers demographic questions (e.g., age).
+3. Participant consents to participating.
+4. Participant completes a few practice trials to become familiar with the task.
+5. Participant completes the task as instructed.
+6. Participant is debriefed about the purpose of the experiment.
+7. Participant is compensated for their time and labour in a manner approved by the Ethics Committee.
+
+### Data structure
+
+This dataset was specifically designed to teach linguists about data visualisation and analysis. Let's take a look at what it contains to understand its specifically linguistic properties.
+
+Now we can read it in to our R session:
+```{r}
+# read in the data
+data <- read.csv("../data/simulated-data.csv")
+# check out what it contains
+str(data)
+```
+
+This data contains the following columns:
+
+- `subj`: unique participant ID numbers to anonymise each person (integers)
+- `age`: the participant's age in years (whole numbers, discrete data)
+- `item`: each participant was shown each of these items
+- `freq`: whether the participant was shown the high or low frequency version of the specific item
+- `gram`: whether the participant was shown the grammatical or ungrammatical version of the specific item
+- `rating`: the acceptability rating that the participant gave this particular version of the item
+- `accuracy`: whether the participant answered a comprehension question correctly or not
+- `region`: the order in which each word in the sentence occurred
+- `word`: the lexical content of each position in the sentence
+- `rt`: the reaction time; the time it took for the participant to read the work and click a button
+
+

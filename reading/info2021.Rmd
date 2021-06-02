@@ -29,7 +29,7 @@ Due to the on-going pandemic, this workshop will be held entirely remotely. This
 
 ### Day 1 (8 June)
 
-**Data wrangling in Tidyverse**
+[**Data wrangling in Tidyverse**](notebooks/20210608-datawrangling.html)
 
 Get to know a dataset that simulates a linguistic experiment. Learn how to shape it, summarise it, and visualise it using Tidyverse in R.
 
