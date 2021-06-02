@@ -43,6 +43,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Welcome to Day 1!**
 
+[Download the template notebook here.](20210608-datawrangling.Rmd)
+
 Today, we'll be breezing through some of the basics of R. Hopefully, some of this starts off as review. If you find yourself struggling with it at any time, that's *okay*! It's all written down, so you can come back to it later, when it's had more time to sink in.
 
 Learning R and statistics is an *iterative process*. If you attended the exact same workshop four times in a row, you'd learn something new each time. Depending on your skill level and confidence coming into this workshop, you are likely to learn different things. 
