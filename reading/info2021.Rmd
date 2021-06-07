@@ -43,7 +43,7 @@ Get to know a dataset that simulates a linguistic experiment. Learn how to shape
 
 ### Day 2 (10 June)
 
-**Data visualisation as analysis**
+[**Data visualisation as analysis**](notebooks/20210610-dataviz.html)
 
 Using the simulated dataset, select appropriate visualisations for answering sound “research” questions using `ggplot2` (part of the Tidyverse). Learn the principles of what makes a good visualisation and how to communicate efficiently and clearly using a “visual grammar”.
 
