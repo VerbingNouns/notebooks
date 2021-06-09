@@ -357,8 +357,8 @@ simdat %>%
   filter(region == 3) %>% 
   ggplot(aes(x=age, y=rt)) +
   theme_bw() +
-  #geom_point() +
-  geom_smooth(aes(linetype=freq, colour=gram), method = "lm") +
+  # what geometry should you use for a scatter plot?
+  # can you implement geom_smooth() here?
   NULL
 ```
 
@@ -372,8 +372,9 @@ simdat %>%
 ```{r}
 simdat %>% 
   ggplot(aes(x=gram, y=rt, fill=freq)) +
-  geom_boxplot() +
-  facet_grid(.~region)
+  # what geometry should you use for a box plot?
+  # can you implement facet_grid() or facet_wrap() here?
+  NULL
 ```
 
 3. Ordinal data can be very tricky to interpret visually *and* statistically.
@@ -388,13 +389,13 @@ simdat %>%
 
 ```{r}
 simdat %>% 
-  filter(region == 3) %>% 
-  #mutate(rating = as.factor(rating)) %>% 
-  group_by(freq, gram, rating) %>% 
-  summarise(total = n()) %>% 
-  mutate(condition = paste(gram, freq)) %>% 
-  ggplot(aes(x=condition, y=total, fill=rating)) +
-  geom_bar(stat = "identity", position = "stack")
+  # ensure you are only looking at one of the five regions
+  # group your data by frequency, grammaticality, and rating
+  # summarise your data so you can get total counts of each grouping
+  # create ("mutate") a column that combines the grammaticality and frequency condition names to make 4 unique names
+  ggplot(aes()) + # add aesthetics for x-axis, y-axis, and fill
+  #implement the appropriate geometry for a bar plot, including arguments for 'position' and 'stat'
+  NULL
 ```
 
 ## Learn from someone else's code
