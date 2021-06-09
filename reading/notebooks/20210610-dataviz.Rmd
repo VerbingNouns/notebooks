@@ -39,18 +39,39 @@ knitr::opts_chunk$set(echo = TRUE)
 #    - mixed effects and convergence
 #    - practical use of lmer(), glmer(), clmm()
 #    - maximal vs parsimonious models
-
-library(tidyverse)
-library(palmerpenguins)
 ```
 
 [Download the template notebook here.](20210610-dataviz.Rmd)
+
+# Quick review
+
+R is a computer language and RStudio is a way we can communicate with the computer using R. While RStudio is only one of many ways to use R, it is by far the easiest and most robust (replicable). We can think of RStudio as our kitchen, where we cook up our analysis.
+
+## In the kitchen
+
+The Notebook or Script panel (often top left) is a text document where we can record the 'transcript' or script of what we, as researchers, ask of R and our data, and what results we receive from our requests. We can think of this panel as containing our recipes and notes, so we can choose what to make and tweak our procedures until they fit our needs.
+
+The Console (often bottom left) is the 'chat window' where R can communicate with us directly. However, everything there is short-lived, so for instance if you have used `swirl` in the Console, you don't have a written record of what you typed. It disappears if you exit RStudio. That's fine for `swirl`, but not good for your data analysis! We can think of the console as our cooking surface, like a hob or oven. However, with `.Rmd` files like the notebooks we're using, we can automatically send ingredient and instructions to the cooking surface and not have to do it all by hand.
+
+The Environment panel (often top right) is like our counter top. It's where everything we need will be stored. Once you have loaded in a dataset or library, it will appear in the Environment (or Global Environment), which indicates it's on the counter, ready to be used.
+
+The final panel contains a number of useful tabs, including Files and Packages (like a pantry and our bookshelf full of recipe books, respectively), as well as Help, which is an offline searchable glossary and FAQ resource for R.
+
+## Getting started
+
+We're using pre-made notebooks for your convenience, so that you can focus on the mechanics of R and statistics, rather than the interface. However, learning how to use the interface is also very important. To create a new notebook, click the button the very uppermost leftmost corner -- it looks like a white square with a green circle containing a white cross. This will give you the option to create a `.R` script (the most simple version of something R can use), an `.Rmd` R notebook (a slightly simpler version of what we're currently using -- highly recommended for beginners), or an `.Rmd` R markdown document (a fully customizable and powerful tool that provides a range of options). There are actually many other options here as well, but we won't worry about them. To learn more, you can read through my introductory tutorial (although it is for a slightly older version of R and RStudio, the basics are the same): 
+
+- [Tutorial 1: File management and datasets](https://verbingnouns.github.io/notebooks/rfficehours/tutorial-1.html)
+- [Tutorial 2: Intro to Tidyverse](https://verbingnouns.github.io/notebooks/rfficehours/tutorial-2.html)
+- [Tutorial 3: Exploration and troubleshooting](https://verbingnouns.github.io/notebooks/rfficehours/tutorial-3.html)
+
+Finally, **cheatsheets** aren't cheating! They're a great resource and range from advanced tools to the very core fundamentals. Check some out [here](https://www.rstudio.com/resources/cheatsheets/), or use your favorite internet search engine to look up one for yourself.
 
 # Why dataviz?
 
 If you don't know the shape of your data, you might not draw appropriate conclusions about the statistical tests you perform.
 
-Check out the [Datasaurus Dozen](https://www.autodeskresearch.com/publications/samestats), which all have the same x/y means and standard deviations, sometimes called the Simpson Paradox:
+Check out the [Datasaurus Dozen](https://www.autodeskresearch.com/publications/samestats), which all have the same x/y means and standard deviations, sometimes called the Simpson Paradox.
 
 ![](../images/datasaurus.gif)
 
@@ -58,19 +79,25 @@ Dataviz is also engaging, communicative, creative, efficient, and fun.
 
 ## Base R plots
 
+```{r}
+# the packages we need today:
+library(tidyverse)
+library(palmerpenguins)
+```
+
 There are some ways to create plots quickly, and it's good to know a little about that before we get too far.
 
 ```{r}
-#
+plot(penguins$bill_length_mm, penguins$bill_depth_mm)
 ```
 
 We will talk more about what to do with these plots later, but I want to show you a Quantile-Quantile plot (QQ plot) output so you can see how easy it is to make even before we discuss why you'd want to make it.
 
 ```{r}
-#qqplot()
+qqplot(penguins$bill_length_mm, penguins$bill_depth_mm)
 
-#qqnorm()
-#qqline()
+qqnorm(penguins$bill_length_mm)
+qqline(penguins$bill_length_mm)
 ```
 
 
@@ -79,7 +106,7 @@ We will talk more about what to do with these plots later, but I want to show yo
 Using the `tidyverse`, we can create beautiful, engaging, informative plots. To do so, we will build up the plot in layers. This might seem to be a bit of a faff at first, but it ends up being powerful (and easy once you know how the components work).
 
 ```{r}
-# base plot
+ggplot(penguins)
 ```
 
 This is the background of the plot -- a check to see that `penguins` is something that can be plotted from.
@@ -87,13 +114,18 @@ This is the background of the plot -- a check to see that `penguins` is somethin
 To start adding things to the plot, we need to specify what we want the plot to extract from `penguins`.
 
 ```{r}
-# add aesthetics
+ggplot(penguins, 
+       aes(x = bill_length_mm,
+           y = bill_depth_mm))
 ```
 
 Now the plot knows a bit more about what we're asking, but not enough to show up the data. This is how `ggplot()` differs from just `plot()`. By itself, `plot()` infers *how* we want to display our data. This is great when it's correct and not great when it's wrong (which it often is, without additional specifications). In contrast, `ggplot()` requires the specifications from the start, but they're integrated more smoothly.
 
 ```{r}
-# simple scatter plot
+ggplot(penguins, 
+       aes(x = bill_length_mm,
+           y = bill_depth_mm)) +
+  geom_point()
 ```
 
 You can get rid of the message at the top (which we don't care about) by adding `, warning = FALSE` after the code chunk identifier:
@@ -106,13 +138,32 @@ Up to this point, we've done exactly what the simple `plot()` command can do. No
 
 
 ```{r, warning = FALSE}
-# colour species differently
+ggplot(penguins, 
+       aes(x = bill_length_mm,
+           y = bill_depth_mm,
+           colour = species)) +
+  geom_point()
 ```
 
 To replicate this plot in base R with `plot()`, we'd need to manually subset and plot each species separately, which is a pain, doesn't include all the same options, and yet takes a LOT more code (plus it still doesn't look as nice, in my opinion):
 
 ```{r}
-# plot() is part of base R
+plot(x = penguins$bill_length_mm, 
+     y = penguins$bill_depth_mm, 
+     col="white", 
+     pch=16)
+points(x = penguins$bill_length_mm[penguins$species=="Adelie"],
+       y = penguins$bill_depth_mm[penguins$species=="Adelie"], 
+       col="salmon", 
+       pch=16)
+points(x = penguins$bill_length_mm[penguins$species=="Chinstrap"],
+       y = penguins$bill_depth_mm[penguins$species=="Chinstrap"], 
+       col="green3", 
+       pch=16)
+points(x = penguins$bill_length_mm[penguins$species=="Gentoo"],
+       y = penguins$bill_depth_mm[penguins$species=="Gentoo"], 
+       col="skyblue2", 
+       pch=16)
 ```
 
 So from now on, we'll be working with `ggplot()` only.
@@ -124,25 +175,61 @@ So from now on, we'll be working with `ggplot()` only.
 Let's take a look at what's needed to make a histogram or density plot.
 
 ```{r, warning = FALSE}
-# think about when it's appropriate to use histograms vs density plots
+ggplot(penguins, 
+       aes(x = bill_length_mm,
+           fill = species)) +
+  theme_bw() +
+  #geom_histogram(bins = 40) +
+  #geom_density(alpha = .5) +
+  NULL
 ```
 
 Another common and useful type of plot is the box and whisker plot.
 
 ```{r, warning = FALSE}
-# box plots are easy and demonstrate how crossed designs are easy to plot
+ggplot(penguins, 
+       aes(x = island,
+           y = flipper_length_mm,
+           fill = species)) +
+  theme_bw() +
+  geom_boxplot()
 ```
 
 Bar plots are sometimes controversial, but they can also be very useful. They take slightly different arguments than other types of plots because of how the bar height is 'calculated'.
 
 ```{r, message=FALSE}
-# bar plots can require some extra prep work
+penguins %>% 
+  filter(!is.na(flipper_length_mm)) %>% 
+  group_by(species) %>% 
+  summarise(flipper_length_mm_mean = mean(flipper_length_mm),
+            flipper_length_mm_sd = sd(flipper_length_mm),
+            flipper_length_mm_se = sd(flipper_length_mm)/sqrt(n())) %>% 
+  ggplot(aes(x = species,
+             y = flipper_length_mm_mean,
+             fill = species)) +
+  theme_bw() +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = flipper_length_mm_mean - flipper_length_mm_sd, 
+                    ymax = flipper_length_mm_mean + flipper_length_mm_sd),
+                width = .2) +
+  NULL
 ```
 
 You may also want to explore fancier types of plots, or combine types we've already encountered. This is easy with `ggplot()`'s modular construction and visual grammar.
 
 ```{r, warning=FALSE}
-# overlay violin, box, and points
+ggplot(penguins, 
+       aes(x = island,
+           y = flipper_length_mm,
+           fill = species)) +
+  theme_bw() +
+  geom_violin() +
+  geom_boxplot(position = position_dodge(.9),
+               alpha = .3) +
+  geom_point(position = position_jitterdodge(.9),
+             shape = 21,
+             alpha = .75) +
+  NULL
 ```
 
 
@@ -174,11 +261,11 @@ y = 2 * x + 5 # for each x, multiply by 2 (slope) and add 5 (intercept)
 Here is what this data look like. Too perfect, everything on a perfect line, even with randomness:
 
 ```{r}
-# create a table with two columns
-# establish the base of a plot
-# use points to plot the data
-# use a nice theme
-# add a red line with the specified slope
+tibble(x, y) %>% # create a table with two columns
+  ggplot(aes(x=x, y=y)) + # establish the base of a plot
+  geom_point() + # use points to plot the data
+  theme_bw() + # use a nice theme
+  geom_abline(intercept = 5, slope = 2, colour="red") # add a red line with the specified slope
 ```
 
 Let's add more noise, like any complex system would have:
@@ -195,11 +282,11 @@ tbl1 <- tibble(x, y2) # combine into a dataset
 How does the new noise change the data?
 
 ```{r}
-# using this dataset
-# create a base plot with x on the x-axis and y2 on the y axis
-# make it pretty
-# make it a scatter plot (points)
-# add the red line to indicate intended slope and intercept
+tbl1 %>% # using this dataset
+  ggplot(aes(x=x, y=y2)) + # create a base plot with x on the x-axis and y2 on the y axis
+  geom_point() + # make it a scatter plot (points)
+  theme_bw() + # make it pretty
+  geom_abline(intercept = 5, slope = 2, colour="red") # add the red line to indicate intended slope and intercept
 ```
 
 Is the red line still the best way to approximate this data?
@@ -217,15 +304,14 @@ coef(model1) # `coef` stands for coefficients
 Plot the data with the intended shape of the data (red) and the calculated shape (green):
 
 ```{r}
-# using the toy dataset
-# establish the base of the plot
-# make it pretty
-# draw the data as points
-# add a vertical blue line at the "intercept" (y axis)
-# add the intended shape of the data (red)
-# add the calculated shape (green)
+tbl1 %>% # using the toy dataset
+  ggplot(aes(x=x, y=y2)) + # establish the base of the plot
+  geom_point() + # draw the data as points
+  geom_vline(xintercept=0, colour="blue") + # add a vertical blue line at the "intercept" (y axis)
+  geom_abline(intercept = 5, slope = 2, colour="red") + # add the intended shape of the data (red)
+  geom_abline(intercept = coef(model1)[1], slope = coef(model1)[2], colour="green3") + # add the calculated shape (green)
+  theme_bw() # make it pretty
 ```
-
 
 How do the intended shape and calculated shape differ? Why?
 
@@ -238,16 +324,15 @@ summary(model1)
 Moreover, there's actually a way to do this calculation *within* a plot:
 
 ```{r, message=FALSE}
-# geom_smooth() calculates the simple linear regression within the ggplot() environment
-
-
-
-
-
-
-
+tbl1 %>% 
+  ggplot(aes(x=x, y=y2)) +
+  geom_point() +
+  geom_smooth(method="lm") + # here is where the calculation happens within the plot
+  geom_vline(xintercept=0, colour="blue") +
+  geom_abline(intercept = 5, slope = 2, colour="red") +
+  geom_abline(intercept = coef(model1)[1], slope = coef(model1)[2], colour="green3") +
+  theme_bw()
 ```
-
 
 # Workshop activities
 
@@ -267,8 +352,15 @@ Using the simulated data set from last time, make and interpret the following pl
     - What properties of the graph are visually useful or not?
     - Try to modify the graph so it is clear and easy to interpret.
 
-
-
+```{r}
+simdat %>% 
+  filter(region == 3) %>% 
+  ggplot(aes(x=age, y=rt)) +
+  theme_bw() +
+  #geom_point() +
+  geom_smooth(aes(linetype=freq, colour=gram), method = "lm") +
+  NULL
+```
 
 2. Use a box and whisker plot (`geom_boxplot()`) to plot each of the five regions reactions times, illustrating the four conditions.
     - A useful tool for this is `facet_grid()` or `facet_wrap()`. Look them up and learn how to use them.
@@ -277,8 +369,12 @@ Using the simulated data set from last time, make and interpret the following pl
     - What other ways might you do this? What works best for you?
     - Can this plot help you interpret the results?
 
-
-
+```{r}
+simdat %>% 
+  ggplot(aes(x=gram, y=rt, fill=freq)) +
+  geom_boxplot() +
+  facet_grid(.~region)
+```
 
 3. Ordinal data can be very tricky to interpret visually *and* statistically.
     - Ensure the dataset you plot does not have artificially inflated power due to multiple regions.
@@ -290,8 +386,16 @@ Using the simulated data set from last time, make and interpret the following pl
     - What can you decipher in this graph?
     - Do you think there are any differences in how conditions were rated?
 
-
-
+```{r}
+simdat %>% 
+  filter(region == 3) %>% 
+  #mutate(rating = as.factor(rating)) %>% 
+  group_by(freq, gram, rating) %>% 
+  summarise(total = n()) %>% 
+  mutate(condition = paste(gram, freq)) %>% 
+  ggplot(aes(x=condition, y=total, fill=rating)) +
+  geom_bar(stat = "identity", position = "stack")
+```
 
 ## Learn from someone else's code
 
