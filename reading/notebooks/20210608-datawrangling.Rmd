@@ -18,7 +18,7 @@ output:
 
 [Return Home](../info2021.html)
 
-```{r,  setup, include=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 # 1. R and RStudio interfaces, RMarkdown, and Tidyverse
@@ -42,8 +42,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 **Welcome to Day 1!**
-
-[Download the template notebook here.](20210608-datawrangling.Rmd)
 
 Today, we'll be breezing through some of the basics of R. Hopefully, some of this starts off as review. If you find yourself struggling with it at any time, that's *okay*! It's all written down, so you can come back to it later, when it's had more time to sink in.
 
@@ -112,8 +110,8 @@ One note of caution: you don't want to irreparably alter your data (which is why
 
 ```{r}
 penguins_edited <- penguins
-
-
+penguins_edited$species <- as.character(penguins_edited$species)
+head(penguins_edited)
 ```
 
 Finally, let's look at an overview of the structure of the dataset.
@@ -128,37 +126,46 @@ str(penguins)
 Before we get into inferential statistics, we should review summary statistics.
 
 ```{r}
-#
+max(penguins$year)
+min(penguins$year)
+range(penguins$year)
+mean(penguins$year)
+median(penguins$year)
 ```
 
 Some of these functions can optionally take an additional argument that tells it what to do with missing data.
 
 ```{r}
-#
+max(   penguins$body_mass_g, na.rm = TRUE)
+min(   penguins$body_mass_g, na.rm = TRUE)
+range( penguins$body_mass_g, na.rm = TRUE)
+mean(  penguins$body_mass_g, na.rm = TRUE)
+median(penguins$body_mass_g, na.rm = TRUE)
 ```
 
 We can also polish up the output so it's more reader friendly.
 
 ```{r}
 print("Adelie stats")
-max(   *** , na.rm = TRUE)
-min(   *** , na.rm = TRUE)
-mean(  *** , na.rm = TRUE)
-median(*** , na.rm = TRUE)
+max(   penguins$body_mass_g[penguins$species=="Adelie"], na.rm = TRUE)
+min(   penguins$body_mass_g[penguins$species=="Adelie"], na.rm = TRUE)
+mean(  penguins$body_mass_g[penguins$species=="Adelie"], na.rm = TRUE)
+median(penguins$body_mass_g[penguins$species=="Adelie"], na.rm = TRUE)
 
 print("Chinstrap stats")
-paste("max body mass =",       max( *** , na.rm = TRUE))
-paste("min body mass =",       min( *** , na.rm = TRUE))
-paste("mean body mass =",     mean( *** , na.rm = TRUE))
-paste("median body mass =", median( *** , na.rm = TRUE))
+paste("max body mass =",       max(penguins$body_mass_g[penguins$species=="Chinstrap"], na.rm = TRUE))
+paste("min body mass =",       min(penguins$body_mass_g[penguins$species=="Chinstrap"], na.rm = TRUE))
+paste("mean body mass =",     mean(penguins$body_mass_g[penguins$species=="Chinstrap"], na.rm = TRUE))
+paste("median body mass =", median(penguins$body_mass_g[penguins$species=="Chinstrap"], na.rm = TRUE))
 
 print("Gentoo stats")
-paste("max body mass =",                    max( *** , na.rm = TRUE))
-paste("min body mass =",                    min( *** , na.rm = TRUE))
-paste("mean body mass =",                  mean( *** , na.rm = TRUE))
-paste("median body mass =",              median( *** , na.rm = TRUE))
-paste("standard deviation of body mass =",   sd( *** , na.rm = TRUE))
-paste("standard error of body mass =", round(sd( *** , na.rm = TRUE)/sqrt(length(na.omit( *** ))), 2))
+paste("max body mass =",                    max(penguins$body_mass_g[penguins$species=="Gentoo"], na.rm = TRUE))
+paste("min body mass =",                    min(penguins$body_mass_g[penguins$species=="Gentoo"], na.rm = TRUE))
+paste("mean body mass =",                  mean(penguins$body_mass_g[penguins$species=="Gentoo"], na.rm = TRUE))
+paste("median body mass =",              median(penguins$body_mass_g[penguins$species=="Gentoo"], na.rm = TRUE))
+paste("standard deviation of body mass =",   sd(penguins$body_mass_g[penguins$species=="Gentoo"], na.rm = TRUE))
+paste("standard error of body mass =", round(sd(penguins$body_mass_g[penguins$species=="Gentoo"], 
+              na.rm = TRUE)/sqrt(length(na.omit(penguins$body_mass_g[penguins$species=="Gentoo"]))), 2))
 ```
 
 # Tidyverse
@@ -186,28 +193,55 @@ penguins %>%
 Here are two ways to do the same thing:
 
 ```{r}
-#
+penguins %>% 
+  pull(body_mass_g) %>% 
+  mean(na.rm = TRUE)
+
+penguins %>% 
+  filter(!is.na(body_mass_g)) %>% 
+  pull(body_mass_g) %>% 
+  mean()
 ```
 
 We can also polish up the output so it's formatted nicely.
 
 ```{r}
-# paste("mean body mass =", .)
+penguins %>% 
+  pull(body_mass_g) %>% 
+  mean(na.rm = TRUE) %>% 
+  round(2) %>% 
+  paste("mean body mass =", .)
 ```
 
 
 ## Summaries and tables
 
-Typically, datasets are giant and unwieldy. We usually don't want to look at the whole thing. It's more informative if we can summarise it. There are functions to summarise whole datasets automatically, but they don't know what you care about in the dataset. Let's summarise `penguins` in the ways we care about.
+Typically, datasets are giant and unweildy. We usually don't want to look at the whole thing. It's more informative if we can summarise it. There are functions to summarise whole datasets automatically, but they don't know what you care about in the dataset. Let's summarise `penguins` in the ways we care about.
 
-```{r, message=FALSE}
-#
+```{r,, message=FALSE}
+penguins %>% 
+  filter(!is.na(body_mass_g)) %>% 
+  group_by(species) %>% 
+  summarise(max =       max(body_mass_g) %>% round(2),
+            min =       min(body_mass_g) %>% round(2),
+            mean =     mean(body_mass_g) %>% round(2),
+            median = median(body_mass_g) %>% round(2),
+            stdev =      sd(body_mass_g) %>% round(2),
+            se =       (stdev/sqrt(n())) %>% round(2))
 ```
 
 As a side note, you can output these sorts of tables formatted for publication so you don't have to copy and paste individual values to a document!
 
-```{r, message=FALSE}
-***
+```{r,, message=FALSE}
+penguins %>% 
+  filter(!is.na(body_mass_g)) %>% 
+  group_by(species) %>% 
+  summarise(`maximum` =           max(body_mass_g),
+            `minimum` =           min(body_mass_g),
+            `mean value` =       mean(body_mass_g),
+            `median value` =   median(body_mass_g),
+            `standard deviation` = sd(body_mass_g),
+            `standard error` = (`standard deviation`/sqrt(n())))  %>% 
   knitr::kable(caption = "Table 1: Summary of penguin body mass (g) by species",
                align = "c",
                digits = 2)
@@ -222,10 +256,21 @@ Data wrangling is the process of taking raw data from whatever output and making
 
 You can create or overwrite columns using `mutate()`, vertically subset data using `select()`, and horizontally subset data using `filter()`.
 
-```{r, message=FALSE}
+```{r,, message=FALSE}
 # area of a triangle = height * base / 2
 # density = mass / volume; volume = length * width * height
-
+penguins %>% 
+  mutate(bill_area_mm2     = bill_length_mm * bill_depth_mm / 2,
+         flipper_length_cm = flipper_length_mm/100,
+         bill_length_cm    = bill_length_mm/100,
+         bill_depth_cm     = bill_depth_mm/100,
+         penguin_volume    = (.75*flipper_length_cm) * bill_length_cm * (10*bill_depth_cm),
+         penguin_density   = body_mass_g / penguin_volume) %>% 
+  select(year, species, sex, island, bill_area_mm2, penguin_density) %>% 
+  filter(!is.na(sex)) %>% 
+  group_by(species, sex) %>% 
+  summarise(mean_bill_area_mm2 = mean(bill_area_mm2),
+            mean_density       = mean(penguin_density))
 ```
 
 
@@ -233,7 +278,7 @@ You can create or overwrite columns using `mutate()`, vertically subset data usi
 
 Sometimes, your data is too long or too wide for the analysis you want to do. This is made easy to fix with `pivot_wider()` and `pivot_longer()`.
 
-```{r, message=FALSE}
+```{r,, message=FALSE}
 penguins %>% 
   filter(!is.na(body_mass_g)) %>% 
   group_by(species) %>% 
@@ -249,7 +294,7 @@ wide_penguins
 
 
 ```{r}
-# pivot_longer()
+wide_penguins %>% pivot_longer(cols = c("max", "min", "mean", "median", "stdev", "se"), names_to = "measure", values_to = "values")
 ```
 
 
@@ -259,7 +304,8 @@ wide_penguins %>% pivot_longer(cols = c("max", "min", "mean", "median", "stdev",
 
 
 ```{r}
-# pivot_wider()
+long_penguins %>% 
+  pivot_wider(names_from = "measure", values_from = "values")
 ```
 
 
@@ -275,10 +321,21 @@ head(penguins_raw)
 
 The function `case_when()` allows us to isolate certain rows for manipulation or cleaning and apply different rules to different situations. It's very handy but can take some practice to get used to.
 
-```{r, message=FALSE}
-# unique `Comments`
-# range of `Delta 13 C (o/oo)`
+```{r,, message=FALSE}
+penguins_raw %>% pull(`Comments`) %>% unique()
+penguins_raw %>% pull(`Delta 13 C (o/oo)`) %>% range(na.rm = TRUE)
 
+penguins_raw %>% 
+  mutate(keeper = case_when(Comments == "Adult not sampled." ~                                       "remove",
+                            Comments == "No blood sample obtained." ~                                "remove",
+                            Comments == "Nest never observed with full clutch." ~                    "keep",
+                            Comments == "No blood sample obtained for sexing." ~                     "remove",
+                            Comments == "Adult not sampled. Nest never observed with full clutch." ~ "remove",
+                            TRUE ~ "evaluate"),
+         D13.level = case_when(`Delta 13 C (o/oo)` <= -26  ~ "low",
+                               `Delta 13 C (o/oo)` > -24.8 ~ "high",
+                               TRUE ~ "mid")) %>% 
+  group_by(D13.level, keeper) %>% summarise(count = n())
 ```
 
 # Workshop activities
