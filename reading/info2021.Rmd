@@ -57,7 +57,7 @@ Using the simulated dataset, select appropriate visualisations for answering sou
 
 ### Day 3 (15 June)
 
-**Types of linear models**
+[**Types of linear models**](notebooks/20210615-linearmodels.html)
 
 Continuous, categorical, binomial, and ordinal data all have distinctive properties that require distinct analytical techniques. Start to learn about how to analyse each of these types of data, and practice on the simulated data set.
 

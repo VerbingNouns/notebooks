@@ -1,0 +1,311 @@
+---
+title: "(Types of) Linear Models"
+author: "Dr Lauren Ackerman"
+date: "15 JUN 2021"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
+    highlight: default
+    includes: 
+      in_header: ../../google_analytics.html
+---
+
+[Return Home](../info2021.html)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# 1. R and RStudio interfaces, RMarkdown, and Tidyverse
+#    - Basic functionality, shortcuts, writing scripts and notebooks
+#    - Piping syntax and code replicability
+#    - Tidyr, Dplyr, related packages
+#    - Cleaning, combining, and rearranging data frames
+# 2. Data visualisation using ggplot and best practices
+#    - Structure and syntax of ggplot and geom
+#    - Customising and combining plots
+#    - Determining what plot is best for your data
+# 3. Basic linear models (including gaussian, binomial, and ordinal)
+#    - building/selecting an appropriate model
+#    - practical use of lm(), glm()
+#    - dummy coding vs contrast coding
+#    - interpreting the output
+# 4. Mixed effects linear models
+#    - mixed effects and convergence
+#    - practical use of lmer(), glmer(), clmm()
+#    - maximal vs parsimonious models
+```
+
+[Download the template notebook here.](20210615-linearmodels.Rmd)
+
+# Quick review
+
+Make sure to load the following packages, which should should have previously installed:
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+# a new one for today:
+library(broom)
+```
+
+## `ggplot()`
+
+In `ggplot`, we build plots in "layers", starting with the base, and slowly specifying more and more detail.
+
+The "aesthetics" (`aes()`) arguments are originally specified within `ggplot()`, and they map columns from the source data to dimensions of the plot, including x-axis, y-axis, and colour, among others. We can also specify these mappings within a geometry (e.g., `geom_point()`) if we want the mapping to specific to that geometry and not be shared by others. For instance:
+
+```{r, message=FALSE, warning=FALSE}
+penguins %>% # we could put this within the ggplot() function, but keeping it separate allows us to modify it if we wish
+  ggplot(aes(x = bill_length_mm, # specify the mapping for the x-axis
+             y = bill_depth_mm)) + # specify the mapping for the y-axis
+  theme_bw() + # black and white background for clarity
+  geom_point(aes(colour = species)) + # plot points with different colours by species
+  geom_smooth(method = "lm") + # a line of best fit for the dataset as a whole
+  geom_smooth(aes(colour = species), method = "lm") + # three lines of best fit, one for each species
+  NULL # optional add-on to let us comment out the previous line without confusing R
+```
+
+
+## Visual analysis
+
+Any straight line can be specified on a plot by its **slope** and its **intercept**. The intercept is how far away it is from where the x- and y- axes cross along the x=0 (vertical, y-axis) dimension. The slope is the amount of change in height of the line for every (one) unit of change along the x-axis. This is sometimes referred to as "rise over run" (although 'rise' can be negative or downward here).
+
+A linear model is simply a straight line drawn through your data to approximate the way your data behave. This is easiest to visualise if we have a single independent factor (e.g., age) and a single dependent measure (e.g., reaction time). There is evidence that increased age correlates with a slow down of reaction time, which would look like a line with a positive slope. However, this isn't the only factor (think of muscle tone, caffeine intake, amount of sleep the previous night, practice, etc). This makes our data *noisy*. A straight line is not a perfect way to describe noisy data, so we also want to know how much noise can be accounted for by the line (linear model). We might also want to include other sorts of reasons the data might not be a perfectly straight line (caffeine, quality of sleep, practice), which would increase the number of independent factors in our model. This is easy to do mathematically, but harder to visualise.
+
+We may also want to look at factors that are not continuous, such as gender, employment status, socioeconomic status, and highest level of education. Some of these factors are unordered (e.g., gender) and some of them are (e.g., educational attainment). Furthermore, we might also want to examine *measures* that aren't continuous values. We may look at accuracy of responses to yes/no questions, acceptability ratings on a scale, or frequency of constructions in a free interview or text response. These different types of measurements require slightly different types of linear models, but if you can implement the simple one for continuous data, adapting it for other types of data is straightforward.
+
+
+# Linear models
+
+What test do you use, and how do you use it? 
+
+* t-test
+* ANOVA
+* Chi-squared test (χ²)/($\chi^2$)
+* linear regression / model
+* linear mixed effects regression / model
+
+These are all... linear models. [They really are.](https://lindeloev.github.io/tests-as-linear/)
+
+If you can learn how linear models work (we won't go into the maths behind them), then any of these parametric tests (and some nonparametric ones, too) will make a whole lot more sense and you will be able to deploy them with more confidence.
+
+## Continuous data
+
+> Question: Does bill length predict bill depth?
+
+We've already seen this graph, so we already know there's more to the story than just bill length. 
+
+```{r}
+# save the base plot for future use
+plot1 <- penguins %>% ggplot(aes(x = bill_length_mm, y = bill_depth_mm)) + theme_bw()
+```
+
+But how much of the variance can we account for if we *only* know the relationship between bill length and bill depth?
+
+```{r, message=FALSE, warning=FALSE}
+plot1 + geom_point() + geom_smooth(method = "lm")
+```
+
+```{r}
+model.1 <- lm(penguins$bill_depth_mm ~ 1 + penguins$bill_length_mm)
+
+summary(model.1)
+```
+
+If we use the `glance()` and `tidy()` functions from the `broom` package, we can see all this information and more laid out in a table, which means we can reference it in in-line text, for when we compile the document.
+
+```{r}
+glance(model.1)
+tidy(model.1)
+```
+
+From these results, we can see there is an R^2 value of `r glance(model.1)$r.squared %>% round(3)`. This means the current model describes only 5.5% of the variance we observe in our data. That's pretty low, but at the same time, we see the relationship between bill length and depth is significant, with a test statistic (in this case, t-value) of `r tidy(model.1)$statistic[2] %>% round(2)` and a p-value of `r tidy(model.1)$p.value[2] %>% round(5) %>% format(scientific=FALSE)`. 
+
+So what happens when we also take account of the fact we have three different species in our data, and each species appears to have a different direction relationship between bill length and depth to the dataset as a whole?
+
+```{r, message=FALSE, warning=FALSE}
+plot1 + geom_point(aes(colour = species)) + geom_smooth(aes(colour = species), method = "lm")
+```
+
+```{r}
+model.2 <- lm(penguins$bill_depth_mm ~ 1 + penguins$bill_length_mm + penguins$species)
+
+summary(model.2)
+```
+
+```{r}
+glance(model.2)
+tidy(model.2)
+```
+
+
+From these results, we can see there is an R^2 value of `r glance(model.2)$r.squared %>% round(3)`. This means the current model describes a whopping 76.9% of the variance we observe in our data. That's pretty high, so we expect to see that the relationship between bill length and depth is significant, with a test statistic (again, t-value) of `r tidy(model.2)$statistic[2] %>% round(2)` and a p-value of less than 0.00001.
+
+There are also a few other rows in the output now. One is labeled `penguins$speciesChinstrap` and the other is labeled `penguins$speciesGentoo`. Where did the Adelies go? Since 'Adelie' is alphabetically first in the list of species, it was automatically selected to be the baseline for comparison. In continuous data, there need not be a "baseline" other than 0, but in categorical data, there isn't a numberline on which to anchor comparisons, so R defaults to the alphabet. You can change this manually to compare Chinstraps and Gentoos in a pairwise comparison.
+
+The Estimate (sometimes abbreviated as β) is the slope -- the change in bill depth for every one unit of positive change in bill length.
+
+The Standard Error (SE) is the value above and below the estimate that we believe the "true" value lies.
+
+The statistic (t, Z, LR, χ², etc) is the statistically calculated value that indicates how robust the observations are. Each test statistic has its own "rules" for what counts as significant, and this can change with different degrees of freedom (e.g., more independent factors and more levels within a factor will often require a higher threshold).
+
+The p-value provides you with an indication of how likely this row of the table is to represent a subset of data that systematically differs from the "default" subset of data -- this can be the 'null hypothesis' or the 'baseline' in most cases. Importantly, p-values appear to be continuous numbers, but should not be interpreted as such! A p-value is *either* significant or not significant. There is no such thing as "very" significant. (Marginal significance is debatable...)
+
+## Categorical factors
+
+With categories, there isn't a natural numberline on which to gauge slope, so we have a few options. We could take R's default settings (called 'dummy coding'), or we can 'contrast code' the data. Neither is right or wrong, per se, but different choices will give you different information about your data.
+
+Take, for example, bill depth as a function of penguin sex. (Let's ignore species for the moment.)
+
+> Is sex a significant predictor of bill depth?
+
+```{r}
+penguins %>% 
+  filter(!is.na(sex)) %>%
+  #mutate(sex_as_number = as.numeric(sex),
+  #       sex_centered = sex_as_number-1.5) %>% 
+  ggplot(aes(x = sex, y = bill_depth_mm)) +
+  geom_point(aes(colour=sex), 
+             position = position_jitterdodge(0.2), 
+             alpha=1) +
+  #geom_smooth(method = "lm", colour="black") +
+  theme_bw() +
+  NULL
+```
+
+Translating that into a linear model requires 'female' and 'male' to be translated into numbers.
+
+```{r}
+penguins %>% 
+  filter(!is.na(sex)) %>%
+  mutate(sex_as_number = as.numeric(sex),
+         sex_centered = sex_as_number-1.5) -> penguins2 # new dataset that we can edit as we please
+```
+
+In the following three linear model summaries, what changes? What stays the same?
+
+```{r}
+lm(penguins2$bill_depth_mm ~ penguins2$sex) %>% summary
+```
+```{r}
+lm(penguins2$bill_depth_mm ~ penguins2$sex_as_number) %>% summary
+```
+```{r}
+lm(penguins2$bill_depth_mm ~ penguins2$sex_centered) %>% summary
+```
+
+When your predictors are centred, then the estimate gives you the mean for your whole data set. When they aren't, the estimate gives you the value of the prediction where x=0, whether or not that is valid or interpretable. When is it uninterpretable and when is it interpretable?
+
+```{r, message=FALSE}
+penguins %>% 
+  filter(!is.na(sex)) %>%
+  mutate(sex_as_number = as.numeric(sex),
+         sex_centered = sex_as_number-1.5) %>% 
+  ggplot(aes(x = sex_centered, y = bill_depth_mm)) +
+  geom_point(aes(colour=sex), 
+             position = position_jitterdodge(0.2), 
+             alpha=1) +
+  geom_smooth(method = "lm", colour="black") +
+  geom_vline(xintercept = 0, colour="grey50") +
+  theme_bw() +
+  NULL
+```
+
+## Binomial data
+
+Binomial data is data that has two states.
+
+* Yes / No
+* Correct / Incorrect
+* 1 / 0
+* On / Off
+* A / B
+* Same / Different
+* etc...
+
+In some ways, this is like categorical data. In other ways, it's very, very different.
+
+The question we can ask here is whether a penguin's body mass alone (the predictor, now) gives you enough information as to whether you can predict if it's a Gentoo or not. In other words, let's say you're walking around, blindfolded, weighing penguins. If you get the weight of a penguin, how confident can you be that you have just weighed a Gentoo if that's all the information you have?
+
+> Is body mass a significant predictor of species (Gentoo or not)?
+
+```{r, message=FALSE}
+penguins_raw %>% 
+  filter(!is.na(`Body Mass (g)`)) %>% 
+  mutate(binary.species = case_when(str_detect(Species, "Gentoo") ~ 1,
+                                    TRUE ~ 0)) -> penguins3
+
+penguins3 %>% 
+  ggplot(aes(x = `Body Mass (g)`, y = binary.species)) +
+  geom_point() +
+  geom_smooth(method = "lm", colour="red") +
+  geom_smooth(method = "glm", method.args = list(family = "binomial"), colour="blue") +
+  theme_bw() +
+  NULL
+```
+
+This is a bit of a silly example on its own, but if we translate this to linguistic data, it might sound more interesting:
+
+If you are manipulating the acceptability or difficulty of a sentence, you might ask people to read the sentence and then answer a question about it. You might predict that difficult sentences are answered less accurately because of how hard they are to read in the first place. However, each individual sentence and comprehension question can only result in one of two answers: correct or incorrect. Sometimes, people might make a silly mistake even though they know the answer, and sometimes people might guess correctly even if they don't know the answer. This noisy binary outcome is accuracy data, so there are two options: Yes they answered it correctly (1), or No they answered it incorrectly (0), but we don't know how that outcome relates to the difficulty of the sentence yet. So, we ask if, based solely on the difficulty of the sentence they read (which, presumably, you are controlling precisely for your experiment), with how much confidence can you predict that they answered it incorrectly?
+
+That confidence is the S-curve plotted in the previous plot. It is never 0% confident or 100% confident because there is always the possibility of human error. It is also never below 0% or above 100% because that is not a meaningful number.
+
+Because we can't draw a straight line on this plot, but we aren't drawing a quadratic, polynomial or exponential (among others) line either, we must use a "log-linear" function. This is done with the `glm()` (generalized linear model) function in R.
+
+```{r}
+glm(penguins3$binary.species ~ penguins3$`Body Mass (g)`, family="binomial") %>% summary()
+```
+
+Since this isn't a linear model (in a Euclidean sense), it's a little harder to interpret the estimate as a "slope". 
+
+# Group challenge question
+
+Again, let's turn to the simulated dataset. You can name it `simdat` as I have in the past, or you can name it something else.
+
+```{r}
+# load in the simulated_data.csv file (however you like)
+```
+
+For this challenge, create an appropriate model that investigates whether Frequency (`freq`) is a significant predictor of `accuracy` -- that is, if we know whether the verb is high frequency or low frequency, how well can we predict the likelihood of the response to the yes/no question being answered correctly, as compared to the baseline?
+
+- Is it better to use lm() or glm()? Why?
+- What is your (dependent) measure and what is your (independent) predictor?
+      - What types of data are they (continuous, categorical, binomial)?
+- What is the baseline level for comparison?
+
+```{r}
+# Challenge code part 1
+```
+
+Let's take this a step further. So far, we've mostly been looking at a single predictor. Many times, however, we have multiple predictors that simultaneously can affect the measured outcome. (Think back to `model.2` earlier on.)
+
+- What happens if you add in `gram` as an additional independent predictor?
+      - Are any of the comparisons significant?
+
+```{r}
+# Challenge code part 2
+```
+
+Finally, let's do this properly. It's very possibly that `freq` and `gram` *interact* with each other. That is, one combination of their levels might not simply be the addition of the two main effects -- it might produce another type of behaviour. For instance, if we know that ungrammatical sentences are universally read slowly (because they're ungrammatical), it might not matter whether or not the verb is high frequency. However, when the sentence is grammatical, we might see that frequency starts to matter. On the other hand, we might find that frequency and grammaticality have independent and purely additive effects on reading times, and there is no interaction.
+
+To include an interaction term in your model, you will need to add a third additional predictor. This predictor is created by writing the first predictor and the second predictor next to each other, separated by the `:` symbol. Here is an example that you can use as a template (just make sure the names are changed to match the dataset and proper R code syntax!)
+
+```
+lm(measure ~ factor1 + factor2 + factor1:factor2)
+```
+
+Given this syntax for adding an interaction:
+
+- What happens if we add in the interaction between `freq` and `gram`?
+      - Does anything change?
+
+```{r}
+# Challenge code part 3
+```
+
