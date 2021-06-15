@@ -71,7 +71,7 @@ Continuous, categorical, binomial, and ordinal data all have distinctive propert
 
 ### Day 4 (17 June)
 
-**Mixed effects and beyond**
+[**Mixed effects and beyond**](notebooks/20210617-mixedeffects.html)
 
 Simple linear models don’t account for important sources of noise, especially in experiments that have between-subjects and/or between-items analyses. Learn how to build and interpret a mixed effect model that accounts for this noise, to give you more reliable and informative analyses.
 
