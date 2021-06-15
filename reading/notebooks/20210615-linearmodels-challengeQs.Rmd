@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+# Group challenge question
+
+Again, let's turn to the simulated dataset. You can name it `simdat` as I have in the past, or you can name it something else.
+
+```{r}
+# load in the simulated_data.csv file (however you like)
+#simdat <- read_csv("../data/simulated-data.csv")
+```
+
+For this challenge, create an appropriate model that investigates whether Frequency (`freq`) is a significant predictor of `accuracy` -- that is, if we know whether the verb is high frequency or low frequency, how well can we predict the likelihood of the response to the yes/no question being answered correctly, as compared to the baseline?
+
+- Is it better to use lm() or glm()? Why?
+- What is your (dependent) measure and what is your (independent) predictor?
+      - What types of data are they (continuous, categorical, binomial)?
+- What is the baseline level for comparison?
+
+```{r}
+# Challenge code part 1
+model.3 <- glm(simdat$accuracy ~ simdat$freq, family = "binomial")
+
+summary(model.3)
+```
+
+Let's take this a step further. So far, we've mostly been looking at a single predictor. Many times, however, we have multiple predictors that simultaneously can affect the measured outcome. (Think back to `model.2` earlier on.)
+
+- What happens if you add in `gram` as an additional independent predictor?
+      - Are any of the comparisons significant?
+
+```{r}
+# Challenge code part 2
+model.4 <- glm(accuracy ~ freq + gram, data=simdat, family = "binomial")
+
+glm(simdat$accuracy ~ simdat$freq + simdat$gram, family = "binomial") %>% summary()
+
+summary(model.4)
+```
+
+Finally, let's do this properly. It's very possibly that `freq` and `gram` *interact* with each other. That is, one combination of their levels might not simply be the addition of the two main effects -- it might produce another type of behaviour. For instance, if we know that ungrammatical sentences are universally read slowly (because they're ungrammatical), it might not matter whether or not the verb is high frequency. However, when the sentence is grammatical, we might see that frequency starts to matter. On the other hand, we might find that frequency and grammaticality have independent and purely additive effects on reading times, and there is no interaction.
+
+To include an interaction term in your model, you will need to add a third additional predictor. This predictor is created by writing the first predictor and the second predictor next to each other, separated by the `:` symbol. Here is an example that you can use as a template (just make sure the names are changed to match the dataset and proper R code syntax!)
+
+```
+lm(measure ~ factor1 + factor2 + factor1:factor2)
+```
+
+Given this syntax for adding an interaction:
+
+- What happens if we add in the interaction between `freq` and `gram`?
+      - Does anything change?
+
+```{r}
+# Challenge code part 3
+glm(simdat$accuracy ~ 1 +
+                      simdat$freq + 
+                      simdat$gram +
+                      simdat$freq:simdat$gram, 
+    family = "binomial") %>% 
+  summary()
+```
+
+
+
+```{r}
+simdat %>% 
+  group_by(freq, gram) %>% 
+  summarise(n = n(),
+            acc = sum(accuracy)) %>% 
+  mutate(correct = acc/n) %>% 
+  ggplot(aes(x=freq, fill=gram, y=correct)) +
+  theme_bw() +
+  geom_bar(stat="identity", position="dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0,1, by=.1))
+```
+
+```{r}
+simdat %>% 
+  group_by(freq, gram) %>% 
+  summarise(n = n(),
+            acc = sum(accuracy)) %>% 
+  mutate(correct = acc/n) %>% 
+  ggplot(aes(x = freq, colour = gram, y = correct)) +
+  geom_point() +
+  geom_path(aes(group = gram)) +
+  theme_bw() +
+  ggtitle("simdat$freqlow:simdat$gramyes  -1.3963     0.2211   -6.31  2.7e-10 ***")
+```
+

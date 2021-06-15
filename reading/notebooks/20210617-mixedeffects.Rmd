@@ -1,0 +1,364 @@
+---
+title: "More Complex Models"
+author: "Dr Lauren Ackerman"
+date: "17 JUN 2021"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    toc_float: 
+      smooth_scroll: true
+      collapsed: false
+    theme: sandstone
+    highlight: default
+    includes: 
+      in_header: ../../google_analytics.html
+---
+
+[Return Home](../info2021.html)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# 1. R and RStudio interfaces, RMarkdown, and Tidyverse
+#    - Basic functionality, shortcuts, writing scripts and notebooks
+#    - Piping syntax and code replicability
+#    - Tidyr, Dplyr, related packages
+#    - Cleaning, combining, and rearranging data frames
+# 2. Data visualisation using ggplot and best practices
+#    - Structure and syntax of ggplot and geom
+#    - Customising and combining plots
+#    - Determining what plot is best for your data
+# 3. Basic linear models (including gaussian, binomial, and ordinal)
+#    - building/selecting an appropriate model
+#    - practical use of lm(), glm()
+#    - dummy coding vs contrast coding
+#    - interpreting the output
+# 4. Mixed effects linear models
+#    - mixed effects and convergence
+#    - practical use of lmer(), glmer(), clmm()
+#    - maximal vs parsimonious models
+```
+
+[Download the template notebook here.](20210617-mixedeffects.Rmd)
+
+Let's load in the packages we'd been using previously.
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+Let's also create a dataset that doesn't have NA values for the factor `sex`, to simplify our task later. This also gets rid of all cases with missing numerical measurements.
+
+```{r}
+penguins.complete <- penguins %>% filter(!is.na(sex))
+```
+
+
+# Linear model components
+
+Based on this model output, what can we say about the effects of species and sex on flipper length, and the interaction of the two?
+
+```{r}
+model.1 <- lm(flipper_length_mm ~ species + sex + species:sex, data=penguins.complete) # equivalent to species * sex
+summary(model.1)
+```
+
+## Main effects
+
+What does it mean that there are stars at the end of the row that starts `sexmale`?
+
+```{r}
+penguins.complete %>% 
+  ggplot(aes(x = sex,
+             y = flipper_length_mm,
+             fill = sex)) +
+  theme_bw() +
+  geom_boxplot() +
+  ggtitle("sexmale                     4.616      0.936    4.93  1.3e-06 ***")
+# the title is copied from the lm output for convenience. (don't do this for real)
+```
+
+What does it mean that there are stars at the end of the rows beginning with `speciesChinstrap` and `speciesGentoo`?
+
+```{r}
+penguins.complete %>% 
+  filter(species != "Gentoo") %>% 
+  ggplot(aes(x = species,
+             y = flipper_length_mm,
+             fill = species)) +
+  theme_bw() +
+  geom_boxplot() +
+  ggtitle("speciesChinstrap            3.941      1.174    3.36  0.00088 ***")
+
+penguins.complete %>% 
+  filter(species != "Chinstrap") %>% 
+  ggplot(aes(x = species,
+             y = flipper_length_mm,
+             fill = species)) +
+  theme_bw() +
+  geom_boxplot() +
+  ggtitle("speciesGentoo              24.912      0.995   25.04  < 2e-16 ***")
+```
+
+But wait -- what about comparing Chinstrap to Gentoo? This is just a pair-wise comparison, and it's only two of the three combinations.
+
+First: relevel (reorder the levels) so that the baseline is one of the other options.
+
+```{r}
+model.2 <- lm(flipper_length_mm ~ species + sex + species:sex, 
+              data=penguins.complete %>% 
+                      mutate(species = fct_relevel(species, c("Chinstrap", "Adelie", "Gentoo")))) 
+summary(model.2)
+```
+
+This gives us the remaining pair-wise comparison.
+
+```{r}
+penguins.complete %>% 
+  filter(species != "Adelie") %>% 
+  ggplot(aes(x = species,
+             y = flipper_length_mm,
+             fill = species)) +
+  theme_bw() +
+  geom_boxplot() +
+  ggtitle("speciesGentoo           20.972      1.221   17.17  < 2e-16 ***")
+```
+
+But it still doesn't tell us about the **main effect** of species. For this, we need to get metaphorical for a moment.
+
+When you need to know how much your small pet weighs, but you only have a bathroom scale, you can't just put the pet on the scale. This is because the scale is not accurate for such small measures. To weight your pet, you'll need to weigh yourself holding the pet, then put the pet down and weigh yourself alone. Then, subtract your own weight from the combined weight and you get the weight of your pet.
+
+This is a similar strategy to what we call *model comparison*. Model comparison is great for evaluating the contribution of any effect to the overall fit of the model, but it is especially important for effects that contain complex interactions or multiple levels.
+
+To assess the contribution of `species` to the overall fit of the model (that is, does adding `species` to the model improve its description of the variance in a meaningful way), we need to compare the model with it in, and with it out.
+
+For simplicity, let's get rid of the interaction term for now.
+
+```{r}
+model.full <- lm(flipper_length_mm ~ 1 +
+                                     species + 
+                                     sex, 
+                 data=penguins.complete)
+
+model.no.species <- lm(flipper_length_mm ~ 1 +
+                                           #species + 
+                                           sex, 
+                       data=penguins.complete)
+
+anova(model.full, model.no.species)
+```
+
+This ANOVA function isn't *always* an ANOVA (as well see soon), but it always provides the appropriate model comparison. Here, we can see that `species` contributes significantly to the overall model fit, as the model with it in describes more variance than without it.
+
+## Interactions
+
+Interactions can be very trick to interpret. Looking back at our first model, we have the same problem as before, since `species` has two levels. But this time, it's unclear what the estimate is referring to.
+
+```{r}
+summary(model.1)
+```
+
+Let's also look at the releveled analysis so we can see how the Chinstrap-Gentoo comparison is evaluated:
+
+```{r}
+summary(model.2)
+```
+
+Note that the interaction of speciesChinstrap:sexmale and speciesGentoo:sexfemale (the baseline) is *not* significant. So, is the overall contribution of the interaction term significant, or is it only describing a very small part of the variance in the data?
+
+Here is where data visualisation becomes imperative for interpretation:
+
+```{r, message=FALSE}
+penguins.complete %>% 
+  group_by(species, sex) %>% 
+  summarise(flipper.mean = mean(flipper_length_mm),
+            flipper.se = sd(flipper_length_mm)/sqrt(n())) %>% 
+  #mutate(species = fct_relevel(species, c("Gentoo", "Adelie", "Chinstrap"))) %>% 
+  ggplot(aes(x = sex,
+             y = flipper.mean,
+             group = species,
+             colour = species)) +
+  theme_bw() +
+  geom_point() +
+  geom_errorbar(aes(ymin = flipper.mean-flipper.se,
+                    ymax = flipper.mean+flipper.se),
+                width=.1) +
+  geom_path() +
+  NULL
+```
+
+Well, it's possible to eye-ball that Adelies have a different slope between female and male than the other two groups (what we saw in `model.1`). It's a little harder but not impossible to guess that the slope for Chinstraps and Gentoos is almost exactly the same. This would explain why there is no significant interaction for that comparison.
+
+But the simple model output doesn't tell us anything about the interaction *overall*. For that, we need model comparison again. Remember, `model.1` is our complete version of this model. (And `model.2` simply reorders the species levels.)
+
+```{r}
+model.no.interaction <- lm(flipper_length_mm ~ 1 + sex + species, data = penguins.complete)
+
+anova(model.1, model.no.interaction)
+```
+
+Even though the interaction is tiny (as we see in the plot), it's enough to significantly contribute to the overall model fit.
+
+# Mixed effects
+
+**Fixed effects** are the main and interaction effects we've been working with up until now. **Random effects** are the type of effect I'll be introducing shortly. The use of both fixed and random effects in a single linear model is what we call **mixed effects** modeling.
+
+```{r}
+# load package for mixed effects modeling
+library(lme4)
+
+# read in your data, however you like
+simdat <- read.csv("../data/simulated-data.csv", header = TRUE)
+```
+
+In short, random effects help you account for noise that you suspect is being introduced into your data in a consistent way, but from a source that has nothing to do with your research question and/or that you can't control.
+
+For instance, each person will have a different reading style, different exposure to vocabulary, different muscle responsiveness, different vocal tract shapes, and a different brain. 
+
+Each sentence they read (no matter how carefully you craft them) will have different word frequencies, different syllable structures, different meanings, and different contexts. 
+
+These two sources of variation are unavoidable, and they might interact in unexpected ways. One person might consistently read familiar words more slowly, but they might also be more familiar with some of the "low frequency" vocabulary. Another person might consistently read familiar words more quickly, but they might also be more familiar with the "low frequency" vocabulary. Here is how different participants' responses appear -- it's very messy!
+
+```{r, message=FALSE}
+simdat %>% 
+  group_by(subj,freq,gram) %>% 
+  summarise(rt.mean = mean(rt),
+            rt.se = sd(rt)/sqrt(n())) %>% 
+  ggplot(aes(x=freq,colour=gram,y=rt.mean)) +
+  geom_path(aes(group=gram)) +
+  geom_errorbar(aes(ymin=rt.mean-rt.se,ymax=rt.mean+rt.se), width=.1) +
+  theme_bw() +
+  facet_wrap(~subj)
+```
+
+Rather than trying to establish a baseline for each individual on each stimulus item (which isn't possible, nor relevant to the actual research question, which is about the population in aggregate), we can add `subj` (participant) and `item` to our random effects. We can also add `freq` and `gram` (and anything else) to our random effects structure, because we aren't sure how each person-item-condition-etc pairing will vary.
+
+
+```{r}
+mdl.max <- lmer(rt ~ 1 +
+                  freq +
+                  gram +
+                  freq:gram +
+                  age +
+                  (1 + freq + gram | subj) + 
+                  (1 + age | item),
+                data = simdat)
+summary(mdl.max)
+```
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+mdl.max <- lmer(rt ~ 1 +
+                  freq +
+                  gram +
+                  freq:gram +
+                  age +
+                  (1 | subj) + 
+                  (1 | item),
+                data = simdat)
+```
+
+If we get messages about `boundary (singular) fit: see ?isSingular`, this is a good indication our data don't support the complexity of the model, even if it is conceptually sound. (Practitioners of Bayesian statistics would say 'this is why you should be doing Bayesian statistics instead of inferential statistics!' but Bayesian statistics has its own problems, so it's not always better!)
+
+We can simplify the model until it "converges" or is appropriate for our data. Unfortunately, this might mean removing terms that are conceptually important. Ideally, you would run simulations of your data before you even started your experiment, so you would know how much data you would need to support the models you want to run. This is a good practice, but very difficult to plan for when you're first starting out with these sorts of analytical tools. Just something to keep in mind for the future.
+
+To do model comparison, copy the maximal model and comment out the interaction first. This will tell you the "weight" or contribution of the interaction term to the overall fit. This will also provide the "missing" p-values, if you want them.
+
+```{r}
+mdl.int <- lmer(rt ~ 1 +
+                  freq +
+                  gram +
+                  #freq:gram +
+                  age +
+                  (1 | subj) + 
+                  (1 | item),
+                data = simdat)
+
+anova(mdl.max, mdl.int)
+```
+
+Since the interaction term contains *both* `freq` and `gram`, we can't have it in the model when we test the *main* effects of `freq` or `gram`, so we can use the `mdl.int` model for our new 'baseline' model.
+
+First, let's test the contribution of frequency.
+
+```{r}
+mdl.frq <- lmer(rt ~ 1 +
+                  #freq +
+                  gram +
+                  #freq:gram +
+                  age +
+                  (1 | subj) + 
+                  (1 | item),
+                data = simdat)
+
+anova(mdl.int, mdl.frq)
+```
+
+Now let's test grammaticality. (Note: See [this page](https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html) for convergence help, although the warning below will disappear when the maximal model is fixed.)
+
+```{r}
+mdl.frq <- lmer(rt ~ 1 +
+                  freq +
+                  #gram +
+                  #freq:gram +
+                  age +
+                  (1 | subj) + 
+                  (1 | item),
+                #control=lmerControl(optimizer="bobyqa"),
+                data = simdat)
+
+anova(mdl.int, mdl.frq)
+```
+
+Since `age` isn't part of the interaction, we can use the maximal model for a comparison baseline again.
+
+```{r}
+mdl.age <- lmer(rt ~ 1 +
+                  freq +
+                  gram +
+                  freq:gram +
+                  #age +
+                  (1 | subj) + 
+                  (1 | item),
+                data = simdat)
+
+anova(mdl.max, mdl.age)
+```
+
+If you'd like to learn more about why we do this, when it's appropriate, and how to design the best mixed effects model for your data I recommend these two papers. They're a bit technical and dense, but if you are patient with yourself and chip away slowly, they are treasure troves of information (even when they disagree)!
+
+- [Random effects structure for confirmatory hypothesis testing: Keep it maximal (Barr, Levy, Scheepers & Tily 2013)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3881361/)
+- [Parsimonious Mixed Models (Bates, Kliegl, Vasishth & Baayen 2018)](https://arxiv.org/abs/1506.04967)
+
+I can also offer you some tips and strategies for reporting these sorts of statistics in prose, which I have written up [here](https://verbingnouns.github.io/notebooks/prose_statistics.nb.html).
+
+# Challenge questions
+
+Using the binomial (log linear) model in `lme4`, construct and interpret a model that examines accuracy as a function of age, frequency, grammaticality, and the interaction of frequency and grammaticality. Include random effects for intercept and figure out if any random effects for slope will converge.
+
+```{r}
+# maximal model
+```
+
+```{r}
+# add depleted models to test the contribution of each fixed effect
+```
+
+
+To help you interpret the interaction term, here is a plot of the interaction (without age or random effects accounted for).
+
+```{r, message=FALSE}
+simdat %>% 
+  filter(rating==1) %>% 
+  group_by(freq,gram) %>% 
+  summarise(n=n(),
+            acc=sum(accuracy),
+            correct= acc/n) %>% 
+  ggplot(aes(x = freq, colour=gram, y = correct)) +
+  geom_point() +
+  geom_path(aes(group=gram)) +
+  theme_bw() +
+  NULL
+```
+
