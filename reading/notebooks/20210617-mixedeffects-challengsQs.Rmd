@@ -1,0 +1,117 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(lme4)
+
+simdat <- read.csv(file.choose())
+```
+
+# Challenge questions
+
+Using the binomial (log linear) model in `lme4`, construct and interpret a model that examines accuracy as a function of age, frequency, grammaticality, and the interaction of frequency and grammaticality. Include random effects for intercept and figure out if any random effects for slope will converge.
+
+```{r challenge-one, warning=FALSE}
+# maximal model
+# measure ~ factor1 + factor2 + factor1:factor2 + (1 + random slopes | random intercept)
+
+challenge.mdl.max <- glmer(accuracy ~ 1 +
+                            age + 
+                            freq + 
+                            gram + 
+                            freq:gram +
+                            (1 | subj) +
+                            (1 | item),
+                          data = simdat %>% filter(region==1),
+                          family = "binomial")
+summary(challenge.mdl.max)
+```
+
+```{r}
+# add depleted models to test the contribution of each fixed effect
+challenge.mdl.int <- glmer(accuracy ~ 1 +
+                            age + 
+                            freq + 
+                            gram + 
+                            #freq:gram +
+                            (1 | subj) +
+                            (1 | item),
+                          data = simdat %>% filter(region==1),
+                          family = "binomial")
+
+anova(challenge.mdl.max, challenge.mdl.int)
+```
+
+```{r}
+challenge.mdl.frq <- glmer(accuracy ~ 1 +
+                            age + 
+                            #freq + 
+                            gram + 
+                            #freq:gram +
+                            (1 | subj) +
+                            (1 | item),
+                          data = simdat %>% filter(region==1),
+                          family = "binomial")
+anova(challenge.mdl.frq, challenge.mdl.int)
+```
+
+```{r}
+challenge.mdl.grm <- glmer(accuracy ~ 1 +
+                            age + 
+                            freq + 
+                            #gram + 
+                            #freq:gram +
+                            (1 | subj) +
+                            (1 | item),
+                          data = simdat %>% filter(region==1),
+                          family = "binomial")
+anova(challenge.mdl.grm, challenge.mdl.int)
+```
+
+```{r}
+challenge.mdl.age <- glmer(accuracy ~ 1 +
+                            #age + 
+                            freq + 
+                            gram + 
+                            freq:gram +
+                            (1 | subj) +
+                            (1 | item),
+                          data = simdat %>% filter(region==1),
+                          control = glmerControl(optimizer = "bobyqa"),
+                          family = "binomial")
+anova(challenge.mdl.age, challenge.mdl.max) %>% broom::tidy()
+```
+
+
+To help you interpret the interaction term, here is a plot of the interaction (without age or random effects accounted for).
+
+```{r, message=FALSE}
+simdat %>% 
+  filter(region==1) %>% 
+  group_by(age,freq,gram) %>% 
+  summarise(n=n(),
+            acc=sum(accuracy),
+            correct= acc/n) %>% 
+  ggplot(aes(x = freq, colour=gram, y = correct)) +
+  geom_point() +
+  geom_path(aes(group=gram)) +
+  theme_bw() +
+  facet_wrap(~age) +
+  NULL
+
+simdat %>% 
+  filter(region==1) %>% 
+  group_by(freq,gram) %>% 
+  summarise(n=n(),
+            acc=sum(accuracy),
+            correct= acc/n) %>% 
+  ggplot(aes(x = freq, colour=gram, y = correct)) +
+  geom_point() +
+  geom_path(aes(group=gram)) +
+  theme_bw() +
+  NULL
+```
+
