@@ -54,7 +54,7 @@ input %>%
 
 First, I created the static image from which the frames will be extracted.
 
-```{r static}
+```{r static, eval=FALSE}
 idols %>% 
   # These filters are good for testing how it responds to y-axis changes and x-axis dimensions
   #filter(timestampPOSIX > strptime("2021-06-25 02:00:01", format = "%F %T") &
