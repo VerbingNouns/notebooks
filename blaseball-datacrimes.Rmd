@@ -1,0 +1,178 @@
+---
+title: "Datacrimes Visualized"
+author: "by Lauren Ackerman"
+date: "2021 July 25"
+output: html_notebook
+---
+
+This is the code I used to render the following video.
+
+Data compiled by David Lazar ([\@davidthelazar](https://twitter.com/davidthelazar)) and available [here](https://docs.google.com/spreadsheets/d/1VfM2Lan8_B-tfDlSi8q_h4JuIe6fzqo8r5I4yKAN1NQ/edit). The version used to create the following video is [here](20210723_idolBoardData-rawData.csv).
+
+Notes from twitter: 
+
+* so just to double check, columns C:V are eDensities of the corresponding players in columns W:AP? and strictlyConfidential is, what, where the noodle was? 
+* All correct. But just to be clear, the eDensities and player names are always in order from top of idolboard to the bottom (labels in row 1). Also, strictlyConfidential is zero-indexed so the noodle has strictlyConfidential+1 players above it
+
+
+```{r setup, eval=FALSE}
+library(tidyverse)
+library(gganimate)
+library(transformr)
+
+input <- read.csv("~/Desktop/blaseball/20210723_idolBoardData-rawData.csv") 
+
+input %>% 
+  select(-c(3:22)) %>% 
+  pivot_longer(cols = 3:22,
+               names_to = "position",
+               values_to = "player") %>% 
+  mutate(position = str_remove(position, "X"),
+         position = str_remove(position, fixed(".1"))) %>% 
+  full_join(input %>%
+              select(1:22) %>% 
+              pivot_longer(cols = 3:22,
+                           names_to = "position",
+                           values_to = "eDensity") %>% 
+              mutate(position = str_remove(position, "X")),
+            by = c("timestamp", "strictlyConfidential", "position")) %>% 
+  mutate(position = as.integer(position),
+         timestamp = str_trunc(timestamp, 
+                               width = 19, 
+                               side = "right", 
+                               ellipsis = ""),
+         timestamp = str_replace(timestamp, pattern = "T",replacement = " "),
+         timestamp = strftime(timestamp,
+                              format = "%F %T"),
+         timestampPOSIX = strptime(timestamp,
+                                   format = "%F %T")) %>% 
+  rename(noodle = strictlyConfidential) -> idols
+```
+
+First, I created the static image from which the frames will be extracted.
+
+```{r static}
+idols %>% 
+  # These filters are good for testing how it responds to y-axis changes and x-axis dimensions
+  #filter(timestampPOSIX > strptime("2021-06-25 02:00:01", format = "%F %T") &
+  #         timestampPOSIX < strptime("2021-06-29 02:00:01", format = "%F %T")) %>% 
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestampPOSIX) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  full_join(idols %>% 
+              # Same as above.
+              #filter(timestampPOSIX > strptime("2021-06-25 02:00:01", format = "%F %T") &
+              #         timestampPOSIX < strptime("2021-06-29 02:00:01", format = "%F %T")) %>%
+              mutate(timestamp_fct = as.factor(timestamp),
+                     position_fct = as.factor(position)),
+            by = "timestampPOSIX") %>% 
+  # Just to keep the names consistent across all timepoints
+  mutate(player_name = case_when(player == "--at-ema -lem-f-yo" ~ "Anathema Elemefayo",
+                                 player == "B-by Do-le" ~ "Baby Doyle",
+                                 player == "Com-issioner V-por" ~ "Commissioner Vapor",
+                                 player == "Commissioner V-por" ~ "Commissioner Vapor",
+                                 player == "-o- Mit-hel-" ~ "Don Mitchell",
+                                 player == "-o- Mitchel-" ~ "Don Mitchell",
+                                 player == "-o- Mitchell" ~ "Don Mitchell",
+                                 player == "-on Mitchell" ~ "Don Mitchell",
+                                 player == "-ud-ey -ueller" ~ "Dudley Mueller",
+                                 player == "-ud-ey Mueller" ~ "Dudley Mueller",
+                                 player == "Dud-ey Mueller" ~ "Dudley Mueller",
+                                 player == "Dudley Muelle-" ~ "Dudley Mueller",
+                                 player == "Dud-ey Mueller" ~ "Dudley Mueller",
+                                 player == "Dudley Muelle-" ~ "Dudley Mueller",
+                                 player == "G-a Holb---k" ~ "Gia Holbrook",
+                                 player == "G-a Holb--ok" ~ "Gia Holbrook",
+                                 player == "G-a Holbr-ok" ~ "Gia Holbrook",
+                                 player == "H-t-ie-d S-z-ki" ~ "Hatfield Suzuki",
+                                 player == "J-xo- B-c--ey" ~ "Jaxon Buckley",
+                                 player == "J-xo- B-ck-ey" ~ "Jaxon Buckley",
+                                 player == "J-xon B-ck-ey" ~ "Jaxon Buckley",
+                                 player == "J-x-n B-ck--y" ~ "Jaxon Buckley",
+                                 player == "J-x-n B-ckl-y" ~ "Jaxon Buckley",
+                                 player == "J-x-n Buckl-y" ~ "Jaxon Buckley",
+                                 player == "J-x-n Buckley" ~ "Jaxon Buckley",
+                                 player == "Jax-n Buckley" ~ "Jaxon Buckley",
+                                 player == "Jaxon B-ck-ey" ~ "Jaxon Buckley",
+                                 player == "Jaxon Buck-ey" ~ "Jaxon Buckley",
+                                 player == "Knight Triu-phant" ~ "Knight Triumphant",
+                                 player == "Malik Dest-ny" ~ "Malik Destiny",
+                                 player == "Mi-a -emma" ~ "Mira Lemma",
+                                 player == "Mira -emma" ~ "Mira Lemma",
+                                 player == "P-u-a --rn-p" ~ "Paula Turnip",
+                                 player == "P-u-a --rnip" ~ "Paula Turnip",
+                                 player == "Pau-a -urnip" ~ "Paula Turnip",
+                                 player == "Pi-ching -ac--ne" ~ "Pitching Machine",
+                                 player == "R-g-- --ie-r---" ~ "Rigby Friedrich",
+                                 player == "T-oma- Drac-ena" ~ "Thomas Dracaena",
+                                 player == "Thoma- Drac-ena" ~ "Thomas Dracaena",
+                                 player == "Thomas Drac-ena" ~ "Thomas Dracaena",
+                                 player == "--n--- Carve-" ~ "Sandie Carver",
+                                 TRUE ~ player)) %>% 
+  group_by(timestampPOSIX, position_fct, player_name) %>% 
+  summarise(percent = eDensity/total,
+            abs_percent = abs(eDensity)/total) %>% 
+  mutate(log_percent = case_when(abs_percent == 0 ~ 0,
+                                 abs_percent > 0 ~ log(abs_percent)+6),
+         player_position = paste0(" ", as.character(position_fct), ": ", player_name)) %>% 
+  # Plot begins here
+  ggplot(aes(x = timestampPOSIX, 
+             y = percent,
+             colour = position_fct)) +
+  theme_bw() +
+  viridis::scale_fill_viridis(option = "plasma", discrete = TRUE) +
+  viridis::scale_colour_viridis(option = "plasma", discrete = TRUE) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "none") +
+  # Layer 1 (for animation)
+  geom_point(aes(#group = player_position,
+                 size = percent),
+             position = "stack",
+             stat = "identity",
+             alpha = .5) +
+  # Layer 2 (to be excluded from animation's shadow/trace)
+  geom_text(aes(label = player_position,
+                size = log_percent),
+            stat = "identity",
+            position = "stack",
+            check_overlap = FALSE, 
+            hjust = 0) +
+  ggtitle("") -> q
+```
+
+Next, animate the plot, which will initially compile as a gif, but only with 100 frames (for now).
+
+```{r animate2, eval=FALSE}
+q + transition_states(timestampPOSIX,
+                      transition_length = 10,
+                      state_length = 1) +
+  ease_aes("cubic-in") +
+  view_follow(fixed_x = TRUE) +
+  labs(title = 'Idol Board at {closest_state}') + 
+  shadow_trail(distance = 1,
+               exclude_layer = 2) + 
+  shadow_mark(alpha = .05,
+              exclude_layer = 2) +
+  enter_fade() + exit_fade() -> q1
+```
+
+Finally, render it as a video and save it (although I still needed to convert to .m4v using [VLC](https://www.videolan.org/) and then transcode to .mp4 using [HandBrake](https://handbrake.fr/)).
+
+```{r render2, eval=FALSE}
+animate(q1, 
+        nframes = 6000,
+        fps = 30,
+        renderer = av_renderer(),
+        detail = 3,
+        width = 1920,
+        height = 1080)
+#anim_save("20210725-big_vid")
+```
+
+And, if all goes well, and you have lots of time and sufficient computing power, you get something like this:
+
+<video width="900" controls>
+  <source src="20210725-big_vid.mp4" type="video/mp4">
+</video>
