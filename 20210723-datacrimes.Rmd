@@ -1,0 +1,349 @@
+---
+title: "2021 July 23"
+output: html_notebook
+---
+
+Data compiled by David Lazar ([@davidthelazar](https://twitter.com/davidthelazar)) and available [here](https://docs.google.com/spreadsheets/d/1VfM2Lan8_B-tfDlSi8q_h4JuIe6fzqo8r5I4yKAN1NQ/edit).
+
+* so just to double check, columns C:V are eDensities of the corresponding players in columns W:AP? and strictlyConfidential is, what, where the noodle was? 
+* All correct. But just to be clear, the eDensities and player names are always in order from top of idolboard to the bottom (labels in row 1). Also, strictlyConfidential is zero-indexed so the noodle has strictlyConfidential+1 players above it
+
+
+```{r setup}
+library(tidyverse)
+library(gganimate)
+library(transformr)
+
+input <- read.csv("~/Desktop/blaseball/20210723_idolBoardData-rawData.csv") 
+
+input %>% 
+  select(-c(3:22)) %>% 
+  pivot_longer(cols = 3:22,
+               names_to = "position",
+               values_to = "player") %>% 
+  mutate(position = str_remove(position, "X"),
+         position = str_remove(position, fixed(".1"))) %>% 
+  full_join(input %>%
+              select(1:22) %>% 
+              pivot_longer(cols = 3:22,
+                           names_to = "position",
+                           values_to = "eDensity") %>% 
+              mutate(position = str_remove(position, "X")),
+            by = c("timestamp", "strictlyConfidential", "position")) %>% 
+  mutate(position = as.integer(position),
+         timestamp = str_trunc(timestamp, 
+                               width = 19, 
+                               side = "right", 
+                               ellipsis = ""),
+         timestamp = str_replace(timestamp, pattern = "T",replacement = " "),
+         timestamp = strftime(timestamp,
+                              format = "%F %T"),
+         timestampPOSIX = strptime(timestamp,
+                                   format = "%F %T")) %>% 
+  rename(noodle = strictlyConfidential) -> idols; idols
+```
+
+
+
+# Does it blend?
+
+
+```{r replicate}
+idols %>% #head()
+  filter(timestampPOSIX < strptime("2021-05-15 00:00:00", format = "%F %T")) %>% #pull(timestamp) %>% unique()
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestamp_fct) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  full_join(idols %>% 
+              filter(timestampPOSIX < strptime("2021-05-15 00:00:00", format = "%F %T")) %>%
+              mutate(timestamp_fct = as.factor(timestamp),
+                     position_fct = as.factor(position)),
+            by = "timestamp_fct") %>% 
+  group_by(timestamp_fct, position_fct) %>% 
+  summarise(percent = eDensity/total) %>% 
+  ggplot(aes(x = timestamp_fct, 
+             y = percent,
+             fill = position_fct)) +
+  theme_bw() +
+  viridis::scale_fill_viridis(option = "plasma", discrete = TRUE) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  #scale_x_date() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "none") +
+  geom_col(width=1)
+```
+
+
+```{r labels for animate}
+idols %>% #head()
+  filter(timestampPOSIX < strptime("2021-03-03 02:00:01", format = "%F %T")) %>% #pull(timestamp) %>% unique()
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestampPOSIX) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  full_join(idols %>% 
+              filter(timestampPOSIX < strptime("2021-03-03 02:00:01", format = "%F %T")) %>%
+              mutate(timestamp_fct = as.factor(timestamp),
+                     position_fct = as.factor(position)),
+            by = "timestampPOSIX") %>% 
+  group_by(timestampPOSIX, position_fct, player) %>% 
+  summarise(percent = eDensity/total) %>% 
+  mutate(player = paste0(as.character(position_fct),": ",player)) %>% 
+  ggplot(aes(x = timestampPOSIX, 
+             y = percent,
+             colour = position_fct,
+             fill = position_fct,
+             size = percent)) +
+  theme_bw() +
+  viridis::scale_fill_viridis(option = "plasma", discrete = TRUE) +
+  viridis::scale_colour_viridis(option = "plasma", discrete = TRUE) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_datetime() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "none") +
+  #geom_point(position = "stack",
+  #           stat = "identity",
+  #           alpha = .9) +
+  geom_text(aes(label = player), 
+             #colour = "black",
+             stat = "identity",
+             position = "stack",
+             #size = 3,
+             check_overlap = FALSE)
+```
+
+How to even out the size problems?
+
+```{r}
+# what are the range of total eDensities?
+idols %>% 
+  filter(timestampPOSIX < strptime("2021-04-13 02:00:01", format = "%F %T")) %>% #pull(timestamp) %>% unique()
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestampPOSIX) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  ggplot(aes(x=total)) +
+  geom_density()
+
+# what are the range of percents, which control the `size` scale? can we log them?
+idols %>% 
+  filter(timestampPOSIX < strptime("2021-04-13 02:00:01", format = "%F %T")) %>% #pull(timestamp) %>% unique()
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestampPOSIX) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  full_join(idols %>% 
+              filter(timestampPOSIX < strptime("2021-04-13 02:00:01", format = "%F %T")) %>%
+              mutate(timestamp_fct = as.factor(timestamp),
+                     position_fct = as.factor(position)),
+            by = "timestampPOSIX") %>% 
+  group_by(timestampPOSIX, position_fct, player) %>% 
+  summarise(percent = eDensity/total) %>% 
+  ggplot(aes(x=log(percent))) +
+  geom_density()
+
+# get rid of the NaNs
+idols %>% #head()
+  filter(timestampPOSIX < strptime("2021-04-13 02:00:01", format = "%F %T")) %>% #pull(timestamp) %>% unique()
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestampPOSIX) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  full_join(idols %>% 
+              filter(timestampPOSIX < strptime("2021-04-13 02:00:01", format = "%F %T")) %>%
+              mutate(timestamp_fct = as.factor(timestamp),
+                     position_fct = as.factor(position)),
+            by = "timestampPOSIX") %>% 
+  group_by(timestampPOSIX, position_fct, player) %>% 
+  summarise(percent = eDensity/total) %>% 
+  mutate(player = paste0(as.character(position_fct),": ",player),
+         stuff = 0,
+         log_percent = case_when(percent == 0 ~ 0,
+                                 percent > 0 ~ log(percent)+6)) %>% ggplot() + geom_histogram(aes(x=log_percent), bins = 1000)
+```
+
+# first animation
+
+```{r animation_maybe}
+idols %>% #head()
+  filter(timestampPOSIX < strptime("2021-04-13 02:00:01", format = "%F %T")) %>% #pull(timestamp) %>% unique()
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestampPOSIX) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  full_join(idols %>% 
+              filter(timestampPOSIX < strptime("2021-04-13 02:00:01", format = "%F %T")) %>%
+              mutate(timestamp_fct = as.factor(timestamp),
+                     position_fct = as.factor(position)),
+            by = "timestampPOSIX") %>% 
+  group_by(timestampPOSIX, position_fct, player) %>% 
+  summarise(percent = eDensity/total) %>% 
+  mutate(player = paste0(as.character(position_fct),": ",player),
+         stuff = 0,
+         log_percent = case_when(percent == 0 ~ 0,
+                                 percent > 0 ~ log(percent)+6)) %>% 
+  ggplot(aes(x = stuff, 
+             y = percent,
+             colour = position_fct,
+             fill = position_fct,
+             size = log_percent)) +
+  theme_bw() +
+  viridis::scale_fill_viridis(option = "plasma", discrete = TRUE) +
+  viridis::scale_colour_viridis(option = "plasma", discrete = TRUE) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme(#axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "none") +
+  #geom_point(position = "stack",
+  #           stat = "identity",
+  #           alpha = .9) +
+  geom_text(aes(label = player), 
+             #colour = "black",
+             stat = "identity",
+             position = "stack",
+             #size = 3,
+             check_overlap = FALSE) +
+  xlab("") -> p; p
+```
+
+```{r}
+p + transition_states(timestampPOSIX,
+                      transition_length = 3,
+                      state_length = 1) +
+  labs(title = 'Idol Board at {closest_state}') +
+  enter_fade() + exit_fade() -> p1; p1
+```
+
+```{r save1}
+animate(p1, 
+        nframes = 4000,
+        fps = 30,
+        renderer = av_renderer(),
+        detail = 3)
+#anim_save("test-20210724")
+```
+
+# second animation
+
+```{r static}
+idols %>% #head()
+  #filter(timestampPOSIX > strptime("2021-06-25 02:00:01", format = "%F %T") &
+  #         timestampPOSIX < strptime("2021-06-29 02:00:01", format = "%F %T")) %>% 
+  mutate(timestamp_fct = as.factor(timestamp),
+         position_fct = as.factor(position)) %>% 
+  group_by(timestampPOSIX) %>% 
+  summarise(total = sum(eDensity)) %>% 
+  full_join(idols %>% 
+              #filter(timestampPOSIX > strptime("2021-06-25 02:00:01", format = "%F %T") &
+              #         timestampPOSIX < strptime("2021-06-29 02:00:01", format = "%F %T")) %>%
+              mutate(timestamp_fct = as.factor(timestamp),
+                     position_fct = as.factor(position)),
+            by = "timestampPOSIX") %>% 
+  mutate(player_name = case_when(player == "--at-ema -lem-f-yo" ~ "Anathema Elemefayo",
+                                 player == "B-by Do-le" ~ "Baby Doyle",
+                                 player == "Com-issioner V-por" ~ "Commissioner Vapor",
+                                 player == "Commissioner V-por" ~ "Commissioner Vapor",
+                                 player == "-o- Mit-hel-" ~ "Don Mitchell",
+                                 player == "-o- Mitchel-" ~ "Don Mitchell",
+                                 player == "-o- Mitchell" ~ "Don Mitchell",
+                                 player == "-on Mitchell" ~ "Don Mitchell",
+                                 player == "-ud-ey -ueller" ~ "Dudley Mueller",
+                                 player == "-ud-ey Mueller" ~ "Dudley Mueller",
+                                 player == "Dud-ey Mueller" ~ "Dudley Mueller",
+                                 player == "Dudley Muelle-" ~ "Dudley Mueller",
+                                 player == "Dud-ey Mueller" ~ "Dudley Mueller",
+                                 player == "Dudley Muelle-" ~ "Dudley Mueller",
+                                 player == "G-a Holb---k" ~ "Gia Holbrook",
+                                 player == "G-a Holb--ok" ~ "Gia Holbrook",
+                                 player == "G-a Holbr-ok" ~ "Gia Holbrook",
+                                 player == "H-t-ie-d S-z-ki" ~ "Hatfield Suzuki",
+                                 player == "J-xo- B-c--ey" ~ "Jaxon Buckley",
+                                 player == "J-xo- B-ck-ey" ~ "Jaxon Buckley",
+                                 player == "J-xon B-ck-ey" ~ "Jaxon Buckley",
+                                 player == "J-x-n B-ck--y" ~ "Jaxon Buckley",
+                                 player == "J-x-n B-ckl-y" ~ "Jaxon Buckley",
+                                 player == "J-x-n Buckl-y" ~ "Jaxon Buckley",
+                                 player == "J-x-n Buckley" ~ "Jaxon Buckley",
+                                 player == "Jax-n Buckley" ~ "Jaxon Buckley",
+                                 player == "Jaxon B-ck-ey" ~ "Jaxon Buckley",
+                                 player == "Jaxon Buck-ey" ~ "Jaxon Buckley",
+                                 player == "Knight Triu-phant" ~ "Knight Triumphant",
+                                 player == "Malik Dest-ny" ~ "Malik Destiny",
+                                 player == "Mi-a -emma" ~ "Mira Lemma",
+                                 player == "Mira -emma" ~ "Mira Lemma",
+                                 player == "P-u-a --rn-p" ~ "Paula Turnip",
+                                 player == "P-u-a --rnip" ~ "Paula Turnip",
+                                 player == "Pau-a -urnip" ~ "Paula Turnip",
+                                 player == "Pi-ching -ac--ne" ~ "Pitching Machine",
+                                 player == "R-g-- --ie-r---" ~ "Rigby Friedrich",
+                                 player == "T-oma- Drac-ena" ~ "Thomas Dracaena",
+                                 player == "Thoma- Drac-ena" ~ "Thomas Dracaena",
+                                 player == "Thomas Drac-ena" ~ "Thomas Dracaena",
+                                 player == "--n--- Carve-" ~ "Sandie Carver",
+                                 TRUE ~ player)) %>% 
+  group_by(timestampPOSIX, position_fct, player_name) %>% 
+  summarise(percent = eDensity/total,
+            abs_percent = abs(eDensity)/total) %>% 
+  mutate(log_percent = case_when(abs_percent == 0 ~ 0,
+                                 abs_percent > 0 ~ log(abs_percent)+6),
+         player_position = paste0(" ", as.character(position_fct), ": ", player_name)) %>% 
+  #ggplot(aes(x=log_percent)) + geom_density()
+  ggplot(aes(x = timestampPOSIX, 
+             y = percent,
+             colour = position_fct)) +
+  theme_bw() +
+  viridis::scale_fill_viridis(option = "plasma", discrete = TRUE) +
+  viridis::scale_colour_viridis(option = "plasma", discrete = TRUE) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "none") +
+  #geom_line(aes(group = position_fct), # i can't seem to transition lines or paths at all
+  #          #colour = "grey",
+  #          position = "stack",
+  #          stat = "identity",
+  #          alpha = .5,
+  #          lwd = 1) +
+  geom_point(aes(#group = player_position,
+                 size = percent),
+             position = "stack",
+             stat = "identity",
+             alpha = .5) +
+  geom_text(aes(label = player_position,
+                size = log_percent),
+            stat = "identity",
+            position = "stack",
+            check_overlap = FALSE, 
+            hjust = 0) +
+  ggtitle("") -> q; q
+```
+
+```{r animate2}
+q + transition_states(timestampPOSIX,
+                      transition_length = 10,
+                      state_length = 1) +
+  ease_aes("cubic-in") +
+  view_follow(fixed_x = TRUE) +
+  labs(title = 'Idol Board at {closest_state}') + 
+  shadow_trail(distance = 1,
+               exclude_layer = 2) + 
+  shadow_mark(alpha = .05,
+              exclude_layer = 2) +
+  enter_fade() + exit_fade() -> q1; q1
+beepr::beep()
+```
+
+
+```{r render2}
+animate(q1, 
+        nframes = 6000,
+        fps = 30,
+        renderer = av_renderer(),
+        detail = 3,
+        width = 1920,
+        height = 1080)
+beepr::beep()
+```
+
+```{r save2}
+anim_save("big-20210725")
+```
