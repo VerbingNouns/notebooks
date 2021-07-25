@@ -2,7 +2,10 @@
 title: "Datacrimes Visualized"
 author: "by Lauren Ackerman"
 date: "2021 July 25"
-output: html_notebook
+output: 
+  html_notebook:
+      includes: 
+          in_header: google_analytics.html
 ---
 
 This is the code I used to render the following video.
