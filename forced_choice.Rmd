@@ -1,7 +1,7 @@
 ---
 title: "Forced choice data"
 author: "Lauren M Ackerman"
-date: "Last updated: 03 May 2018"
+date: "Last updated: 06 August 2021"
 output: 
   html_notebook:
     toc: true
@@ -11,8 +11,9 @@ output:
 ---
 [🔙 Home](https://verbingnouns.github.io/notebooks/)
 
-```{r echo=FALSE,message=FALSE}
-library(ggplot2)
+```{r setup, message=FALSE}
+library(tidyverse)
+library(lme4)
 ```
 
 
@@ -21,50 +22,215 @@ library(ggplot2)
 The following is some boilerplate R code I use to test whether, in my forced-choice (binomial) data, my participants are selecting one option different from chance (50%).
 
 ```{r}
-# Author: Lauren M Ackerman
-# Available: https://lmackerman.com/r-snippets/
-# Date: July 21, 2016; updated January 30, 2018
+# Date: July 21, 2016; 
+# updated January 30, 2018; 
+# updated May 3, 2018;
+# updated August 6, 2021
 
-#library(lme4)
-data = read.csv("data/binomial-data.csv",header=TRUE,as.is=TRUE) #data file
+data = read.csv("data/binomial-data.csv",header=TRUE) # data file
+# "selectCode" is the responses which consist of 1s (hits) and 0s (misses)
 head(data)
-# "answer" is the responses which consist of 1s (hits) and 0s (misses)
 ```
 
-## Set up vectors for 1-sample proportions tests
+## 1-sample proportions tests
+
+```{r, message=FALSE, warning=FALSE}
+data.pct <- data %>% # save following operation into new dataset
+   group_by(experiment, condition) %>% # choose which columns define "100%" of each subset
+   summarise(total = n()) %>% # summarize to find the total number of each subset
+   full_join(data, ., by = c("experiment", "condition")) %>% # join it back to your data
+   group_by(experiment, condition, selectCode, total) %>% # choose columns to summarize
+   summarise(count = n()) %>% # count how many correct and incorrect responses there were
+   mutate(percent = count/total) # calculate the percent for each subset
+
+data.pct
+```
+
+First, check if the Baseline condition in Experiment 1 is different from chance levels of performance.
 
 ```{r}
-sum.cond.1 = sum(na.omit(data$selectCode[data$condition=="Baseline"])) # find the number of 1s in the "island" condition
-len.cond.1 = length(na.omit(data$selectCode[data$condition=="Baseline"])) # find the total number of points in the condition
-prop.test(sum.cond.1, len.cond.1, p = 0.5) # is the number of hits (1s) different from chance?
+# prop.test( x = successTrials ,
+#            n = totalTrials ,
+#            p = probabilityOfSuccess )
 
-sum.cond.2 = sum(na.omit(data$selectCode[data$condition=="Treatment"])) # same as previous, but in the "matrix" condition
-len.cond.2 = length(na.omit(data$selectCode[data$condition=="Treatment"]))
-prop.test(sum.cond.2, len.cond.2, p = 0.5)
+data.pct %>% # taking our summary table
+   filter(experiment == "first", # keep only Experiment 1
+          condition == "Baseline", # keep only Baseline condition
+          selectCode == 1) %>% # keep only correct selections
+   pull(count) -> baseline.success.exp1 # pull out the value(s) from the count column
+
+data.pct %>% # taking our summary table
+   filter(experiment == "first", # keep only Experiment 1
+          condition == "Baseline", # keep only Baseline condition
+          selectCode == 1) %>% # keep only correct selections
+   pull(total) -> baseline.total.exp1 # pull out the value(s) from the total column
+
+
+prop.test(x = baseline.success.exp1,
+          n = baseline.total.exp1,
+          p = 0.5) # check against "chance" levels of 50%
 ```
 
-## LM to compare across conditions
+No, it is not detectably different from chance (β=0.541, χ²(1)=1.50, p=0.22).
+
+Now, do the same test with the Treatment condition in Experiment 1.
 
 ```{r}
-summary(lm(selectCode~condition,data)) # summary of lmer to get Estimate and Standard Error
-max = lm(selectCode~condition,data) # store lmer for comparison
-less = lm(selectCode~1,data) # remove relevant term to see if it's relevant*
-anova(max,less) # anova test tells you the p value for "condition" (the estimate+SE)
+# prop.test( x = successTrials ,
+#            n = totalTrials ,
+#            p = probabilityOfSuccess )
 
-# Report:
-# prop.test...
-# χ²(df), p, 95% CI (lower-upper)
-# lmer...
-# Estimate, SE, χ²(df), p
+data.pct %>% # taking our summary table
+   filter(experiment == "first", # keep only Experiment 1
+          condition == "Treatment", # keep only Baseline condition
+          selectCode == 1) %>% # keep only correct selections
+   pull(count) -> treatment.success.exp1 # pull out the value(s) from the count column
 
-# * often, you might have a 2x2 design, but for this experiment, there was a 1x2 design, which has only one independent factor ("condition")
+data.pct %>% # taking our summary table
+   filter(experiment == "first", # keep only Experiment 1
+          condition == "Treatment", # keep only Baseline condition
+          selectCode == 1) %>% # keep only correct selections
+   pull(total) -> treatment.total.exp1 # pull out the value(s) from the total column
+
+
+prop.test(x = treatment.success.exp1,
+          n = treatment.total.exp1,
+          p = 0.5) # check against "chance" levels of 50%
 ```
+
+Yes, it is detectably different from chance (β=0.754, χ²(1)=61.0, p<0.0001).
+
+## GLM to compare across conditions
+
+Because we are using binomial data, we must use a logistic regression. The logistic regress is nearly identical to a linear regression, but rather than finding a linear line of best fit, it finds a log-linear line of best fit, which [looks like an S-curve](https://verbingnouns.github.io/notebooks/reading/notebooks/20210615-linearmodels.html#23_Binomial_data) when the predictor is continuous.
+
+Let's look at Experiment 1 only.
+
+```{r}
+model.glm <- glm(selectCode ~ 1 +
+                              condition,
+                 family = "binomial",
+                 data = data %>% filter(experiment == "first"))
+summary(model.glm)
+```
+
+Here we can see that our maximal model provides an estimate (β) for the Treatment condition as 0.9539. This is significant because the standard error (SE, or Std. Error) is smaller than the estimate (0.1981 < 0.9539), which is reflected in the test statistic, in this case a Z-value, of 4.814. This is larger than the threshold needed for significance, so the p-value is less than 0.05. In fact, the p-value written in scientific notation is is 1.48e-6 ("one point four eight times ten to the negative sixth power"), which means you would need to move the decimal point six places to the left (p = 0.00000148).
+
+If you have a more complex model, e.g., a GLMER that also takes into account the other experiments included in this dataset, you may wish to do some model comparison.
+
+```{r}
+model.max <- glmer(selectCode ~ 1 + # outcome measure as a function of the null hypothesis
+                      condition + # and condition
+                      experiment + # and experiment
+                      condition:experiment + # and the interaction of condition and experiment
+                      (1 | subject) + # with random intercepts for subject
+                      (1 | item), # and item
+                   family = "binomial", # using a binomial linking function
+                   data = data) # and our dataset
+
+# * the null hypothesis is by default included in all models and 
+#   can be explicitly written out as 1, which I have done to allow
+#   all the other terms to be on their own lines
+summary(model.max)
+```
+
+While we can see that the Treatment condition is still significantly different to the Baseline condition (β=0.96, SE=0.20, Z=4.68, p<0.0001), we can also see that the Experiments are only listed as pairwise comparisons, thus so are the interactions. In order to report them as a main effect and interaction effect rather than pairwise comparisons, we should do model comparison.
+
+```{r}
+# remove the interaction term to compare this nested depleted model to the maximal one
+model.int <- glmer(selectCode ~ 1 + 
+                      condition + 
+                      experiment + 
+                      # condition:experiment + 
+                      (1 | subject) + 
+                      (1 | item), 
+                   family = "binomial", 
+                   data = data) 
+# this model is identical to our maximal model, except we have commented out
+# the term of interest
+
+anova(model.max, model.int)
+```
+
+Here, the model comparison shows us that the overall contribution of the interaction term is significant to the fit of our model (χ²(1)=103.06, p<0.0001). This means we can say there is a significant interaction between condition and experiment.
+
+We should also check if there is a main effect of experiment:
+
+```{r}
+# remove the all terms containing the term of interest to compare this nested depleted model
+model.exp <- glmer(selectCode ~ 1 + 
+                      condition + 
+                      # experiment + 
+                      # condition:experiment + 
+                      (1 | subject) + 
+                      (1 | item), 
+                   family = "binomial", 
+                   data = data) 
+# this model is identical to our maximal model, except we have commented out
+# the term of interest and all other terms containing it
+
+# since we commented out two terms, we should compare this model to the next greater, not the maximal one
+anova(model.int, model.exp)
+```
+
+From this, we can see there is a main effect of experiment, regardless of pairwise comparisons (χ²(1)=190.66, p<0.0001).
+
+Now, to understand what this means, we must plot our data. (In fact, we should have done this first...)
 
 # Plotting results with error bars
 
-This code builds directly off of the previous code to produce the graph shown at the bottom of this section. It uses only the base graphics library.
+## Tidyverse
 
-## Step 1
+This is tidyverse style code for producing a visualization of the data analyzed above. First, we will create a new dataset that will allow us to plot calculated estimates and confidence intervals. It is not necessary to save this as a separate dataset -- it could be piped directly into the plot. However, this way, you get a chance to see the content and structure of the dataset first.
+
+```{r}
+data.plot <- data.pct %>% # start with our SUMMARY data, not raw data and save a new copy
+   # create a column that labels the select codes
+   mutate(observed = case_when(selectCode == 1 ~ "correct", # 1 = correct
+                               selectCode == 0 ~ "incorrect"), # 0 = incorrect
+          observed = factor(observed, # make it a factor
+                            levels = c("incorrect", "correct"))) %>% # order the levels
+   rowwise() %>% # the next operate will be conducted for each row
+   # using rowwise() is essential for applying certain base R functions such as prop.test
+   # create columns for estimate, upper CI value, and lower CI value:
+   mutate(estimate = prop.test(x = count, n = total, p = 0.5)$estimate, # extract estimate
+          confint.lower = prop.test(x = count, n = total, p = 0.5)$conf.int[1], # extract lower CI
+          confint.upper = prop.test(x = count, n = total, p = 0.5)$conf.int[2]) # extract upper CI
+
+data.plot
+```
+
+Now, let's plot it:
+
+```{r}
+data.plot %>% 
+   ggplot(aes(x = condition, # x-axis is by condition
+              y = estimate, # y-axis is by calculated estimate
+              fill = observed)) + # this will allow us to hide extra error bars later on*
+   theme_bw() + # make the plot clean and pretty
+   geom_col() + # plot the bars as stacked columns
+   geom_hline(aes(yintercept=.5), # plot a line at 0.5 (50%)
+              colour = "black", # make it black
+              alpha=.5, # make it half-transparent
+              linetype = "dashed") + # make it a dashed line
+   geom_errorbar(aes(ymin = confint.lower, # define lower CI limit
+                     ymax = confint.upper, # define upper CI limit
+                     alpha = observed), # define transparency for error bars*
+                 width = .1) + # keep the crossbars narrow
+   scale_alpha_manual(values = c(0,1), guide = "none") + # *hide extra error bars for 'incorrect' values
+   scale_y_continuous(labels = scales::percent_format()) + # y-axis converted from decimal to percent
+   ylab("percent selected") + # relabel the y-axis
+   facet_grid(~experiment) + # put each experiment in its own facet
+   NULL # this line allows you comment out the previous one(s) without breaking the plot
+```
+
+From this plot, you can see that the Baseline conditions overlap with chance levels in Experiments 1 and 2 but not 3, where it is far below chance. Furthermore, you can see that Experiments 1 and 2 have higher-than-chance Treatment conditions, but not in Experiment 3. This is likely what is driving the interaction effect we observed. Now the statistical tests can be discussed with more clarity and conclusions about how outcomes in the two conditions and three experiments compare (and what this means) can be drawn.
+
+## Base R graphics
+
+This code builds directly off of the previous code to produce the graph shown at the bottom of this section. It uses only the base graphics library. It looks at Experiment 1 only.
+
+### Step 1
 
 ```{r}
 # Author: Lauren M Ackerman
@@ -72,13 +238,14 @@ This code builds directly off of the previous code to produce the graph shown at
 # Date: January 30, 2018
 
 # store the prop.test() results for use in the graph 
-err.cond.1 <- prop.test(sum.cond.1, len.cond.1, p = 0.5)
-err.cond.2 <- prop.test(sum.cond.2, len.cond.2, p = 0.5)
+err.cond.1 <- prop.test(baseline.success.exp1, baseline.total.exp1, p = 0.5)
+err.cond.2 <- prop.test(treatment.success.exp1, treatment.total.exp1, p = 0.5)
 
 # format the table as percentages rounded to 2 decimal places
-numOfConds <- length(levels(as.factor(data$condition)))
-numerator <- (table(data$selection, data$condition))
-denominator <- (length(data$selection)/numOfConds)
+numOfConds <- length(levels(as.factor(data$condition[data$experiment=="first"])))
+numerator <- (table(data$selection[data$experiment=="first"], 
+                    data$condition[data$experiment=="first"]))
+denominator <- (length(data$selection[data$experiment=="first"])/numOfConds)
 dfTable <- (numerator/denominator)*100
 
 counts <- round(dfTable,2)
@@ -91,13 +258,12 @@ barplot(counts,
    )
 ```
 
-## Step 2
+### Step 2
 
 ```{r}
 barplot(counts,
-#  legend = rownames(counts),
    main=paste0("Choice of ",rownames(counts)[1]," and ",rownames(counts)[2]," in a forced-choice task"),
-   ylab="Percent (%)", #xlab="condition", 
+   ylab="Percent (%)",  
    cex.names=1, names=c(colnames(counts)[1], colnames(counts)[2]),
    col=c("lightseagreen","salmon"), border=c("black","black")
    )
@@ -108,7 +274,7 @@ mtext(paste0(rownames(counts)[2]," = ", counts[2],"%"), side=3,line=-1.5,at=0.7,
 mtext(paste0(rownames(counts)[2]," = ", counts[4],"%"), side=3,line=-1.5,at=1.9,col="black",cex=1)
 ```
 
-## Step 3
+### Step 3
 
 ```{r}
 barplot(counts,

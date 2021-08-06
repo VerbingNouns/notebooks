@@ -7,6 +7,7 @@ output:
     theme: cerulean
     highlight: default
     toc: true
+    to_depth: 1
     toc_float: true
     includes: 
       in_header: google_analytics.html
@@ -16,48 +17,60 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### [Dealing with ordinal data](ordinal_data.html)
+### Dealing with ordinal data
 
+* [Dealing with ordinal data](ordinal_data.html)
 * A description of why ordinal regressions are useful and how to use them.
 * Code for producing useful visualisations of ordinal data.
 
-### [Statistics for Linguists with R](reading/info.html)
-* [2019 Event website](https://www.reading.ac.uk/celm/training/introduction-to-r-workshop-4-day-workshop/)
-* 2021 Event website coming soon!
+### Statistics for Linguists with R
 
-### [Data Viz/Analysis Workshop](leeds/blank-workbook.html)
+* [2019 Event website](reading/info.html)
+* [2021 Event website](reading/info2021.html)
+
+### Data Viz/Analysis Workshop
+
+* [Data Viz/Analysis Workshop](leeds/blank-workbook.html)
 * "*Visualisation and analysis of linguistic data, using R*"
 * University of Leeds, 28 February 2019.
 * Blank workbook to be filled out during the workshop.
 * [Event website](https://www.latl.leeds.ac.uk/events/visualisation-and-analysis-of-linguistic-data-using-r/)
 
-### [RfficeHours](rfficehours/info.html)
+### RfficeHours
+
+* [RfficeHours](rfficehours/info.html)
 * Information about my drop-in R seminars, being trialed in September 2018.
 
-### [Adventures In R](https://verbingnouns.github.io/AdventuresInR/)
+### Adventures in R
 
+* [Adventures In R](https://verbingnouns.github.io/AdventuresInR/)
 * Official page for the *Adventures In R* workshop.
 
-### [Setting up RStudio](1_Setting_Up.nb.html)
+### Setting up RStudio
 
+* [Setting up RStudio](1_Setting_Up.nb.html)
 * A very introductory description of how to get RStudio set up in advance of a tutorial or workshop.
 
-### [Reporting statistics in prose](prose_statistics.nb.html)
+### Reporting statistics in prose
 
+* [Reporting statistics in prose](prose_statistics.nb.html)
 * A tutorial on how to find the numbers one typically needs to report when conducting certain statistical tests.
 * Includes examples of wording for writing about statistical tests in academic prose.
 
-### [Using and graphing prop.test()](forced_choice.nb.html)
+### Using and graphing prop.test()
 
+* [Using and graphing prop.test()](forced_choice.nb.html)
 * Some quick snippets and instructions for performing 1-sample proportions tests.
 * Base graphics code for producing stacked proportions bar charts with error bars (CI 95%).
 
-### [Processing Ibex Farm output](bash_processing.html)
+### Processing Ibex Farm output
 
+* [Processing Ibex Farm output](bash_processing.html)
 * A description of bash script used to process the results file from an Ibex Farm experiment.
 
-### [Eye-tracking workflow](eye-tracking-workflow.nb.html)
+### Eye-tracking workflow
 
+* [Eye-tracking workflow](eye-tracking-workflow.nb.html)
 * Documentation for how to take .EDF files exported from [EyeTrack](https://blogs.umass.edu/eyelab/software/) and turn them into an analyzable dataset
 * Includes workflow for using:
     1. fix_align_v0p92.R
@@ -65,12 +78,20 @@ knitr::opts_chunk$set(echo = TRUE)
     3. SideEye (beta)
     4. Failed attempts and depricated code
 
-### [Snail races](snail_race.nb.html)
+### Just for fun
+
+#### [• Snail races](snail_race.nb.html)
 
 * A quick and dirty analysis of how people respond to Twitter "snail races".
 * Can be used to compensate for order effects in 4-point multiple choice questions (MCQs).
 
-### [Life in the UK timeline](lifeintheuk.html)
+#### [• Blaseball datacrimes](https://www.blaseball.com/)
+
+* Fun analysis and visualization of Blaseball data
+* [Datacrimes](blaseball-datacrimes.nb.html), or how [eDensity](https://www.blaseball.wiki/w/EDensity) has effecting idol standings
+* [Trajectory](trajectory_map.nb.html), or how Team navigated through space after [Season 24](https://www.blaseball.wiki/w/Season_24) Earlsiesta.
+
+#### [• Life in the UK timeline](lifeintheuk.html)
 
 * A supplementary study guide to visualise the order in which events took place.
 * Based on the Official Life in the UK Test handbook.
