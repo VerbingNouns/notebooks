@@ -34,6 +34,10 @@ head(data)
 
 ## 1-sample proportions tests
 
+A 1-sample proportions test is excellent for determining whether a single condition or vector of hits and misses (successes and failures) differs from some pre-determined level. This level could be chance (e.g., 50% with two options, 33.3% with three, etc) or it could be another relevant value (e.g., some threshold for accuracy).
+
+First, we create a summary dataset from our raw data.
+
 ```{r, message=FALSE, warning=FALSE}
 data.pct <- data %>% # save following operation into new dataset
    group_by(experiment, condition) %>% # choose which columns define "100%" of each subset
@@ -46,7 +50,7 @@ data.pct <- data %>% # save following operation into new dataset
 data.pct
 ```
 
-First, check if the Baseline condition in Experiment 1 is different from chance levels of performance.
+Next, check if the Baseline condition in Experiment 1 is different from chance levels of performance.
 
 ```{r}
 # prop.test( x = successTrials ,
