@@ -1,7 +1,7 @@
 ---
 title: "Snail Race"
 author: "Lauren M Ackerman"
-date: "Last updated: 28 September 2021"
+date: "Last updated: 28 Sept 2021<br/>First published: 28 May 2018"
 output: 
   html_notebook:
     toc: true
@@ -219,24 +219,6 @@ snail %>%
 
 **Next steps:** I'd like to figure out how to weight each poll by how many responses were received.
 
-Please cite as:
-
-> Ackerman, L.M. (2021, September 28). *Snail Race* (v2). Retrieved from: [https://verbingnouns.github.io/notebooks/snail_race.nb.html]()
-
-BibTeX:
-
-```
-@MISC{snailRace,
-author = {Ackerman, Lauren M.},
-title = {Snail Race},
-month = may,
-year = {2021},
-howpublished={\url{https://verbingnouns.github.io/notebooks/snail_race.nb.html}}
-}
-```
-
-***
-
 From the [first 68 gathered polls](https://twitter.com/VerbingNouns/status/1000775095294586880):
 
 ```{r, eval=FALSE}
@@ -253,3 +235,27 @@ beepr::beep()
 ```
 
 ![](images/slug-graph.gif)
+
+## Discussion
+
+Twitter user [\@queerterpreter](https://twitter.com/queerterpreter) has done some of their own work on Twitter Snail races! They also have [lovely snails](https://twitter.com/search?q=from%3Aqueerterpreter%20snail&src=typed_query&f=video) of their own.
+
+One [neat thread](https://twitter.com/queerterpreter/status/1340395809905516546?s=20) they did was trying to get people to produce pre-determined distributions. It was difficult!
+
+## Citation
+
+Please cite as:
+
+> Ackerman, L.M. (2021, September 28). *Snail Race* (v2). Retrieved from: [https://verbingnouns.github.io/notebooks/snail_race.nb.html]()
+
+BibTeX:
+
+```
+@MISC{snailRace,
+author = {Ackerman, Lauren M.},
+title = {Snail Race},
+month = {September},
+year = {2021},
+howpublished={\url{https://verbingnouns.github.io/notebooks/snail_race.nb.html}}
+}
+```
